@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sediment Core Logger</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Core Logger</h2>
+        
+        <div class="input-section">
+            <input type="text" id="coreId" placeholder="Core ID (e.g., BH-01)">
+            <div class="depth-range">
+                <input type="number" id="depthFrom" placeholder="From (m)" step="0.01">
+                <input type="number" id="depthTo" placeholder="To (m)" step="0.01">
+            </div>
+            <input type="text" id="soilColor" placeholder="Color (e.g., Grayish Brown)">
+            <textarea id="soilDesc" placeholder="Field Description (e.g., sandy clay, moist)"></textarea>
+            <button onclick="addLayer()" class="btn-add">Add Layer</button>
+        </div>
+
+        <table id="logTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Depth (m)</th>
+                    <th>Color</th>
+                    <th>Official Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added here -->
+            </tbody>
+        </table>
+
+        <button onclick="copyToClipboard()" class="btn-export">Copy for Google Sheets</button>
+    </div>
+    <script src="./js/script.js
+    "></script>
+</body>
+</html>
