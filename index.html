@@ -36,21 +36,31 @@
         </div>
 
         <div class="table-container">
-            <table id="logTable">
-                <thead>
-                    <tr>
-                        <th>Core ID</th>
-                        <th>Depth (m)</th>
-                        <th>Color</th>
-                        <th>Class</th>
-                        <th>Field Description</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>Core ID</th>
+                <th>Depth (m)</th>
+                <th>Color</th>
+                <th>Class</th>
+                <th>Field Description</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<button onclick="copyToClipboard()" class="btn-secondary">Export to Clipboard (TSV)</button>
+<div class="graph-section">
+    <h3>Stratigraphic Profile</h3>
+    <div class="canvas-wrapper">
+        <canvas id="coreCanvas"></canvas>
+    </div>
+</div>
 
-        <button onclick="copyToClipboard()" class="btn-secondary">Export to Clipboard (TSV)</button>
+<div class="export-actions">
+    <button onclick="exportImage('jpg')" class="btn-export">Download JPG</button>
+    <button onclick="exportSVG()" class="btn-export">Download SVG</button>
+</div>
     </div>
     <script src="js/script.js"></script>
 </body>
