@@ -1,0 +1,143 @@
+:root {
+    --primary: #1a365d;    /* Deep Navy */
+    --accent: #2b6cb0;     /* Geological Blue */
+    --success: #2f855a;    /* Earth Green */
+    --bg: #f7fafc;         /* Soft Gray */
+    --border: #e2e8f0;
+    --text: #2d3748;
+}
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Header & Logo Styles */
+.header-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.soil-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    margin: 0;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+}
+
+h1 small {
+    font-size: 0.6em;
+    color: #a0aec0;
+}
+
+/* Modern Input Card */
+.input-section {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    border-top: 4px solid var(--primary);
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--success);
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-secondary {
+    background-color: var(--primary);
+    color: white;
+    margin-top: 20px;
+}
+
+/* Professional Table */
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+th {
+    background-color: #edf2f7;
+    color: var(--primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 12px;
+    border-bottom: 2px solid var(--border);
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Scientific look for depth values */
+td:nth-child(2) {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .input-grid { grid-template-columns: 1fr; }
+    body { padding: 10px; }
+}
