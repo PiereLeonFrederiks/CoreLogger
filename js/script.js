@@ -4,6 +4,8 @@ function translateSoil(desc) {
     let lowerDesc = desc.toLowerCase();
     let official = "";
     if (lowerDesc.includes("sandy clay")) official = "S(t)";
+    else if (lowerDesc.includes("sandy silt")) official = "U(s)";
+    else if (lowerDesc.includes("peat")) official = "H()";
     else if (lowerDesc.includes("sand")) official = "S()";
     else if (lowerDesc.includes("clay")) official = "T()";
     else if (lowerDesc.includes("silt")) official = "U()";
