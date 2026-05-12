@@ -8,7 +8,7 @@ window.onload = async function() {
     // ── Load external soil data ───────────────────────────────────────────────
     try {
       
-        const res  = await fetch('/data/soilData.json'); 
+        const res  = await fetch('../data/soilData.json'); 
         const data = await res.json();
 
         SOIL_MAINS     = data.soilMains;
