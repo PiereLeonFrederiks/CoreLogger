@@ -34,7 +34,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.soil-logo { width: 24px; height: auto; opacity: 0.8; flex-shrink: 0; }
+.soil-logo { width: 50%; opacity: 0.8; flex-shrink: 0; }
 
 h1 { 
     margin: 0; 
