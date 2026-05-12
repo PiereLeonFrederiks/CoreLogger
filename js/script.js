@@ -1,45 +1,33 @@
 const layers = [];
 
-// Vollständige Farbliste basierend auf Munsell
-const SOIL_COLOR_LIST = [
-    { name: "Schwarz", hex: "#211f1e" },
-    { name: "Sehr dunkles Braun", hex: "#2c2621" },
-    { name: "Sehr dunkles Grau", hex: "#433f3c" },
-    { name: "Sehr dunkles Graubraun", hex: "#4b443b" },
-    { name: "Dunkelbraun", hex: "#4e4131" },
-    { name: "Dunkles Graubraun", hex: "#645b50" },
-    { name: "Dunkelbraun (alt)", hex: "#675949" },
-    { name: "Dunkelgelblichbraun", hex: "#69563c" },
-    { name: "Braun", hex: "#857766" },
-    { name: "Gelblichbraun", hex: "#877353" },
-    { name: "Hellgelblichbraun", hex: "#a79273" },
-    { name: "Hellgrau", hex: "#bcb6ad" },
-    { name: "Weiß", hex: "#d6d1c9" },
-    { name: "Schwarz (organisch)", hex: "#231f20" },
-    { name: "Dunkelbraun (lehmig)", hex: "#4d3f33" },
-    { name: "Kräftiges Braun", hex: "#7a593e" },
-    { name: "Dunkelrötlichbraun", hex: "#503932" },
-    { name: "Rötlichbraun", hex: "#7e5241" },
-    { name: "Gelblichrot", hex: "#a15b35" },
-    { name: "Dunkelrot", hex: "#662a22" },
-    { name: "Hellolivbraun", hex: "#8d7f57" },
-    { name: "Olivgrau", hex: "#8b8773" },
-    { name: "Dunkelgrau", hex: "#616363" },
-    { name: "Grüngrau", hex: "#7a8279" },
-    { name: "Blaugrau", hex: "#778385" }
-];
+// Soil lookup tables — populated at load time from data/soilData.json
+let SOIL_MAINS     = {};
+let SOIL_MODIFIERS = {};
 
-window.onload = function() {
-    const colorSelect = document.getElementById('soilColor');
-    SOIL_COLOR_LIST.forEach(color => {
-        let option = document.createElement('option');
-        option.value = color.hex;
-        option.text = color.name;
-        option.style.backgroundColor = color.hex;
-        option.style.color = isDark(color.hex) ? 'white' : 'black';
-        colorSelect.appendChild(option);
-    });
+window.onload = async function() {
+    // ── Load external soil data ───────────────────────────────────────────────
+    try {
+        const res  = await fetch('../data/soilData.json');
+        const data = await res.json();
 
+        SOIL_MAINS     = data.soilMains;
+        SOIL_MODIFIERS = data.soilModifiers;
+
+        const colorSelect = document.getElementById('soilColor');
+        data.colors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color.hex;
+            option.text  = color.name;
+            option.style.backgroundColor = color.hex;
+            option.style.color = isDark(color.hex) ? 'white' : 'black';
+            colorSelect.appendChild(option);
+        });
+    } catch (err) {
+        console.error('Fehler beim Laden von soilData.json:', err);
+        alert('Bodendaten konnten nicht geladen werden. Bitte sicherstellen, dass data/soilData.json erreichbar ist.');
+    }
+
+    // ── Table delete handler ──────────────────────────────────────────────────
     document.querySelector("#logTable tbody").addEventListener('click', function(e) {
         const btn = e.target.closest('.btn-delete');
         if (!btn) return;
@@ -57,10 +45,13 @@ function translateSoil(desc) {
     const d = desc.toLowerCase();
     let main = "-";
     let modifiers = [];
-    const mains = { 'ton': 'T', 'schluff': 'U', 'lehm': 'L', 'sand': 'S', 'kies': 'G', 'torf': 'H' };
-    for (let key in mains) { if (d.split(' ').pop().includes(key)) { main = mains[key]; break; } }
-    const mods = { 'tonig': 't', 'schluffig': 'u', 'sandig': 's', 'kiesig': 'g', 'humos': 'h', 'kalk': 'ca' };
-    for (let key in mods) { if (d.includes(key)) modifiers.push(mods[key]); }
+    const lastWord = d.split(' ').pop();
+    for (const [key, val] of Object.entries(SOIL_MAINS)) {
+        if (lastWord.includes(key)) { main = val; break; }
+    }
+    for (const [key, val] of Object.entries(SOIL_MODIFIERS)) {
+        if (d.includes(key)) modifiers.push(val);
+    }
     modifiers = [...new Set(modifiers)].sort();
     return main === "-" ? "-" : (modifiers.length > 0 ? `${main}(${modifiers.join(',')})` : main);
 }
