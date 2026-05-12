@@ -198,140 +198,110 @@ function drawGraph() {
 
     const totalDepth = Math.max(...layers.map(l => l.depthTo));
 
-    // Layout constants
-    const PAD_TOP    = 30;
-    const PAD_BOTTOM = 40;
-    const PAD_LEFT   = 95;   // room for left-side depth labels + bracket
-    const PAD_RIGHT  = 190;  // room for right-side soil labels + markers
-    const CORE_W     = 70;
+    // ── Layout constants ──────────────────────────────────────────────────────
+    // Left zone layout (left → right):
+    //   [depth label 60px] [gap 8px] [tick 6px] [core]
+    // Right zone:
+    //   [core] [gap 10px] [soil label + markers 180px]
+    const PAD_TOP     = 30;
+    const PAD_BOTTOM  = 50;
+    const DEPTH_LABEL_W = 60;   // fixed column for "0.00 m" text
+    const TICK_W        = 6;
+    const GAP_L         = 8;
+    const PAD_LEFT      = DEPTH_LABEL_W + GAP_L + TICK_W;  // = 74
+    const PAD_RIGHT     = 200;
+    const CORE_W        = 80;
 
-    // Minimum 380px so axis labels are never clipped on narrow screens
-    canvas.width  = Math.max(380, PAD_LEFT + CORE_W + PAD_RIGHT);
+    canvas.width  = PAD_LEFT + CORE_W + PAD_RIGHT;   // 354 – always enough
     canvas.height = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
 
     // White background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const coreX = PAD_LEFT;
-
-    // ── Collect label data for left axis ─────────────────────────────────────
-    // We show: depthFrom at top of each layer, depthTo at bottom of the LAST layer
-    // For thickness we render it centred on the layer with a bracket.
-
-    // Build list of unique boundary labels (from/to depths)
-    const boundarySet = new Map(); // depth -> pixel Y
-    layers.forEach(layer => {
-        const yTop = layer.depthFrom * SCALE + PAD_TOP;
-        const yBot = layer.depthTo   * SCALE + PAD_TOP;
-        boundarySet.set(layer.depthFrom, yTop);
-        boundarySet.set(layer.depthTo,   yBot);
-    });
-
-    // Sort boundaries
-    const boundaries = Array.from(boundarySet.entries())
-        .sort((a, b) => a[0] - b[0]);
-
-    // Resolve overlapping labels (font ~11px, give 13px per label)
-    const labelItems = boundaries.map(([depth, y]) => ({
-        idealY: y,
-        text: `${depth.toFixed(2)} m`
-    }));
-    const resolvedY = resolveLabels(labelItems, 13);
+    const coreX = PAD_LEFT;  // left edge of the core column
 
     // ── Draw layers ───────────────────────────────────────────────────────────
     layers.forEach(layer => {
         const yTop   = layer.depthFrom * SCALE + PAD_TOP;
         const height = (layer.depthTo - layer.depthFrom) * SCALE;
-
-        ctx.fillStyle = layer.color;
+        ctx.fillStyle   = layer.color;
         ctx.fillRect(coreX, yTop, CORE_W, height);
         ctx.strokeStyle = "#2c3e50";
         ctx.lineWidth   = 1;
         ctx.strokeRect(coreX, yTop, CORE_W, height);
     });
 
-    // ── Left axis: depth labels + tick marks ──────────────────────────────────
-    ctx.font      = "11px 'Courier New', monospace";
-    ctx.fillStyle = "#2d3748";
+    // ── Left axis: depth labels, ticks, and thickness per layer ──────────────
+    //
+    // Each layer gets:
+    //   • a depth label at yTop  (e.g. "0.00 m")
+    //   • a depth label at yBot  (only drawn for the last layer; others share
+    //     their yBot with the next layer's yTop)
+    //   • a thickness label centred in the layer zone, left of the depth column
+    //
+    // We collect ALL boundary labels first, resolve overlaps, then draw.
 
-    boundaries.forEach(([depth, idealY], i) => {
-        const resolvedLabelY = resolvedY[i];
+    const boundarySet = new Map();
+    layers.forEach(layer => {
+        boundarySet.set(layer.depthFrom, layer.depthFrom * SCALE + PAD_TOP);
+        boundarySet.set(layer.depthTo,   layer.depthTo   * SCALE + PAD_TOP);
+    });
+    const boundaries = Array.from(boundarySet.entries()).sort((a, b) => a[0] - b[0]);
 
-        // Tick mark on the core left edge
+    // Resolve overlap — minimum 14px between labels
+    const labelItems = boundaries.map(([depth, y]) => ({ idealY: y, text: `${depth.toFixed(2)} m` }));
+    const resolvedY  = resolveLabels(labelItems, 14);
+
+    // Draw ticks + depth labels
+    boundaries.forEach(([depth, tickY], i) => {
+        const labelY = resolvedY[i];
+
+        // Tick on core left edge
         ctx.strokeStyle = "#2c3e50";
         ctx.lineWidth   = 1;
+        ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(coreX - 4, idealY);
-        ctx.lineTo(coreX,     idealY);
+        ctx.moveTo(coreX - TICK_W, tickY);
+        ctx.lineTo(coreX,          tickY);
         ctx.stroke();
 
-        // Leader line if label was pushed away from tick
-        if (Math.abs(resolvedLabelY - idealY) > 2) {
-            ctx.strokeStyle = "#aab";
-            ctx.lineWidth   = 0.5;
-            ctx.setLineDash([2, 2]);
+        // Thin leader line when label has been pushed from its tick
+        if (Math.abs(labelY - tickY) > 3) {
+            ctx.strokeStyle = "#b0b8c8";
+            ctx.lineWidth   = 0.6;
+            ctx.setLineDash([2, 3]);
             ctx.beginPath();
-            ctx.moveTo(coreX - 5, idealY);
-            ctx.lineTo(coreX - 10, resolvedLabelY - 1);
+            ctx.moveTo(coreX - TICK_W - 1, tickY);
+            ctx.lineTo(coreX - TICK_W - 3, labelY - 2);
             ctx.stroke();
             ctx.setLineDash([]);
         }
 
-        // Label (right-aligned to coreX - 14)
+        // Depth label — right-aligned inside the fixed DEPTH_LABEL_W column
         ctx.fillStyle = "#2d3748";
+        ctx.font      = "11px 'Courier New', monospace";
         ctx.textAlign = "right";
-        ctx.fillText(`${depth.toFixed(2)} m`, coreX - 14, resolvedLabelY);
+        ctx.fillText(`${depth.toFixed(2)} m`, DEPTH_LABEL_W, labelY + 1);
     });
 
-    // ── Left axis: thickness bracket per layer ────────────────────────────────
+    // Thickness label — centred vertically in each layer, placed in the
+    // gap between the depth-label column and the tick (small but readable).
+    // We draw it as plain horizontal text; no rotation, no squishing.
     layers.forEach(layer => {
-        const yTop     = layer.depthFrom * SCALE + PAD_TOP;
-        const yBot     = layer.depthTo   * SCALE + PAD_TOP;
-        const height   = yBot - yTop;
-        const thick    = (layer.depthTo - layer.depthFrom).toFixed(2);
-        const bracketX = 12;  // x position of bracket (from left edge)
-        const midY     = yTop + height / 2;
+        const yTop   = layer.depthFrom * SCALE + PAD_TOP;
+        const yBot   = layer.depthTo   * SCALE + PAD_TOP;
+        const height = yBot - yTop;
+        const midY   = yTop + height / 2;
+        const thick  = (layer.depthTo - layer.depthFrom).toFixed(2);
 
-        // Only draw bracket if layer is tall enough (> 18 px)
-        if (height > 18) {
-            ctx.strokeStyle = "#94a3b8";
-            ctx.lineWidth   = 1;
-            ctx.setLineDash([]);
+        if (height < 10) return; // too thin to annotate
 
-            // Vertical bracket line
-            ctx.beginPath();
-            ctx.moveTo(bracketX, yTop + 2);
-            ctx.lineTo(bracketX, yBot - 2);
-            ctx.stroke();
-
-            // Top & bottom serifs
-            ctx.beginPath();
-            ctx.moveTo(bracketX, yTop + 2);
-            ctx.lineTo(bracketX + 4, yTop + 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(bracketX, yBot - 2);
-            ctx.lineTo(bracketX + 4, yBot - 2);
-            ctx.stroke();
-
-            // Thickness label — rotated 90° if layer tall enough, else horizontal
-            ctx.save();
-            if (height > 40) {
-                ctx.translate(bracketX - 4, midY);
-                ctx.rotate(-Math.PI / 2);
-                ctx.font      = "bold 9px 'Courier New', monospace";
-                ctx.fillStyle = "#64748b";
-                ctx.textAlign = "center";
-                ctx.fillText(`Δ ${thick} m`, 0, 0);
-            } else {
-                ctx.font      = "bold 8px 'Courier New', monospace";
-                ctx.fillStyle = "#64748b";
-                ctx.textAlign = "left";
-                ctx.fillText(`${thick}m`, 2, midY + 3);
-            }
-            ctx.restore();
-        }
+        // Small "Δ X.XX m" label right-aligned just before the tick gap
+        ctx.fillStyle = "#94a3b8";
+        ctx.font      = "bold 9px 'Courier New', monospace";
+        ctx.textAlign = "right";
+        ctx.fillText(`Δ${thick}m`, DEPTH_LABEL_W - 2, midY + 4);
     });
 
     // ── Right side: soil class + description labels ───────────────────────────
