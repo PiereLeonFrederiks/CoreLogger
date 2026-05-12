@@ -4,19 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sediment Core Logger // TEST //</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="container">
         <div class="header-section">
-            <svg class="soil-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <rect x="35" y="10" width="30" height="80" fill="none" stroke="#2c3e50" stroke-width="3"/>
-                <rect x="35" y="10" width="30" height="15" fill="#5d4037"/>
-                <rect x="35" y="25" width="30" height="25" fill="#8d6e63"/>
-                <rect x="35" y="50" width="30" height="20" fill="#bcaaa4"/>
-                <rect x="35" y="70" width="30" height="20" fill="#d7ccc8"/>
-            </svg>
-            <h1>Core Logger <small>// TEST //</small></h1>
+            <img class="soil-logo" src="/assets/logo.png" alt="Soil Logo">
+            <h1><small>// TESTVERSION //</small></h1>
         </div>
         
         <div class="input-section">
@@ -76,7 +70,7 @@
             <button onclick="exportSVG()" class="btn-export">Download SVG</button>
         </div>
     </div>
-    <script src="./js/script.js"></script>
+    <script src="/js/script.js"></script>
     <script>
         // Prevent pinch-zoom on iOS (gesturestart) and multi-touch zoom (touchmove)
         document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
