@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sediment Core Logger // TEST //</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <svg class="soil-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="35" y="10" width="30" height="80" fill="none" stroke="#2c3e50" stroke-width="3"/>
+    <rect x="35" y="10" width="30" height="15" fill="#5d4037"/>
+    <rect x="35" y="25" width="30" height="25" fill="#8d6e63"/>
+    <rect x="35" y="50" width="30" height="20" fill="#bcaaa4"/>
+    <rect x="35" y="70" width="30" height="20" fill="#d7ccc8"/>
+    </svg>
+            <h1>Core Logger <small>// TEST //</small></h1>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-grid">
+                <input type="text" id="coreId" placeholder="Bohrung ID (z.B. BH1)">
+                <div class="depth-range">
+                    <input type="number" id="depthFrom" placeholder="Von (m)" step="0.01">
+                    <input type="number" id="depthTo" placeholder="Bis (m)" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-grid secondary-inputs">
+                <select id="soilColor"></select>
+                <textarea id="soilDesc" placeholder="Bodenbeschreibung (z.B. stark sandiger Schluff)"></textarea>
+            </div>
+
+            <div class="marker-section">
+                <h4>Punktfund / Probe (Optional)</h4>
+                <div class="input-grid marker-inputs">
+                    <input type="number" id="markerDepth" placeholder="Tiefe (m)" step="0.01">
+                    <input type="text" id="markerLabel" placeholder="Typ (z.B. Probe, Holz, Keramik)">
+                </div>
+            </div>
+
+            <button onclick="addLayer()" class="btn-primary">Schicht hinzufügen</button>
+            <button onclick="addExtraMarker()" class="btn-primary" style="background: var(--secondary);">+ Marker</button>
+        </div>
+
+        <div class="table-container">
+            <table id="logTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tiefe (m)</th>
+                        <th>Farbe</th>
+                        <th>Ansprache</th>
+                        <th>Beschreibung / Funde</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <button onclick="copyToClipboard()" class="btn-secondary">Daten als TSV kopieren</button>
+
+        <div class="graph-section">
+            <h3>Stratigraphisches Profil</h3>
+            <div class="canvas-wrapper">
+                <canvas id="coreCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="export-actions">
+            <button onclick="exportImage('jpg')" class="btn-export">Download JPG</button>
+            <button onclick="exportSVG()" class="btn-export">Download SVG</button>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
