@@ -7,7 +7,10 @@ let SOIL_MODIFIERS = {};
 window.onload = async function() {
     // ── Load external soil data ───────────────────────────────────────────────
     try {
-        const res  = await fetch('../data/soilData.json');
+        // Resolve relative to index.html, works on GitHub Pages regardless of repo name
+        const base = document.baseURI || window.location.href;
+        const url  = new URL('data/soilData.json', base);
+        const res  = await fetch(url.href);
         const data = await res.json();
 
         SOIL_MAINS     = data.soilMains;
@@ -24,7 +27,7 @@ window.onload = async function() {
         });
     } catch (err) {
         console.error('Fehler beim Laden von soilData.json:', err);
-        alert('Bodendaten konnten nicht geladen werden. Bitte sicherstellen, dass data/soilData.json erreichbar ist.');
+        alert('Bodendaten konnten nicht geladen werden.\nPfad: data/soilData.json\nDetails: ' + err.message);
     }
 
     // ── Table delete handler ──────────────────────────────────────────────────
