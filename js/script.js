@@ -201,11 +201,12 @@ function drawGraph() {
     // Layout constants
     const PAD_TOP    = 30;
     const PAD_BOTTOM = 40;
-    const PAD_LEFT   = 90;   // room for left-side depth labels
-    const PAD_RIGHT  = 200;  // room for right-side soil labels + markers
-    const CORE_W     = 80;
+    const PAD_LEFT   = 95;   // room for left-side depth labels + bracket
+    const PAD_RIGHT  = 190;  // room for right-side soil labels + markers
+    const CORE_W     = 70;
 
-    canvas.width  = PAD_LEFT + CORE_W + PAD_RIGHT;
+    // Minimum 380px so axis labels are never clipped on narrow screens
+    canvas.width  = Math.max(380, PAD_LEFT + CORE_W + PAD_RIGHT);
     canvas.height = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
 
     // White background
