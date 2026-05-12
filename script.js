@@ -382,7 +382,7 @@ function isDark(color) {
     const b = parseInt(color.slice(5, 7), 16);
     return (r * 0.299 + g * 0.587 + b * 0.114) < 128;
 }
-
+/*
 function copyToClipboard() {
     let tsv = "ID\tVon\tBis\tColor\tClass\tDesc\tMarker\n";
     layers.forEach(l => {
@@ -404,4 +404,4 @@ function exportImage(format) {
 
 function exportSVG() {
     alert("SVG-Export ist noch nicht implementiert.");
-}
+} */
