@@ -1,11 +1,15 @@
 :root {
-    --primary: #0f172a;    /* Deep Slate */
-    --secondary: #64748b;  /* Cool Gray */
-    --accent: #334155;     /* Steel */
-    --danger: #991b1b;     /* Deep Red (für Löschen & Marker) */
-    --bg: #ffffff;         /* Reinweiß für maximale Lesbarkeit draußen */
-    --card-bg: #f8fafc;    /* Sehr helles Grau für Eingaben */
-    --border: #e2e8f0;     /* Feine Linien */
+    --primary: #0f172a;
+    --secondary: #64748b;
+    --accent: #334155;
+    --danger: #991b1b;
+    --bg: #ffffff;
+    --card-bg: #f8fafc;
+    --border: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body { 
@@ -18,7 +22,7 @@ body {
 
 .container { max-width: 850px; margin: auto; }
 
-/* Clean Header */
+/* Header */
 .header-section {
     display: flex;
     align-items: center;
@@ -28,7 +32,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.soil-logo { width: 24px; height: auto; opacity: 0.8; }
+.soil-logo { width: 24px; height: auto; opacity: 0.8; flex-shrink: 0; }
 
 h1 { 
     margin: 0; 
@@ -38,11 +42,17 @@ h1 {
     text-transform: uppercase;
 }
 
-/* Modern Input Cards */
+h1 small {
+    font-weight: 400;
+    opacity: 0.45;
+    font-size: 0.8em;
+}
+
+/* Input section */
 .input-section {
     background: var(--card-bg);
     padding: 30px;
-    border-radius: 4px; /* Eckiger/Technischer Look */
+    border-radius: 4px;
     border: 1px solid var(--border);
     margin-bottom: 40px;
 }
@@ -50,8 +60,14 @@ h1 {
 .input-grid { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
-    gap: 20px; 
-    margin-bottom: 20px; 
+    gap: 16px; 
+    margin-bottom: 16px; 
+}
+
+.depth-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
 .marker-section {
@@ -64,95 +80,251 @@ h1 {
     font-size: 0.7rem; 
     text-transform: uppercase; 
     color: var(--secondary); 
-    margin-bottom: 15px;
+    margin: 0 0 15px 0;
     letter-spacing: 0.1em;
 }
 
+.marker-inputs {
+    grid-template-columns: 1fr 1fr;
+}
+
 input, select, textarea {
+    width: 100%;
     background: white;
-    padding: 12px;
+    padding: 11px 12px;
     border: 1px solid var(--border);
     border-radius: 2px;
     font-size: 14px;
     color: var(--primary);
     transition: border-color 0.2s;
+    font-family: inherit;
 }
 
-.btn-delete {
-    background: none;
-    border: none;
-    color: #000; /* Schwarz passend zum Monochrome-Look */
-    cursor: pointer; /* Zeigt die Hand beim Drüberfahren */
-    font-size: 1.2rem;
-    padding: 5px 10px;
-    transition: opacity 0.2s, transform 0.1s;
-    pointer-events: auto !important; /* Stellt sicher, dass Klicks durchgehen */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--secondary);
+    outline: none;
 }
 
-.btn-delete:hover {
-    opacity: 0.6;
-    transform: scale(1.1);
+textarea { 
+    height: 80px; 
+    resize: vertical;
 }
-
-.btn-delete:active {
-    transform: scale(0.9);
-}
-
-/* Verhindert, dass das Icon im Button den Klick "abfängt" */
-.btn-delete * {
-    pointer-events: none;
-}
-
-input:focus { border-color: var(--secondary); outline: none; }
-
-textarea { height: 80px; width: 100%; box-sizing: border-box; }
 
 .btn-primary { 
     background: var(--primary); 
     color: white; 
     width: 100%; 
-    padding: 14px; 
+    padding: 13px; 
     border: none; 
     cursor: pointer; 
     font-weight: 600;
+    font-family: inherit;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-top: 10px;
+    border-radius: 2px;
+    transition: opacity 0.15s;
 }
 
-/* Minimalist Table */
-.table-container { margin-top: 20px; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 6px 10px;
+    transition: opacity 0.2s, transform 0.1s;
+    pointer-events: auto !important;
+}
+
+.btn-delete:hover  { opacity: 0.5; transform: scale(1.1); }
+.btn-delete:active { transform: scale(0.9); }
+.btn-delete *      { pointer-events: none; }
+
+/* Table */
+.table-container { 
+    margin-top: 20px; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+}
+
+table { width: 100%; border-collapse: collapse; min-width: 520px; }
+
 th { 
     text-align: left; 
-    padding: 12px; 
+    padding: 10px 12px; 
     font-size: 0.7rem; 
     color: var(--secondary); 
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     border-bottom: 2px solid var(--primary);
+    white-space: nowrap;
 }
-td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+
+td { 
+    padding: 14px 12px; 
+    border-bottom: 1px solid var(--border); 
+    font-size: 0.88rem;
+    vertical-align: top;
+}
 
 .marker-tag {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--danger);
     margin-top: 4px;
     font-weight: 500;
 }
 
-/* Visualization Wrapper */
-.graph-section { margin-top: 50px; }
-.canvas-wrapper {
-    background: white;
-    padding: 40px;
+/* Export row */
+.btn-secondary {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: none;
     border: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+    transition: border-color 0.2s, color 0.2s;
 }
 
+.btn-secondary:hover {
+    border-color: var(--secondary);
+    color: var(--primary);
+}
+
+/* Stratigraphic profile section */
+.graph-section { margin-top: 50px; }
+
+.graph-section h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--secondary);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/* Scrollable canvas wrapper */
+.canvas-wrapper {
+    background: white;
+    border: 1px solid var(--border);
+    overflow-y: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Fixed viewport height — user can scroll the profile */
+    max-height: 60vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px 10px;
+    /* Subtle inset shadow to show it's scrollable */
+    box-shadow: inset 0 -8px 16px -8px rgba(0,0,0,0.06),
+                inset 0  8px 16px -8px rgba(0,0,0,0.04);
+}
+
+/* Scroll hint label */
+.scroll-hint {
+    font-size: 0.68rem;
+    color: var(--secondary);
+    text-align: right;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+#coreCanvas {
+    display: block;
+    /* Let canvas render at its natural pixel size; the wrapper scrolls */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Export buttons */
+.export-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.btn-export {
+    flex: 1;
+    padding: 11px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-export:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-    .input-grid { grid-template-columns: 1fr; }
-    body { padding: 15px; }
-    .input-section { padding: 20px; }
+    body { padding: 12px; }
+
+    .container { max-width: 100%; }
+
+    .header-section { margin-bottom: 24px; }
+
+    .input-section { padding: 16px; }
+
+    /* Stack both grid pairs to single column on mobile */
+    .input-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    /* Depth from/to stay side-by-side even on mobile */
+    .depth-range {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .marker-inputs {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    textarea { height: 64px; }
+
+    .btn-primary { padding: 12px; font-size: 12px; }
+
+    /* Table: horizontal scroll */
+    .table-container { margin-top: 12px; }
+    td, th { padding: 10px 8px; font-size: 0.82rem; }
+
+    /* Canvas wrapper: taller on mobile for better readability */
+    .canvas-wrapper {
+        max-height: 55vh;
+        padding: 12px 6px;
+    }
+
+    .export-actions { flex-direction: column; gap: 8px; }
+    .btn-export { width: 100%; }
+
+    .scroll-hint { font-size: 0.65rem; }
+}
+
+@media (max-width: 380px) {
+    .depth-range,
+    .marker-inputs { grid-template-columns: 1fr; }
 }
