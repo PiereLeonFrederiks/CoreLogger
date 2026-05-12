@@ -40,8 +40,6 @@ window.onload = function() {
         colorSelect.appendChild(option);
     });
 
-    // Event delegation: one listener on tbody handles all delete buttons,
-    // even after innerHTML re-renders wipe out old onclick handlers.
     document.querySelector("#logTable tbody").addEventListener('click', function(e) {
         const btn = e.target.closest('.btn-delete');
         if (!btn) return;
@@ -104,7 +102,6 @@ function addLayer() {
     document.getElementById('depthTo').focus();
 }
 
-
 function addExtraMarker() {
     if (layers.length === 0) {
         alert("Bitte zuerst eine Schicht erstellen.");
@@ -127,7 +124,6 @@ function addExtraMarker() {
     document.getElementById('markerLabel').value = "";
 }
 
-// Single definition of updateTable — uses l.markers (array)
 function updateTable() {
     const tbody = document.querySelector("#logTable tbody");
     if (!tbody) return;
@@ -158,62 +154,263 @@ function updateTable() {
     });
 }
 
-const SCALE = 2000; 
+// ─── Graph drawing ────────────────────────────────────────────────────────────
+
+const SCALE = 2000;
+
+// Minimum pixel gap between two labels on the same side before we stagger them
+const MIN_LABEL_GAP = 14;
+
+/**
+ * Resolve vertical positions for a set of labels so none overlap.
+ * @param {Array<{idealY: number, text: string}>} items
+ * @param {number} lineHeight  – font size + padding
+ * @returns {Array<number>}  – resolved Y positions (same order as items)
+ */
+function resolveLabels(items, lineHeight) {
+    if (items.length === 0) return [];
+    // Sort by idealY, keep original index so we can map back
+    const sorted = items.map((item, i) => ({ ...item, origIndex: i }))
+                        .sort((a, b) => a.idealY - b.idealY);
+
+    // Forward pass: push down
+    for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1];
+        const cur  = sorted[i];
+        if (cur.idealY < prev.idealY + lineHeight) {
+            cur.idealY = prev.idealY + lineHeight;
+        }
+    }
+
+    // Restore original order
+    const result = new Array(items.length);
+    sorted.forEach(item => { result[item.origIndex] = item.idealY; });
+    return result;
+}
 
 function drawGraph() {
     const canvas = document.getElementById('coreCanvas');
     const ctx = canvas.getContext('2d');
-    if (layers.length === 0) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+    if (layers.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+    }
 
     const totalDepth = Math.max(...layers.map(l => l.depthTo));
-    canvas.width = 500;
-    canvas.height = (totalDepth * SCALE) + 100;
 
-    ctx.fillStyle = "white";
+    // Layout constants
+    const PAD_TOP    = 30;
+    const PAD_BOTTOM = 40;
+    const PAD_LEFT   = 90;   // room for left-side depth labels
+    const PAD_RIGHT  = 200;  // room for right-side soil labels + markers
+    const CORE_W     = 80;
+
+    canvas.width  = PAD_LEFT + CORE_W + PAD_RIGHT;
+    canvas.height = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+
+    // White background
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const coreWidth = 100;
-    const startX = 120;
+    const coreX = PAD_LEFT;
 
+    // ── Collect label data for left axis ─────────────────────────────────────
+    // We show: depthFrom at top of each layer, depthTo at bottom of the LAST layer
+    // For thickness we render it centred on the layer with a bracket.
+
+    // Build list of unique boundary labels (from/to depths)
+    const boundarySet = new Map(); // depth -> pixel Y
     layers.forEach(layer => {
-        const yStart = layer.depthFrom * SCALE + 20;
+        const yTop = layer.depthFrom * SCALE + PAD_TOP;
+        const yBot = layer.depthTo   * SCALE + PAD_TOP;
+        boundarySet.set(layer.depthFrom, yTop);
+        boundarySet.set(layer.depthTo,   yBot);
+    });
+
+    // Sort boundaries
+    const boundaries = Array.from(boundarySet.entries())
+        .sort((a, b) => a[0] - b[0]);
+
+    // Resolve overlapping labels (font ~11px, give 13px per label)
+    const labelItems = boundaries.map(([depth, y]) => ({
+        idealY: y,
+        text: `${depth.toFixed(2)} m`
+    }));
+    const resolvedY = resolveLabels(labelItems, 13);
+
+    // ── Draw layers ───────────────────────────────────────────────────────────
+    layers.forEach(layer => {
+        const yTop   = layer.depthFrom * SCALE + PAD_TOP;
         const height = (layer.depthTo - layer.depthFrom) * SCALE;
 
-        // Draw layer
         ctx.fillStyle = layer.color;
-        ctx.fillRect(startX, yStart, coreWidth, height);
+        ctx.fillRect(coreX, yTop, CORE_W, height);
         ctx.strokeStyle = "#2c3e50";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(startX, yStart, coreWidth, height);
+        ctx.lineWidth   = 1;
+        ctx.strokeRect(coreX, yTop, CORE_W, height);
+    });
 
-        // Depth label
-        ctx.fillStyle = "#2d3748";
-        ctx.font = "bold 11px monospace";
-        ctx.textAlign = "right";
-        ctx.fillText(`${layer.depthFrom.toFixed(2)}m`, startX - 10, yStart + 10);
-        
-        // Soil class label
-        ctx.textAlign = "left";
-        ctx.font = "bold 12px sans-serif";
-        ctx.fillText(layer.officialDesc, startX + coreWidth + 10, yStart + (height / 2) + 5);
+    // ── Left axis: depth labels + tick marks ──────────────────────────────────
+    ctx.font      = "11px 'Courier New', monospace";
+    ctx.fillStyle = "#2d3748";
 
-        // Draw all markers — iterate over the markers array
-        layer.markers.forEach(marker => {
-            const yMarker = marker.depth * SCALE + 20;
-            ctx.fillStyle = "red";
+    boundaries.forEach(([depth, idealY], i) => {
+        const resolvedLabelY = resolvedY[i];
+
+        // Tick mark on the core left edge
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth   = 1;
+        ctx.beginPath();
+        ctx.moveTo(coreX - 4, idealY);
+        ctx.lineTo(coreX,     idealY);
+        ctx.stroke();
+
+        // Leader line if label was pushed away from tick
+        if (Math.abs(resolvedLabelY - idealY) > 2) {
+            ctx.strokeStyle = "#aab";
+            ctx.lineWidth   = 0.5;
+            ctx.setLineDash([2, 2]);
             ctx.beginPath();
-            ctx.moveTo(startX + coreWidth, yMarker);
-            ctx.lineTo(startX + coreWidth + 15, yMarker - 6);
-            ctx.lineTo(startX + coreWidth + 15, yMarker + 6);
+            ctx.moveTo(coreX - 5, idealY);
+            ctx.lineTo(coreX - 10, resolvedLabelY - 1);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Label (right-aligned to coreX - 14)
+        ctx.fillStyle = "#2d3748";
+        ctx.textAlign = "right";
+        ctx.fillText(`${depth.toFixed(2)} m`, coreX - 14, resolvedLabelY);
+    });
+
+    // ── Left axis: thickness bracket per layer ────────────────────────────────
+    layers.forEach(layer => {
+        const yTop     = layer.depthFrom * SCALE + PAD_TOP;
+        const yBot     = layer.depthTo   * SCALE + PAD_TOP;
+        const height   = yBot - yTop;
+        const thick    = (layer.depthTo - layer.depthFrom).toFixed(2);
+        const bracketX = 12;  // x position of bracket (from left edge)
+        const midY     = yTop + height / 2;
+
+        // Only draw bracket if layer is tall enough (> 18 px)
+        if (height > 18) {
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth   = 1;
+            ctx.setLineDash([]);
+
+            // Vertical bracket line
+            ctx.beginPath();
+            ctx.moveTo(bracketX, yTop + 2);
+            ctx.lineTo(bracketX, yBot - 2);
+            ctx.stroke();
+
+            // Top & bottom serifs
+            ctx.beginPath();
+            ctx.moveTo(bracketX, yTop + 2);
+            ctx.lineTo(bracketX + 4, yTop + 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(bracketX, yBot - 2);
+            ctx.lineTo(bracketX + 4, yBot - 2);
+            ctx.stroke();
+
+            // Thickness label — rotated 90° if layer tall enough, else horizontal
+            ctx.save();
+            if (height > 40) {
+                ctx.translate(bracketX - 4, midY);
+                ctx.rotate(-Math.PI / 2);
+                ctx.font      = "bold 9px 'Courier New', monospace";
+                ctx.fillStyle = "#64748b";
+                ctx.textAlign = "center";
+                ctx.fillText(`Δ ${thick} m`, 0, 0);
+            } else {
+                ctx.font      = "bold 8px 'Courier New', monospace";
+                ctx.fillStyle = "#64748b";
+                ctx.textAlign = "left";
+                ctx.fillText(`${thick}m`, 2, midY + 3);
+            }
+            ctx.restore();
+        }
+    });
+
+    // ── Right side: soil class + description labels ───────────────────────────
+    // Collect right-side label positions and resolve overlaps
+    const rightLabelItems = layers.map(layer => {
+        const yTop   = layer.depthFrom * SCALE + PAD_TOP;
+        const height = (layer.depthTo - layer.depthFrom) * SCALE;
+        return {
+            idealY: yTop + height / 2,
+            text: layer.officialDesc
+        };
+    });
+    const resolvedRight = resolveLabels(rightLabelItems, 16);
+
+    layers.forEach((layer, i) => {
+        const yTop   = layer.depthFrom * SCALE + PAD_TOP;
+        const height = (layer.depthTo - layer.depthFrom) * SCALE;
+        const midY   = yTop + height / 2;
+        const labelY = resolvedRight[i];
+        const labelX = coreX + CORE_W + 12;
+
+        // Leader line from core edge to label if shifted
+        if (Math.abs(labelY - midY) > 4) {
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth   = 0.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(coreX + CORE_W + 2, midY);
+            ctx.lineTo(labelX - 2, labelY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Soil class badge
+        ctx.font      = "bold 12px sans-serif";
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "left";
+        ctx.fillText(layer.officialDesc, labelX, labelY + 4);
+    });
+
+    // ── Markers ────────────────────────────────────────────────────────────────
+    layers.forEach(layer => {
+        layer.markers.forEach(marker => {
+            const yMarker = marker.depth * SCALE + PAD_TOP;
+
+            // Horizontal dashed line across core
+            ctx.strokeStyle = "rgba(200,0,0,0.45)";
+            ctx.lineWidth   = 0.8;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(coreX, yMarker);
+            ctx.lineTo(coreX + CORE_W, yMarker);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Arrow triangle
+            ctx.fillStyle = "#cc0000";
+            ctx.beginPath();
+            ctx.moveTo(coreX + CORE_W,      yMarker);
+            ctx.lineTo(coreX + CORE_W + 14, yMarker - 5);
+            ctx.lineTo(coreX + CORE_W + 14, yMarker + 5);
             ctx.fill();
-            
-            ctx.fillStyle = "red";
-            ctx.font = "italic 11px sans-serif";
-            ctx.textAlign = "left";
-            ctx.fillText(marker.label, startX + coreWidth + 20, yMarker + 4);
+
+            // Label
+            ctx.fillStyle   = "#cc0000";
+            ctx.font        = "italic 10px sans-serif";
+            ctx.textAlign   = "left";
+            ctx.fillText(marker.label, coreX + CORE_W + 18, yMarker + 4);
         });
     });
+
+    // ── Bottom depth label ─────────────────────────────────────────────────────
+    const yBottom = totalDepth * SCALE + PAD_TOP;
+    ctx.fillStyle = "#2d3748";
+    ctx.font      = "bold 11px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`↕ ${totalDepth.toFixed(2)} m Gesamt`, coreX + CORE_W / 2, yBottom + 22);
 }
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function isDark(color) {
     const r = parseInt(color.slice(1, 3), 16);
