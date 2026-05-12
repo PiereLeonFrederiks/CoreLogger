@@ -7,10 +7,8 @@ let SOIL_MODIFIERS = {};
 window.onload = async function() {
     // ── Load external soil data ───────────────────────────────────────────────
     try {
-        // Resolve relative to index.html, works on GitHub Pages regardless of repo name
-        const base = document.baseURI || window.location.href;
-        const url  = new URL('data/soilData.json', base);
-        const res  = await fetch(url.href);
+      
+        const res  = await fetch('./data/soilData.json'); 
         const data = await res.json();
 
         SOIL_MAINS     = data.soilMains;
@@ -27,7 +25,7 @@ window.onload = async function() {
         });
     } catch (err) {
         console.error('Fehler beim Laden von soilData.json:', err);
-        alert('Bodendaten konnten nicht geladen werden.\nPfad: data/soilData.json\nDetails: ' + err.message);
+        alert('Bodendaten konnten nicht geladen werden.');
     }
 
     // ── Table delete handler ──────────────────────────────────────────────────
@@ -44,19 +42,34 @@ window.onload = async function() {
     });
 };
 
+
 function translateSoil(desc) {
     const d = desc.toLowerCase();
     let main = "-";
+    let mainPos = -1;
     let modifiers = [];
-    const lastWord = d.split(' ').pop();
+
+  
     for (const [key, val] of Object.entries(SOIL_MAINS)) {
-        if (lastWord.includes(key)) { main = val; break; }
+        const lastIndex = d.lastIndexOf(key);
+        if (lastIndex > mainPos) {
+            mainPos = lastIndex;
+            main = val;
+        }
     }
+
+  
     for (const [key, val] of Object.entries(SOIL_MODIFIERS)) {
-        if (d.includes(key)) modifiers.push(val);
+        if (d.includes(key)) {
+            modifiers.push(val);
+        }
     }
+
+
     modifiers = [...new Set(modifiers)].sort();
-    return main === "-" ? "-" : (modifiers.length > 0 ? `${main}(${modifiers.join(',')})` : main);
+    
+    if (main === "-") return "-";
+    return modifiers.length > 0 ? `${main}(${modifiers.join(',')})` : main;
 }
 
 function addLayer() {
@@ -80,7 +93,7 @@ function addLayer() {
         id, depthFrom: from, depthTo: to, 
         color: hexColor, 
         officialDesc: translateSoil(desc), 
-        originalDesc: desc,
+        originalDesc: desc, 
         markers: newMarker ? [newMarker] : []
     };
     
@@ -88,34 +101,13 @@ function addLayer() {
     updateTable();
     drawGraph();
     
+   
     document.getElementById('depthFrom').value = to; 
     document.getElementById('depthTo').value = "";
     document.getElementById('soilDesc').value = "";
     document.getElementById('markerDepth').value = "";
     document.getElementById('markerLabel').value = "";
     document.getElementById('depthTo').focus();
-}
-
-function addExtraMarker() {
-    if (layers.length === 0) {
-        alert("Bitte zuerst eine Schicht erstellen.");
-        return;
-    }
-    const mDepth = parseFloat(document.getElementById('markerDepth').value);
-    const mLabel = document.getElementById('markerLabel').value.trim();
-
-    if (isNaN(mDepth) || !mLabel) {
-        alert("Bitte Tiefe und Label für den zusätzlichen Marker angeben.");
-        return;
-    }
-
-    layers[layers.length - 1].markers.push({ depth: mDepth, label: mLabel });
-    
-    updateTable();
-    drawGraph();
-    
-    document.getElementById('markerDepth').value = "";
-    document.getElementById('markerLabel').value = "";
 }
 
 function updateTable() {
@@ -133,21 +125,28 @@ function updateTable() {
         row.innerHTML = `
             <td>${l.id}</td>
             <td>${l.depthFrom.toFixed(2)}-${l.depthTo.toFixed(2)}m</td>
-            <td style="background-color:${l.color}; color:${isDark(l.color) ? 'white' : 'black'}; text-align:center;">
+            <td style="background-color:${l.color}; color:${isDark(l.color) ? 'white' : 'black'}; text-align:center; font-family:monospace;">
                 ${l.color}
             </td>
             <td><strong>${l.officialDesc}</strong></td>
             <td>${l.originalDesc}${markersHtml}</td>
             <td>
-                <button class="btn-delete" data-index="${index}" title="Löschen">
-                    ✖
-                </button>
+                <button class="btn-delete" data-index="${index}" title="Löschen">✖</button>
             </td>
         `;
         tbody.appendChild(row);
     });
 }
 
+// Hilfsfunktion für Textkontrast
+function isDark(color) {
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return (r * 0.299 + g * 0.587 + b * 0.114) < 128;
+}
+
+// ... (Rest der drawGraph() und Export-Funktionen bleibt gleich wie in Ihrem Original)
 // ─── Graph drawing ────────────────────────────────────────────────────────────
 
 const SCALE = 2000;
