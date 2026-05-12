@@ -77,5 +77,13 @@
         </div>
     </div>
     <script src="./js/script.js"></script>
+    <script>
+        // Prevent pinch-zoom on iOS (gesturestart) and multi-touch zoom (touchmove)
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+    </script>
 </body>
 </html>
