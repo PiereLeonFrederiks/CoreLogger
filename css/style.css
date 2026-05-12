@@ -287,14 +287,14 @@ td {
 
     .input-section { padding: 16px; }
 
-    /* Stack both grid pairs to single column on mobile */
+    /* Stack grids to single column */
     .input-grid {
         grid-template-columns: 1fr;
         gap: 12px;
         margin-bottom: 12px;
     }
 
-    /* Depth from/to stay side-by-side even on mobile */
+    /* Depth from/to stay side-by-side */
     .depth-range {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
@@ -304,18 +304,43 @@ td {
         grid-template-columns: 1fr 1fr;
     }
 
+    /* 16px font on ALL inputs prevents iOS/Android auto-zoom */
+    input, select, textarea {
+        font-size: 16px;
+    }
+
     textarea { height: 64px; }
 
-    .btn-primary { padding: 12px; font-size: 12px; }
+    .btn-primary { padding: 12px; font-size: 13px; }
 
     /* Table: horizontal scroll */
     .table-container { margin-top: 12px; }
     td, th { padding: 10px 8px; font-size: 0.82rem; }
 
-    /* Canvas wrapper: taller on mobile for better readability */
+    /* 
+     * Canvas wrapper on mobile:
+     * - Full bleed (negative margin cancels body padding)
+     * - Fixed height viewport so profile scrolls inside it
+     * - Horizontal scroll too in case canvas is wider than screen
+     * - No inner padding so canvas uses all available width
+     */
     .canvas-wrapper {
-        max-height: 55vh;
-        padding: 12px 6px;
+        max-height: 60vh;
+        padding: 16px 0;
+        margin-left: -12px;
+        margin-right: -12px;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+        justify-content: flex-start; /* left-align so scroll starts at axis */
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Give the canvas a left indent so the axis labels aren't flush against edge */
+    #coreCanvas {
+        margin-left: 8px;
     }
 
     .export-actions { flex-direction: column; gap: 8px; }
