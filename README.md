@@ -6,7 +6,7 @@ A single-file, offline-capable web app for logging sediment core and borehole st
 
 *by PLF*
 
-[![DOI](https://zenodo.org/badge/1235400558.svg)](https://doi.org/10.5281/zenodo.20487130)
+Citation: 10.5281/zenodo.20487277 https://zenodo.org/badge/1235400558.svg
 
 ---
 
