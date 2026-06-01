@@ -117,3 +117,6 @@ The entire application is a single self-contained `index.html` file. All styles,
 ## License
 
 See repository or contact the author for licensing information.
+
+## Credits
+Developed by PLF. AI-assisted development — Claude (Anthropic) was used during parts of the scripting process.
