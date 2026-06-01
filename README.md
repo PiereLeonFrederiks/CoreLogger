@@ -5,7 +5,8 @@ A single-file, offline-capable web app for logging sediment core and borehole st
 ⚠ Early Access — This project is under active development. Features, exports, and data formats may change between versions. If you use this tool, I'd love to hear what works, what doesn't, and what's missing.
 
 *by PLF*
-[![DOI](https://zenodo.org/badge/1235400558.svg)](https://doi.org/10.5281/zenodo.20487130)
+
+DOI: https://doi.org/10.5281/zenodo.20487277
 
 ---
 
