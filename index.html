@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Geoarchaeological Core Logger</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bitter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Geoarchaeological Core Logger - Modern Dark Theme */
+   --ga-void:      #f5f7f8; /* Crisp, ultra-light slate canvas */
+  --ga-depth:     #FFFFFF; /* Soft slate-blue contrast for sidebars/panels */
+  --ga-stratum:   #ffffff; /* Elevated clean white containers/cards */
+  --ga-layer:     #ffffff; /* Pure white for top-level elements */
+  --ga-border:    #d0dadf; /* Clean, non-distracting lines matching the text tones */
+  --ga-muted-bg:  #eef3f5; /* Subtle backdrop for code blocks or data readouts */
+  --ga-paper:     #ffffff; /* Pristine document background */
+  --ga-vellum:    #f7fafb; /* Soft row tint for data tables */
+  --ga-rule:      #dae3e6; /* Sharp divider lines */
+  --ga-text:      #2d3e46; /* Deep slate-teal for high-contrast, soft readability */
+  --ga-subdued:   #5c747f; /* Muted teal-gray for secondary labels and data fields */
+  --ga-faint:     #8fa4ae; /* Taken from 'geoarchaeological' text—for captions & metadata */
+  --ga-ink:       #1c2d35; /* Crisp, near-black slate-teal for bold emphasis */
+  
+  /* Brand Primary Accents (From the Logo Typography) */
+  --ga-accent:    #4fa3b3; /* Energized, luminous 'CORE LOGGER' teal optimized for dark backgrounds */
+  --ga-accent-lt: #66b5c5; /* Brighter interactive hover state */
+  --ga-accent-dk: #397b88; /* Deeper focused/pressed state */
+  --ga-accent-bg: rgba(79, 163, 179, .10); /* Translucent branding highlight for selections */
+  
+  /* Stratigraphy Status Indicators (Optimized for Dark UI Contrast) */
+  --ga-green:     #9bc4a1; /* Luminous, soft sage green from the lower strata */
+  --ga-green-bg:  rgba(155, 196, 161, .12);
+  --ga-red:       #e07353; /* Vibrant, warm clay-red from the middle strata */
+  --ga-red-bg:    rgba(224, 115, 83, .12);
+  --ga-blue:      #689cb0; /* Mineral blue from the bottom of the tube */
+  --ga-blue-bg:   rgba(104, 156, 176, .12);
+  --ga-amber:     #e5b869; /* Bright sandy stratum gold for warning states */
+
+  /* Brand-specific Earth Tones (For data visualization / logging flags) */
+  --ga-soil-dark:  #3d352e; /* Lightened dark brown for visibility on dark backgrounds */
+  --ga-soil-clay:  #b5875e; /* Vibrant silt/clay brown */
+  --ga-soil-sand:  #dfbe91; /* Sandy stratum gold */
+  --ga-soil-silt:  #bdaea0; /* Loam/Silt gray-brown */
+
+  /* Premium Technical Typography */
+  --ga-sans:      'Inter', system-ui, -apple-system, sans-serif; /* Sleek, legible data UI */
+  --ga-mono:      'JetBrains Mono', 'Fira Code', monospace; /* Precise data logging font */
+
+  /* Local Aliases Mapping */
+  --primary:        var(--ga-ink);
+  --secondary:      var(--ga-subdued);
+  --accent:         var(--ga-accent);
+  --danger:         var(--ga-red);
+  --warn:           var(--ga-amber);
+  --compaction:     var(--ga-blue);
+  --bg:             var(--ga-void);
+  --card-bg:        var(--ga-stratum);
+  --border:         var(--ga-border);
+  --marker-bg:      rgba(229, 184, 105, .08);
+  --marker-border:  var(--ga-amber);
+  --compact-bg:     var(--ga-blue-bg);
+  --compact-bord:   var(--ga-blue);
+  --coord-bg:       var(--ga-green-bg);
+  --coord-bord:     var(--ga-green);
+}
+html,body { touch-action:pan-y; overscroll-behavior-y:contain; }
+body {
+    font-family: var(--ga-serif);
+    background: var(--ga-depth);
+    color: var(--ga-text);
+    padding: 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    padding-left:  max(20px, env(safe-area-inset-left,   0px));
+    padding-right: max(20px, env(safe-area-inset-right,  0px));
+    margin: 0;
+}
+.container { max-width:920px; margin:auto; }
+
+/* ── Header ── */
+.header-section {
+    display:flex; align-items:center; gap:16px;
+    margin-bottom:36px; padding-bottom:18px;
+    border-bottom: 2px solid var(--ga-accent);
+}
+.soil-logo { width:50%; opacity:.75; flex-shrink:0; }
+h1 { margin:0; font-size:1rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ga-accent); font-family:var(--ga-serif); }
+h1 small { font-weight:400; opacity:.45; font-size:.75em; color:var(--ga-subdued); }
+
+/* ── Section label ── */
+.section-label {
+    font-size:.62rem; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--ga-subdued); font-weight:600; margin-bottom:14px;
+    font-family:var(--ga-mono);
+}
+.section-hint { font-size:.72rem; color:var(--ga-subdued); margin:0 0 12px; font-family:var(--ga-mono); }
+
+/* ── Input sections ── */
+.input-section {
+    background:var(--ga-stratum); padding:22px 28px;
+    border:1px solid var(--ga-border); margin-bottom:14px;
+}
+.marker-standalone-section { background: rgba(212,160,60,.06); border-color:var(--ga-amber); }
+.compaction-section         { background: var(--ga-blue-bg); border-color:var(--ga-blue); }
+.coord-section              { background: var(--ga-green-bg); border-color:var(--ga-green); }
+
+.input-grid  { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.input-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px; }
+.input-grid4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:14px; }
+.depth-range { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+.field-label { font-size:.62rem; color:var(--ga-subdued); display:block; margin-bottom:4px; font-weight:500; font-family:var(--ga-mono); text-transform:uppercase; letter-spacing:.08em; }
+
+/* ── Radio row ── */
+.layer-type-row { display:flex; gap:20px; flex-wrap:wrap; margin:14px 0 16px; }
+.radio-label { display:flex; align-items:center; gap:6px; font-size:.78rem; color:var(--ga-subdued); cursor:pointer; user-select:none; font-family:var(--ga-mono); }
+.radio-label input[type="radio"] { accent-color:var(--ga-accent); cursor:pointer; }
+
+/* ── Inline row inputs ── */
+.inline-row { display:grid; gap:12px; align-items:end; }
+.inline-row.col-3 { grid-template-columns:1fr 2fr auto; }
+.inline-row.col-2 { grid-template-columns:1fr 2fr auto; }
+
+/* ── Inputs ── */
+input,select,textarea {
+    width:100%; box-sizing:border-box;
+    background:var(--ga-layer);
+    padding:10px 12px; border:1px solid var(--ga-border);
+    font-size:13px; color:var(--ga-text); transition:border-color .2s;
+    font-family:var(--ga-mono); border-radius:0;
+}
+input:focus,select:focus,textarea:focus { border-color:var(--ga-accent); outline:none; background:var(--ga-muted-bg); }
+input::placeholder,textarea::placeholder { color:var(--ga-faint); }
+select { -webkit-appearance:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239c9280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+}
+textarea { height:80px; resize:vertical; }
+
+.btn-primary {
+    background:var(--ga-accent); color:var(--ga-void); width:100%; padding:12px; border:none;
+    cursor:pointer; font-weight:700; font-family:var(--ga-mono); font-size:12px;
+    text-transform:uppercase; letter-spacing:.1em; margin-top:4px; transition:background .15s;
+}
+.btn-primary:hover { background:var(--ga-accent-lt); }
+
+.btn-action {
+    padding:10px 16px; border:none; font-family:var(--ga-mono); font-size:11px;
+    font-weight:600; text-transform:uppercase; letter-spacing:.08em;
+    cursor:pointer; white-space:nowrap; transition:opacity .15s; color:var(--ga-void);
+}
+.btn-action:hover { opacity:.85; }
+.btn-marker     { background:var(--ga-amber); }
+.btn-compaction { background:var(--ga-blue); }
+
+.btn-delete {
+    background:none; border:none; color:var(--ga-subdued); cursor:pointer; font-size:1.1rem;
+    padding:6px 10px; transition:opacity .2s,transform .1s; pointer-events:auto !important;
+}
+.btn-delete:hover  { color:var(--ga-red); transform:scale(1.1); }
+.btn-delete:active { transform:scale(.9); }
+.btn-delete * { pointer-events:none; }
+
+.btn-edit {
+    background:none; border:none; color:var(--ga-subdued); cursor:pointer; font-size:1rem;
+    padding:6px 10px; transition:opacity .2s,transform .1s; pointer-events:auto !important;
+}
+.btn-edit:hover  { color:var(--ga-accent); transform:scale(1.1); }
+.btn-edit:active { transform:scale(.9); }
+.btn-edit * { pointer-events:none; }
+
+/* ── Edit Modal ── */
+.modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(13,11,9,.7);
+    z-index:1000; align-items:center; justify-content:center; padding:16px;
+    -webkit-overflow-scrolling:touch;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+    background:var(--ga-stratum); border:1px solid var(--ga-border);
+    padding:28px 32px; width:100%; max-width:560px; max-height:90vh;
+    overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.5);
+    -webkit-overflow-scrolling:touch;
+}
+@media(max-width:600px){
+    .modal-overlay { padding:0; align-items:flex-end; }
+    .modal-box {
+        max-width:100%; max-height:92vh; border-bottom:none;
+        padding:20px 16px 28px;
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+        border-radius:0;
+    }
+    .modal-actions { gap:8px; }
+    .modal-actions .btn-cancel { font-size:13px; padding:13px; }
+}
+.modal-box h2 {
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--ga-accent); font-weight:700; margin:0 0 20px;
+    font-family:var(--ga-mono);
+}
+.modal-actions { display:flex; gap:10px; margin-top:20px; }
+.modal-actions .btn-primary { margin-top:0; }
+.btn-cancel {
+    flex:1; padding:12px; border:1px solid var(--ga-border); background:none;
+    color:var(--ga-subdued); font-family:var(--ga-mono); font-size:12px; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.1em; transition:border-color .2s,color .2s;
+}
+.btn-cancel:hover { border-color:var(--ga-accent); color:var(--ga-text); }
+
+.btn-secondary {
+    display:inline-block; margin-top:12px; padding:10px 18px; background:none;
+    border:1px solid var(--ga-border); color:var(--ga-subdued); font-family:var(--ga-mono);
+    font-size:12px; cursor:pointer; text-transform:uppercase; letter-spacing:.08em;
+    transition:border-color .2s,color .2s;
+}
+.btn-secondary:hover { border-color:var(--ga-accent); color:var(--ga-accent); }
+.btn-geodin { border-color:var(--ga-blue); color:var(--ga-blue); }
+.btn-geodin:hover { border-color:var(--ga-blue); color:var(--ga-blue); background:var(--ga-blue-bg); }
+.export-data-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+/* ── Table ── */
+.table-container { margin-top:20px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { width:100%; border-collapse:collapse; min-width:580px; }
+th {
+    text-align:left; padding:9px 12px; font-size:.6rem; color:var(--ga-accent);
+    text-transform:uppercase; letter-spacing:.1em; border-bottom:2px solid var(--ga-accent);
+    white-space:nowrap; background:var(--ga-void); font-family:var(--ga-mono); font-weight:600;
+}
+td { padding:10px 12px; border-bottom:1px solid var(--ga-border); font-size:.84rem; vertical-align:top; color:var(--ga-text); }
+tr.row-disturbed td { background: rgba(212,160,60,.06); }
+tr.row-missing   td { background: rgba(90,135,184,.06); }
+tr.row-anthropogenic td { background: rgba(192,86,58,.06); }
+
+.layer-type-badge {
+    display:inline-block; font-size:.58rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; padding:2px 5px; margin-left:5px; vertical-align:middle;
+    font-family:var(--ga-mono);
+}
+.badge-disturbed { background:rgba(212,160,60,.2); color:var(--ga-amber); }
+.badge-missing   { background:rgba(90,135,184,.2); color:var(--ga-blue); }
+.badge-anthropogenic { background:rgba(192,86,58,.2); color:var(--ga-red); }
+
+.marker-tag    { display:block; font-size:.68rem; color:var(--ga-amber); margin-top:3px; font-weight:500; font-family:var(--ga-mono); }
+.compact-tag   { display:block; font-size:.68rem; color:var(--ga-blue);  margin-top:3px; font-weight:500; font-family:var(--ga-mono); }
+.de-badge {
+    display:inline-block; font-size:.58rem; font-weight:700; padding:1px 5px;
+    margin-left:5px; background:var(--ga-blue-bg); color:var(--ga-blue); vertical-align:middle;
+    text-transform:uppercase; letter-spacing:.05em; font-family:var(--ga-mono);
+}
+
+/* ── Graph section ── */
+.graph-section { margin-top:48px; }
+.graph-section h3 {
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--ga-subdued); margin-bottom:16px; font-weight:600; font-family:var(--ga-mono);
+}
+.canvas-wrapper {
+    background:var(--ga-stratum); border:1px solid var(--ga-border);
+    overflow-x:auto; overflow-y:visible; -webkit-overflow-scrolling:touch;
+    display:flex; justify-content:flex-start; padding:20px 16px;
+    box-shadow:inset 0 -8px 16px -8px rgba(0,0,0,.2),inset 0 8px 16px -8px rgba(0,0,0,.1);
+}
+.scroll-hint { font-size:.65rem; color:var(--ga-faint); text-align:right; margin-top:6px; letter-spacing:.05em; font-family:var(--ga-mono); }
+#coreCanvas { display:block; flex-shrink:0; image-rendering:-webkit-optimize-contrast; image-rendering:crisp-edges; }
+
+/* ── Export actions ── */
+.export-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.btn-export {
+    flex:1; min-width:130px; padding:10px; background:none; border:1px solid var(--ga-border);
+    color:var(--ga-subdued); font-family:var(--ga-mono); font-size:11px; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.08em; transition:border-color .2s,color .2s;
+}
+.btn-export:hover { border-color:var(--ga-accent); color:var(--ga-accent); }
+
+/* coord info bar */
+.coord-bar {
+    font-size:.72rem; color:var(--ga-subdued); margin-top:10px; padding:8px 12px;
+    background:var(--ga-layer); border:1px solid var(--ga-green); display:none;
+    font-family:var(--ga-mono);
+}
+
+/* ── GPS button & status ── */
+.section-label-row {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:8px; margin-bottom:14px;
+}
+.section-label-row .section-label { margin-bottom:0; }
+
+.btn-gps {
+    display:flex; align-items:center; gap:6px;
+    padding:7px 13px; border:1px solid var(--ga-green);
+    background:var(--ga-green-bg); color:var(--ga-green);
+    font-family:var(--ga-mono); font-size:.65rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:.08em;
+    cursor:pointer; transition:background .2s, border-color .2s;
+    white-space:nowrap; flex-shrink:0;
+}
+.btn-gps:hover  { background:rgba(155,196,161,.22); }
+.btn-gps:active { opacity:.8; }
+.btn-gps.loading { opacity:.6; pointer-events:none; }
+.gps-icon { font-size:1rem; line-height:1; }
+
+.gps-status {
+    font-size:.68rem; font-family:var(--ga-mono);
+    padding:7px 12px; margin-bottom:12px;
+    border-left:3px solid var(--ga-faint);
+    background:var(--ga-muted-bg); color:var(--ga-subdued);
+}
+.gps-status.ok     { border-color:var(--ga-green); color:var(--ga-green); }
+.gps-status.error  { border-color:var(--ga-red);   color:var(--ga-red);   }
+.gps-status.busy   { border-color:var(--ga-amber);  color:var(--ga-amber); }
+
+@media(max-width:600px){
+    .btn-gps { font-size:.63rem; padding:9px 12px; } /* bigger tap target */
+}
+
+/* ── Mobile ── */
+@media(max-width:600px){
+    body { padding:10px; }
+    .container { max-width:100%; }
+
+    /* Header */
+    .header-section { margin-bottom:20px; padding-bottom:14px; gap:12px; }
+    .soil-logo { width:45%; }
+
+    /* Sections */
+    .input-section { padding:14px 12px; margin-bottom:10px; }
+
+    /* Grids */
+    .input-grid  { grid-template-columns:1fr; gap:10px; margin-bottom:10px; }
+    .input-grid3 { grid-template-columns:1fr 1fr; gap:10px; }
+    .input-grid4 { grid-template-columns:1fr 1fr; gap:10px; }
+    .depth-range { grid-template-columns:1fr 1fr; gap:8px; }
+
+    /* Inline rows: stack on mobile with full-width button */
+    .inline-row.col-3,
+    .inline-row.col-2 {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .inline-row.col-3 .btn-action,
+    .inline-row.col-2 .btn-action { grid-column:1/-1; width:100%; padding:13px; }
+
+    /* Inputs — 16px prevents iOS auto-zoom */
+    input, select, textarea { font-size:16px !important; padding:11px 12px; }
+    textarea { height:70px; }
+
+    /* Bigger touch targets for buttons */
+    .btn-primary  { padding:14px; font-size:13px; letter-spacing:.08em; }
+    .btn-action   { padding:13px 14px; font-size:12px; }
+    .btn-delete,
+    .btn-edit     { padding:10px 14px; font-size:1.2rem; min-width:40px; min-height:40px; }
+
+    /* Radio labels — easier tap targets */
+    .layer-type-row { gap:10px 18px; margin:12px 0 14px; }
+    .radio-label    { font-size:.82rem; gap:8px; padding:4px 0; }
+    .radio-label input[type="radio"] { width:18px; height:18px; }
+
+    /* Table */
+    .table-container { margin-top:14px; }
+    td, th { padding:9px 7px; font-size:.78rem; }
+    /* Hide less critical columns on very small screens */
+    th:nth-child(2), td:nth-child(2) { display:none; } /* # */
+
+    /* Canvas — full-bleed, scrollable, no scale trick */
+    .canvas-wrapper {
+        margin-left:-10px; margin-right:-10px;
+        border-left:none; border-right:none;
+        overflow-x:auto; overflow-y:visible;
+        -webkit-overflow-scrolling:touch;
+        display:block;
+        padding:16px 12px;
+    }
+    #coreCanvas { width:auto !important; height:auto !important; }
+
+    /* Export buttons */
+    .export-actions    { flex-direction:column; gap:8px; }
+    .btn-export        { width:100%; padding:13px; font-size:12px; }
+    .export-data-row   { flex-direction:column; gap:0; }
+    .btn-secondary     { width:100%; box-sizing:border-box; padding:13px 16px; margin-top:8px !important; text-align:center; }
+
+    /* Section labels */
+    .section-label { font-size:.6rem; margin-bottom:10px; }
+    .section-hint  { font-size:.7rem; margin-bottom:10px; }
+
+    /* Coord bar */
+    .coord-bar { font-size:.68rem; padding:7px 10px; }
+
+    /* Graph section */
+    .graph-section { margin-top:32px; }
+    .scroll-hint   { font-size:.62rem; }
+}
+
+/* ── Extra small (≤380px) — phones like iPhone SE ── */
+@media(max-width:380px){
+    body { padding:8px; }
+    .input-section { padding:12px 10px; }
+    .input-grid4 { grid-template-columns:1fr; }
+    td, th { padding:8px 5px; font-size:.74rem; }
+    /* Also hide Colour column to fit description on tiny screens */
+    th:nth-child(5), td:nth-child(5) { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ── Header ── -->
+<div class="header-section">
+    <img class="soil-logo" id="logoImg"  alt="Core Logger Logo">
+    <h1><small>BETA VERSION</small></h1>
+</div>
+
+<!-- ── Coordinates ── -->
+<div class="input-section coord-section">
+    <div class="section-label-row">
+        <span class="section-label" style="margin-bottom:0">Borehole Coordinates <span style="font-weight:400;text-transform:none;opacity:.5;font-size:1.2em;">— optional</span></span>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-gps" id="btnGPS" onclick="getGPSLocation()" title="Use device GPS">
+                <span class="gps-icon">⊕</span> <span class="gps-label">Use GPS</span>
+            </button>
+            <button class="btn-gps" onclick="_manualCoordsPrompt()" title="Enter coordinates manually" style="opacity:.75;">
+                <span class="gps-icon">✎</span> <span class="gps-label">Enter manually</span>
+            </button>
+        </div>
+    </div>
+    <div id="gpsStatus" class="gps-status" style="display:none"></div>
+    <div class="input-grid4">
+        <div>
+            <label class="field-label">Longitude (WGS84) / Easting</label>
+            <input type="number" id="coordX" placeholder="e.g. 13.4050" step="0.000001" oninput="onCoordChange()">
+        </div>
+        <div>
+            <label class="field-label">Latitude (WGS84) / Northing</label>
+            <input type="number" id="coordY" placeholder="e.g. 52.5200" step="0.000001" oninput="onCoordChange()">
+        </div>
+        <div>
+            <label class="field-label">Surface Elevation (m a.s.l.)</label>
+            <input type="number" id="coordZ" placeholder="e.g. 42.50" step="0.01" oninput="onCoordChange()">
+        </div>
+        <div>
+            <label class="field-label">CRS / Datum</label>
+            <input type="text" id="coordCRS" placeholder="e.g. ETRS89 / UTM32N" oninput="onCoordChange()">
+        </div>
+    </div>
+    <div class="coord-bar" id="coordBar"></div>
+</div>
+
+<!-- ── Add Layer ── -->
+<div class="input-section">
+    <div class="section-label">Add Layer</div>
+    <div class="input-grid">
+        <input type="text" id="coreId" placeholder="Borehole ID (e.g. BH-1)">
+        <div class="depth-range">
+            <input type="number" id="depthFrom" placeholder="From (m)" step="0.01">
+            <input type="number" id="depthTo"   placeholder="To (m)"   step="0.01">
+        </div>
+    </div>
+    <div class="input-grid">
+        <select id="soilColor"></select>
+        <textarea id="soilDesc" placeholder="Description — English or Deutsch&#10;e.g. sandy silt / schluffiger Sand, humic"></textarea>
+    </div>
+    <div class="layer-type-row">
+        <label class="radio-label"><input type="radio" name="layerType" value="normal" checked> Normal</label>
+        <label class="radio-label"><input type="radio" name="layerType" value="disturbed"> Disturbed / reworked</label>
+        <label class="radio-label"><input type="radio" name="layerType" value="missing"> Sediment gap / missing</label>
+        <!-- New Anthropogenic Option -->
+        <label class="radio-label"><input type="radio" name="layerType" value="anthropogenic"> Anthropogenic</label>
+    </div>
+    <button onclick="addLayer()" class="btn-primary">Add Layer</button>
+</div>
+
+<!-- ── Marker ── -->
+<div class="input-section marker-standalone-section">
+    <div class="section-label">Add Marker / Find</div>
+    <div class="inline-row col-3">
+        <input type="number" id="markerDepth" placeholder="Depth (m)" step="0.01">
+        <input type="text"   id="markerLabel" placeholder="Label (e.g. sample, wood, Holz, Keramik)">
+        <button onclick="addStandaloneMarker()" class="btn-action btn-marker">+ Add Marker</button>
+    </div>
+</div>
+
+<!-- ── Compaction ── -->
+<div class="input-section compaction-section">
+    <div class="section-label">Add Compaction Zone</div>
+    <p class="section-hint">Mark depths where corer-induced compaction is suspected (e.g. piston corer, Rammsonde).</p>
+    <div class="inline-row col-3">
+        <input type="number" id="compactionDepth" placeholder="Depth (m)" step="0.01">
+        <input type="text"   id="compactionNote"  placeholder="Note (e.g. ~15% compression, piston corer)">
+        <button onclick="addCompaction()" class="btn-action btn-compaction">+ Add Compaction</button>
+    </div>
+</div>
+
+<!-- ── Table ── -->
+<div class="table-container">
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>#</th>
+                <th>Depth (m)</th>
+                <th class="elev-col" style="display:none">Elevation (m)</th>
+                <th>Colour</th>
+                <th>Class</th>
+                <th>Description / Finds</th>
+                <th>Edit</th>
+                <th>Del</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<div class="export-data-row">
+    <button onclick="copyToClipboard()" class="btn-secondary">Copy as TSV</button>
+    <button onclick="exportTXT()" class="btn-secondary">Download TXT (Excel)</button>
+    <button onclick="exportJSON()" class="btn-secondary">⬇ Save Profile (JSON)</button>
+    <button onclick="exportSEP3CSV()" class="btn-secondary btn-geodin" title="Export GeODin-compatible CSV (SEP-3 field names) for import into GeODin-Shuttle">⬇ GeODin / SEP-3 (CSV)</button>
+    <label class="btn-secondary" style="cursor:pointer;margin-top:12px;" title="Import a previously saved profile JSON">
+        ⬆ Load Profile (JSON)
+        <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="importJSON(event)">
+    </label>
+    <label class="btn-secondary" style="cursor:pointer;margin-top:12px;" title="Import a TXT or CSV exported by this tool">
+        ⬆ Load TXT / CSV
+        <input type="file" id="importTSVInput" accept=".txt,.tsv,.csv,text/plain,text/tab-separated-values,text/csv" style="display:none" onchange="importTSV(event)">
+    </label>
+</div>
+
+<!-- ── Profile ── -->
+<div class="graph-section">
+    <h3>Stratigraphic Profile</h3>
+    <div class="canvas-wrapper">
+        <canvas id="coreCanvas"></canvas>
+    </div>
+    <p class="scroll-hint">↕ Scroll to view full profile</p>
+</div>
+
+<div class="export-actions">
+    <button onclick="exportImage('jpg')" class="btn-export">⬇ JPG</button>
+    <button onclick="exportImage('png')" class="btn-export">⬇ PNG</button>
+    <button onclick="exportSVG()"        class="btn-export">⬇ SVG (vector)</button>
+    <button onclick="exportPDF()"        class="btn-export" id="btnPDF">⬇ PDF (vector)</button>
+    
+</div>
+
+<script>
+// On mobile, relabel the PDF button since it exports SVG instead
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('btnPDF');
+        if (btn) btn.textContent = '⬇ PDF / SVG (share)';
+    });
+}
+</script>
+
+<h6><small>by PLF
+</small></h6>
+
+</div><!-- /container -->
+
+<!-- ── Edit Layer Modal ── -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
+    <div class="modal-box">
+        <h2>Edit Layer</h2>
+        <input type="hidden" id="editIndex">
+        <div class="input-grid">
+            <div>
+                <label class="field-label">Borehole ID</label>
+                <input type="text" id="editCoreId" placeholder="e.g. BH-1">
+            </div>
+            <div class="depth-range">
+                <div>
+                    <label class="field-label">From (m)</label>
+                    <input type="number" id="editDepthFrom" step="0.01">
+                </div>
+                <div>
+                    <label class="field-label">To (m)</label>
+                    <input type="number" id="editDepthTo" step="0.01">
+                </div>
+            </div>
+        </div>
+        <div class="input-grid">
+            <div>
+                <label class="field-label">Colour</label>
+                <select id="editSoilColor"></select>
+            </div>
+            <div>
+                <label class="field-label">Description</label>
+                <textarea id="editSoilDesc"></textarea>
+            </div>
+        </div>
+        <div>
+            <label class="field-label">Layer Type</label>
+            <div class="layer-type-row">
+                <label class="radio-label"><input type="radio" name="editLayerType" value="normal" checked> Normal</label>
+                <label class="radio-label"><input type="radio" name="editLayerType" value="disturbed"> Disturbed / reworked</label>
+                <label class="radio-label"><input type="radio" name="editLayerType" value="missing"> Sediment gap / missing</label>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+            <button class="btn-primary" style="flex:2" onclick="saveEditLayer()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  EMBED LOGO AS BASE64 (injected by build script)
+// ═══════════════════════════════════════════════════════════════
+(function(){
+    const img = document.getElementById('logoImg');
+    img.src = './logo.png';
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  GERMAN → ENGLISH SOIL DICTIONARY
+//  Sorted longest-first at runtime so compound phrases match before
+//  their constituent words.
+// ═══════════════════════════════════════════════════════════════
+const DE_TO_EN_RAW = {
+    // ── Main types (longest compounds first) ──
+    "hochmoortorf":         "raised bog peat",
+    "übergangstorf":        "transition peat",
+    "ubergangstorf":        "transition peat",
+    "niedermoortorf":       "fen peat",
+    "amorpher torf":        "amorphous peat",
+    "wattenmeer sand":      "tidal flat sand",
+    "wattsand":             "tidal flat sand",
+    "wattschluff":          "tidal flat silt",
+    "wattton":              "tidal flat clay",
+    "wattmud":              "tidal flat mud",
+    "strandwall sand":      "beach ridge sand",
+    "strandsand":           "beach sand",
+    "beckensand":           "basin sand",
+    "beckenschluff":        "basin silt",
+    "beckenton":            "basin clay",
+    "banderton":            "varved clay",
+    "bänderton":            "varved clay",
+    "bandermergel":         "varved marl",
+    "bändermergel":         "varved marl",
+    "seekreide":            "lake chalk",
+    "seemergel":            "lake marl",
+    "seesand":              "lake sand",
+    "seeschluff":           "lake silt",
+    "seeton":               "lake clay",
+    "seelehm":              "lake loam",
+    "kernverlust":          "core loss",
+    "feiner ton":           "fine clay",
+    "mittelton":            "medium clay",
+    "grobton":              "coarse clay",
+    "feinschluff":          "fine silt",
+    "mittelschluff":        "medium silt",
+    "grobschluff":          "coarse silt",
+    "feinsand":             "fine sand",
+    "mittelsand":           "medium sand",
+    "grobsand":             "coarse sand",
+    "feinkies":             "fine gravel",
+    "mittelkies":           "medium gravel",
+    "grobkies":             "coarse gravel",
+    "schluff":              "silt",
+    "torf":                 "peat",
+    "lehm":                 "loam",
+    "sand":                 "sand",
+    "kies":                 "gravel",
+    "ton":                  "clay",
+    "mistschicht":          "manure layer",
+    "anthropogene organikschicht":  "anthropogenic organic layer",
+    "organische Schicht":   "organic layer",
+
+    
+    // ── Modifiers ──
+    "sehr schwach zersetzt":     "very weakly decomposed",
+    "schwach zersetzt":          "weakly decomposed",
+    "mittel zersetzt":           "moderately decomposed",
+    "stark zersetzt":            "strongly decomposed",
+    "sehr stark zersetzt":       "very strongly decomposed",
+    "anthropogen organisch":     "anthropogenic organic",
+    "schwach tonig":             "slightly clayey",
+    "mittel tonig":              "moderately clayey",
+    "stark tonig":               "strongly clayey",
+    "schwach schluffig":         "slightly silty",
+    "mittel schluffig":          "moderately silty",
+    "stark schluffig":           "strongly silty",
+    "schwach sandig":            "slightly sandy",
+    "mittel sandig":             "moderately sandy",
+    "stark sandig":              "strongly sandy",
+    "feinsandig":                "fine sandy",
+    "feinsandiger":              "fine sandy",
+    "mittelsandig":              "medium sandy",
+    "mittelsandiger":            "medium sandy",
+    "grobsandig":                "coarse sandy",
+    "grobsandiger":              "coarse sandy",
+    "anthropogen":               "anthropogenic",
+    "tonig":                     "clayey",
+    "toniger":                   "clayey",  
+    "schluffig":                 "silty",
+    "schluffiger":               "silty",   
+    "sandig":                    "sandy",
+    "sandiger":                  "sandy",
+    "kiesig":                    "gravelly",
+    "kiesiger":                  "gravelly",
+    "kalkhaltig":                "calcareous",
+    "kalkhaltiger":              "calcareous",
+    "kalkiger":                  "calcareous",
+    "kalkig":                    "calcareous",
+    "humos":                     "humic",
+    "humoser":                   "humic",  
+    "humusreich":                "humic",
+    "humusreicher":              "humic",
+    "humushaltig":               "humic",
+    "durchwurzelt":              "rooted",
+    "verwurzelt":                "rooted",
+    "holzkohle":                 "charcoal",
+    "eisenoxid":                 "iron oxide",
+    "ferruginoes":               "ferruginous",
+    "ferruginös":                "ferruginous",
+    "geschichtet":               "layered",
+    "laminiert":                 "laminated",
+    "gebändert":                 "banded",
+    "gebandert":                 "banded",
+    "gefleckt":                  "mottled",
+    "marmoriert":                "marbled",
+    "gesprenkelt":               "spotted",
+    "fleckig":                   "patchy",
+    "gestört":                   "disturbed",
+    "gestort":                   "disturbed",
+    "bioturbiert":               "bioturbated",
+    "organisch":                 "organic",
+    "fein":                      "fine",
+    "mittel":                    "medium",
+    "grob":                      "coarse"
+};
+
+// Pre-sort by length descending so compound phrases are matched first
+const DE_TO_EN_SORTED = Object.entries(DE_TO_EN_RAW)
+    .sort((a, b) => b[0].length - a[0].length);
+
+function normalizeUmlauts(str) {
+    return str
+        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+        .replace(/Ä/g,'ae').replace(/Ö/g,'oe').replace(/Ü/g,'ue')
+        .replace(/ß/g,'ss');
+}
+
+function translateGermanToEnglish(desc) {
+    let out = desc.toLowerCase();
+    for (const [de, en] of DE_TO_EN_SORTED) {
+        // Use word-boundary-aware replace — German words don't always have \b
+        const escaped = de.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp('(?<![a-z])' + escaped + '(?![a-z])', 'gi'), en);
+    }
+    // Also try with normalised umlauts
+    const normalized = normalizeUmlauts(desc.toLowerCase());
+    for (const [de, en] of DE_TO_EN_SORTED) {
+        const normDe  = normalizeUmlauts(de);
+        const escaped = normDe.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp('(?<![a-z])' + escaped + '(?![a-z])', 'gi'), en);
+    }
+    return out;
+}
+
+function detectLanguage(desc) {
+    const d = desc.toLowerCase();
+    const deKeys = Object.keys(DE_TO_EN_RAW);
+    return deKeys.some(k => d.includes(k) || normalizeUmlauts(d).includes(normalizeUmlauts(k))) ? 'de' : 'en';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SOIL DATA (inlined from soilData.json)
+// ═══════════════════════════════════════════════════════════════
+const SOIL_DATA = 
+{
+    "colors": [
+    { "name": "White",                          "hex": "#d6d1c9", "munsell": "10YR 8/1"  },
+    { "name": "Pale Yellow",                    "hex": "#F1E4B8", "munsell": "2.5Y 8/4"  },
+    { "name": "Pale Yellow",                    "hex": "#FCD683", "munsell": "2.5Y 8/8"  },
+    { "name": "Brownish Yellow",                "hex": "#C1A365", "munsell": "10YR 6/6"  },
+
+    { "name": "Light Yellowish Brown",          "hex": "#CCBC9A", "munsell": "10YR 7/3"  },
+    { "name": "Light Yellowish Brown",          "hex": "#D3C79F", "munsell": "10YR 7/4"  },
+    { "name": "Light Yellowish Brown",          "hex": "#c9bda5", "munsell": "10YR 7/3"  },
+    { "name": "Light Yellowish Brown",          "hex": "#a79273", "munsell": "10YR 6/4"  },
+    { "name": "Light Olive Brown",              "hex": "#8d7f57", "munsell": "2.5Y 5/4"  },
+    { "name": "Light Olive Brown",              "hex": "#958A6C", "munsell": "2.5Y 6/4"  },
+    { "name": "Light Reddish Brown",            "hex": "#BAA391", "munsell": "5YR 6/4"   },
+    { "name": "Light Brown",                    "hex": "#a18d75", "munsell": "7.5YR 6/4" },
+    { "name": "Yellowish Brown",                "hex": "#877353", "munsell": "10YR 5/4"  },
+    { "name": "Yellowish Brown",                "hex": "#958261", "munsell": "10YR 5/6"  },
+    { "name": "Grayish Yellowish Brown",        "hex": "#857f76", "munsell": "10YR 5/2"  },
+    { "name": "Brown",                          "hex": "#857766", "munsell": "7.5YR 5/4" },
+    { "name": "Moderate Brown",                 "hex": "#705c42", "munsell": "7.5YR 4/4" },
+    { "name": "Strong Brown",                   "hex": "#7a593e", "munsell": "7.5YR 5/6" },
+    { "name": "Moderate Reddish Brown",         "hex": "#A0887C", "munsell": "5YR 5/4"   },
+    { "name": "Moderate Reddish Brown",         "hex": "#7e5241", "munsell": "5YR 4/4"   },
+    { "name": "Dark Reddish Brown",             "hex": "#6e460b", "munsell": "5YR 3/4"   },
+    { "name": "Dark Yellowish Brown",           "hex": "#69563c", "munsell": "10YR 4/4"  },
+    { "name": "Dark Yellowish Brown",           "hex": "#68583F", "munsell": "10YR 4/6"  },
+    { "name": "Dark Brown",                     "hex": "#675949", "munsell": "7.5YR 4/2" },
+    { "name": "Dark Brown",                     "hex": "#4e4131", "munsell": "7.5YR 3/2" },
+    { "name": "Dark Brown",                     "hex": "#4d3f33", "munsell": "7.5YR 3/3" },
+    { "name": "Dark Brown",                     "hex": "#3b3022", "munsell": "7.5YR 2/2" },
+    { "name": "Dark Grayish Yellowish Brown",   "hex": "#736757", "munsell": "10YR 4/2"  },
+    { "name": "Dark Grayish Yellowish Brown",   "hex": "#645b50", "munsell": "10YR 4/1"  },
+    { "name": "Dark Reddish Brown",             "hex": "#503932", "munsell": "5YR 3/3"   },
+    { "name": "Dark Grayish Brown",             "hex": "#59554f", "munsell": "2.5Y 3/2"  },
+    { "name": "Brownish Black",                 "hex": "#24201b", "munsell": "7.5YR 2/1" },
+    { "name": "Very Dark Brown",                "hex": "#4A4339", "munsell": "10YR 3/2"  },
+    { "name": "Very Dark Brown",                "hex": "#2c2621", "munsell": "10YR 2/1"  },
+    { "name": "Very Dark Grayish Brown",        "hex": "#5E5649", "munsell": "10YR 3/1"  },
+    { "name": "Very Dark Grayish Brown",        "hex": "#4b443b", "munsell": "2.5Y 3/1"  },
+
+    { "name": "Light Brownish Gray",            "hex": "#bcb6ad", "munsell": "10YR 7/1"  },
+    { "name": "Light Brownish Gray",            "hex": "#C9BDA5", "munsell": "2.5Y 7/2"  },
+    { "name": "Light Brownish Gray",            "hex": "#AFA48E", "munsell": "10YR 6/2"  },
+    { "name": "Light Greenish Gray",            "hex": "#BFC1B3", "munsell": "5Y 7/1"    },
+    { "name": "Light Olive Gray",               "hex": "#AEAC93", "munsell": "5Y 6/2"    },
+    { "name": "Light Gray",                     "hex": "#C7C6BF", "munsell": "2.5Y 7/1"  },
+    { "name": "Medium Gray",                    "hex": "#828282", "munsell": "N 5/"       },
+    { "name": "Greenish Gray",                  "hex": "#A6A89B", "munsell": "5Y 6/1"    },
+    { "name": "Dark Greenish Gray",             "hex": "#7a8279", "munsell": "5GY 5/1"   },
+    { "name": "Light Bluish Green",             "hex": "#99C1C2", "munsell": "5BG 7/2"   },
+    { "name": "Moderate Greenish Blue",         "hex": "#778385", "munsell": "5B 5/2"    },
+    { "name": "Olive Gray",                     "hex": "#8b8773", "munsell": "5Y 5/2"    },
+    { "name": "Olive Gray",                     "hex": "#716E5B", "munsell": "5Y 4/2"    },
+    { "name": "Dark Brownish Gray",             "hex": "#706C63", "munsell": "10YR 4/1"  },
+    { "name": "Dark Gray",                      "hex": "#616363", "munsell": "N 4/"       },
+    { "name": "Dark Gray",                      "hex": "#48494B", "munsell": "N 3/"       },
+    { "name": "Dark Olive Gray",                "hex": "#605D4E", "munsell": "5Y 4/1"    },
+    { "name": "Dark Greenish Gray",             "hex": "#6E7168", "munsell": "5GY 4/1"   },
+    { "name": "Very Dark Grayish Brown",        "hex": "#59554C", "munsell": "2.5Y 3/1"  },
+    { "name": "Black",                          "hex": "#433f3c", "munsell": "N 2/"       },
+
+    { "name": "Light Grayish Olive",            "hex": "#ABAC8D", "munsell": "5Y 6/3"    },
+    { "name": "Grayish Olive",                  "hex": "#8D8F79", "munsell": "5Y 5/3"    },
+    { "name": "Light Olive",                    "hex": "#8F8B66", "munsell": "5Y 5/4"    },
+    { "name": "Grayish Olive Green",            "hex": "#8B947F", "munsell": "5GY 5/2"   },
+
+    { "name": "Moderate Reddish Orange",        "hex": "#a15b35", "munsell": "5YR 4/6"   },
+    { "name": "Deep Reddish Brown",             "hex": "#662a22", "munsell": "2.5YR 3/6" },
+
+    { "name": "Greenish Black",                 "hex": "#484A3F", "munsell": "5GY 2/1"   },
+    { "name": "Black",                          "hex": "#211f1e", "munsell": "N 2/"       },
+    { "name": "Brownish Black",                 "hex": "#231f20", "munsell": "7.5YR 2/1" },
+
+    { "name": "No Colour",                      "hex": "#ffffff", "munsell": ""           }
+],
+     
+    "soilMains": {
+        "clay": "T",
+        "fine clay": "fT",
+        "medium clay": "mT",
+        "coarse clay": "gT",
+        "silt": "U",
+        "fine silt": "fU",
+        "medium silt": "mU",
+        "coarse silt": "gU",
+        "loam": "L",
+        "sand": "S",
+        "fine sand": "fS",
+        "medium sand": "mS",
+        "coarse sand": "gS",
+        "gravel": "G",
+        "fine gravel": "fG",
+        "medium gravel": "mG",
+        "coarse gravel": "gG",
+        "peat": "H",
+        "raised bog peat": "Hh",
+        "transition peat": "Hu",
+        "fen peat": "Hn",
+        "amorphous peat": "Ha",
+        "tidal flat sand": "Swa",
+        "tidal flat silt": "Uwa",
+        "tidal flat clay": "Twa",
+        "tidal flat mud": "TUwa",
+        "beach ridge sand": "Sstw",
+        "beach sand": "Sst",
+        "lake sand": "Fss",
+        "lake silt": "Fsu",
+        "lake clay": "Fst",
+        "lake loam": "Fsl",
+        "lake marl": "Fsm",
+        "lake chalk": "Fkk",
+        "basin sand": "Sb",
+        "basin silt": "Ub",
+        "basin clay": "Tb",
+        "varved clay": "Tbd",
+        "varved marl": "Mbd",
+        "sand gyttja": "Fms",
+        "core loss": "NA",
+        "manure layer": "hY",
+        "anthropogenic organic layer": "hY",
+        "organic layer": "H"
+    },
+    "soilModifiers": {
+        "clayey": "t",  
+        "slightly clayey": "t2",
+        "moderately clayey": "t3",
+        "strongly clayey": "t4",
+        "silty": "u",
+        "slightly silty": "u2",
+        "moderately silty": "u3",
+        "strongly silty": "u4",
+        "sandy": "s",
+        "slightly sandy": "s2",
+        "moderately sandy": "s3",
+        "strongly sandy": "s4",
+        "fine sandy": "fs",
+        "medium sandy": "ms",
+        "coarse sandy": "gs",
+        "gravelly": "g",
+        "humic": "h",
+        "calcareous": "ca",
+        "anthropogenic organic": "yh",
+        "anthropogenic": "y",
+        "very weakly decomposed": "z1",
+        "weakly decomposed": "z2",
+        "moderately decomposed": "z3",
+        "strongly decomposed": "z4",
+        "very strongly decomposed": "z5",
+        "layered": "lam",
+        "laminated": "lam",
+        "banded": "lam",
+        "mottled": "mot",
+        "marbled": "mot",
+        "spotted": "sp",
+        "speckled": "sp",
+        "patchy": "sp",
+        "disturbed": "dist",
+        "bioturbated": "biot"
+
+    }
+};
+
+let SOIL_MAINS     = {};
+let SOIL_MODIFIERS = {};
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+const layers      = [];
+const compactions = [];   // {depth, note}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+window.onload = function() {
+    SOIL_MAINS     = SOIL_DATA.soilMains;
+    SOIL_MODIFIERS = SOIL_DATA.soilModifiers;
+
+    const sel = document.getElementById('soilColor');
+    SOIL_DATA.colors.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.hex;
+        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
+        opt.style.backgroundColor = c.hex;
+        opt.style.color = isDark(c.hex) ? 'white' : 'black';
+        sel.appendChild(opt);
+    });
+
+    // Populate edit modal colour dropdown
+    const editSel = document.getElementById('editSoilColor');
+    SOIL_DATA.colors.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.hex;
+        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
+        opt.style.backgroundColor = c.hex;
+        opt.style.color = isDark(c.hex) ? 'white' : 'black';
+        editSel.appendChild(opt);
+    });
+
+    document.querySelector('#logTable tbody').addEventListener('click', e => {
+        const btn = e.target.closest('.btn-delete');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.index, 10);
+        if (isNaN(idx)) return;
+        if (confirm('Remove this layer?')) { layers.splice(idx, 1); updateTable(); drawGraph(); }
+    });
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  COORDINATES
+// ═══════════════════════════════════════════════════════════════
+function getSurfaceElev() {
+    const v = parseFloat(document.getElementById('coordZ').value);
+    return isNaN(v) ? null : v;
+}
+
+function onCoordChange() {
+    const z   = getSurfaceElev();
+    const x   = document.getElementById('coordX').value.trim();
+    const y   = document.getElementById('coordY').value.trim();
+    const crs = document.getElementById('coordCRS').value.trim();
+    const bar = document.getElementById('coordBar');
+    const elevCols = document.querySelectorAll('.elev-col');
+
+    if (z !== null) {
+        let parts = [`<strong>Surface: ${z.toFixed(2)} m a.s.l.</strong>`];
+        if (x) parts.push(`E: ${x}`);
+        if (y) parts.push(`N: ${y}`);
+        if (crs) parts.push(`CRS: ${crs}`);
+        bar.innerHTML = parts.join(' &nbsp;·&nbsp; ');
+        bar.style.display = 'block';
+        elevCols.forEach(c => c.style.display = '');
+    } else {
+        bar.style.display = 'none';
+        elevCols.forEach(c => c.style.display = 'none');
+    }
+    updateTable();
+    drawGraph();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GPS LOCATION
+//  iOS Safari blocks navigator.geolocation on file:// URLs —
+//  the API exists but the permission prompt never fires and the
+//  callbacks are never called. We detect this upfront and show
+//  a Maps-based fallback instead.
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//  GPS LOCATION  —  works on desktop (Chrome/Firefox/Edge) and
+//  on mobile when served over HTTP/HTTPS.
+//
+//  Known limitation: iOS Safari on file:// silently ignores the
+//  geolocation API. All other browsers (desktop Chrome/Firefox/
+//  Edge on file://, and all browsers on http/https) work fine.
+// ═══════════════════════════════════════════════════════════════
+
+function _isMobile() {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
+function _isIOSSafari() {
+    return /iP(hone|od|ad)/.test(navigator.userAgent) &&
+           /WebKit/.test(navigator.userAgent) &&
+           !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
+}
+
+function getGPSLocation() {
+    const btn = document.getElementById('btnGPS');
+
+    // No geolocation API at all
+    if (!navigator.geolocation) {
+        _gpsStatus('error', '✕ Geolocation is not supported by this browser. Try Chrome or Firefox.');
+        return;
+    }
+
+    // iOS Safari on file:// — silently fails, show manual fallback immediately
+    if (_isIOSSafari() && location.protocol === 'file:') {
+        _showGPSFallback('ios-file');
+        return;
+    }
+
+    btn.classList.add('loading');
+    btn.querySelector('.gps-label').textContent = 'Locating…';
+    _gpsStatus('busy', '⏳ Requesting location — if prompted, click Allow…');
+
+    let fired = false;
+
+    // Watchdog: only fires if the browser never calls back at all
+    // (e.g. iOS Safari on file:// that slipped through the check above).
+    // Set generously to 20 s — normal GPS fix + permission prompt takes
+    // up to ~10 s on a cold phone.
+    const watchdog = setTimeout(() => {
+        if (!fired) {
+            fired = true;
+            btn.classList.remove('loading');
+            btn.querySelector('.gps-label').textContent = 'Use GPS';
+            _showGPSFallback(_isIOSSafari() ? 'ios-file' : 'timeout');
+        }
+    }, 20000);
+
+    navigator.geolocation.getCurrentPosition(
+        // ── Success ──
+        function(pos) {
+            if (fired) return;
+            fired = true;
+            clearTimeout(watchdog);
+
+            const lat    = pos.coords.latitude;
+            const lon    = pos.coords.longitude;
+            const alt    = pos.coords.altitude;
+            const acc    = pos.coords.accuracy;
+            const altAcc = pos.coords.altitudeAccuracy;
+
+            document.getElementById('coordX').value = lon.toFixed(6);
+            document.getElementById('coordY').value = lat.toFixed(6);
+            if (alt !== null && alt !== undefined) {
+                document.getElementById('coordZ').value = alt.toFixed(2);
+            }
+            const crsField = document.getElementById('coordCRS');
+            if (!crsField.value.trim()) crsField.value = 'WGS84 (EPSG:4326)';
+            onCoordChange();
+
+            let accMsg = `±${Math.round(acc)} m horizontal`;
+            if (alt !== null && altAcc !== null) accMsg += `, ±${Math.round(altAcc)} m vertical`;
+            else if (alt === null)               accMsg += ' · altitude not available';
+
+            _gpsStatus('ok',
+                `✓ Location acquired &nbsp;·&nbsp; Lat: ${lat.toFixed(6)}° &nbsp;` +
+                `Lon: ${lon.toFixed(6)}°` +
+                (alt !== null ? ` &nbsp; Alt: ${alt.toFixed(1)} m` : '') +
+                ` &nbsp;·&nbsp; Accuracy: ${accMsg}`
+            );
+            btn.classList.remove('loading');
+            btn.querySelector('.gps-label').textContent = 'Update GPS';
+        },
+        // ── Error ──
+        function(err) {
+            if (fired) return;
+            fired = true;
+            clearTimeout(watchdog);
+            btn.classList.remove('loading');
+            btn.querySelector('.gps-label').textContent = 'Use GPS';
+
+            if (err.code === 1) {
+                // Permission denied — give platform-specific instructions
+                if (_isIOSSafari()) {
+                    _gpsStatus('error',
+                        '✕ Location access denied.<br>' +
+                        'To enable: <strong>Settings → Privacy & Security → Location Services → Safari → While Using</strong>, ' +
+                        'then tap "Use GPS" again.');
+                } else if (_isMobile()) {
+                    _gpsStatus('error',
+                        '✕ Location access denied.<br>' +
+                        'Enable location for your browser in <strong>phone Settings → Apps → [Browser] → Location</strong>, ' +
+                        'then tap "Use GPS" again.');
+                } else {
+                    _gpsStatus('error',
+                        '✕ Location access denied.<br>' +
+                        'Click the location icon in your browser\'s address bar and choose <strong>Allow</strong>, ' +
+                        'then click "Use GPS" again.');
+                }
+            } else if (err.code === 2) {
+                _gpsStatus('error', '✕ Position unavailable — make sure location/GPS is enabled on your device and try again.');
+            } else if (err.code === 3) {
+                _showGPSFallback('timeout');
+            } else {
+                _gpsStatus('error', `✕ Location error (code ${err.code}) — ${err.message}`);
+            }
+        },
+        {
+            enableHighAccuracy: true,  // use GPS chip, not WiFi/cell
+            timeout:            18000, // 18 s before GeolocationPositionError TIMEOUT
+            maximumAge:         0      // always fresh fix
+        }
+    );
+}
+
+// ── Fallback panel ──
+function _showGPSFallback(reason) {
+    const isIOS     = _isIOSSafari();
+    const isMob     = _isMobile();
+    const isTimeout = reason === 'timeout';
+
+    let html = '';
+
+    if (reason === 'ios-file') {
+        html = `
+        <strong>GPS not available from a local file on iOS Safari.</strong><br>
+        iOS blocks location access when opening HTML files directly. Use one of these instead:<br><br>
+        <strong>Option A — Compass app (fastest):</strong>
+        Open the <strong>Compass</strong> app → swipe left → your coordinates appear. Type them in below.<br><br>
+        <strong>Option B — Apple Maps:</strong>
+        Long-press your position on the map → tap the dropped pin → copy the coordinates shown.<br><br>
+        <strong>Option C — Serve over HTTP:</strong>
+        Run <code style="font-family:monospace;font-size:.9em;">python3 -m http.server 8080</code> on your computer
+        and open the file at <code style="font-family:monospace;font-size:.9em;">http://[your-ip]:8080/core-logger.html</code> —
+        GPS will work automatically.`;
+    } else if (isTimeout) {
+        html = `
+        <strong>Location timed out.</strong> GPS fix took too long.<br>
+        Try: going outside, enabling location in settings, or paste coordinates manually.`;
+    }
+
+    // Always show the manual entry options
+    html += `
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+            <button onclick="_manualCoordsPrompt()" class="btn-gps" style="border-color:var(--ga-accent);color:var(--ga-accent);">
+                ✎ Enter coordinates manually
+            </button>`;
+    if (isIOS || reason === 'ios-file') {
+        html += `
+            <a href="maps://" style="text-decoration:none;">
+                <button class="btn-gps">🗺 Open Maps</button>
+            </a>`;
+    }
+    html += `</div>`;
+
+    const el = document.getElementById('gpsStatus');
+    el.innerHTML     = html;
+    el.className     = 'gps-status error';
+    el.style.display = 'block';
+}
+
+// ── Manual coordinate entry via prompt ──
+function _manualCoordsPrompt() {
+    const raw = prompt(
+        'Enter coordinates as: latitude, longitude\n' +
+        'Example: 53.5178, 8.1169\n\n' +
+        '(Decimal degrees, WGS84 — as shown in Google Maps, Compass app, etc.)'
+    );
+    if (!raw || !raw.trim()) return;
+    _parseAndFillCoords(raw);
+}
+
+// ── Parse "lat, lon" or "lon, lat" and fill fields ──
+function _parseAndFillCoords(text) {
+    const nums = text.match(/-?\d+[\.,]\d+/g);
+    if (!nums || nums.length < 2) {
+        _gpsStatus('error', '✕ Could not read two coordinates from that input. Use decimal degrees, e.g. 53.5178, 8.1169');
+        return;
+    }
+    // Normalise decimal comma to point
+    let a = parseFloat(nums[0].replace(',', '.')),
+        b = parseFloat(nums[1].replace(',', '.'));
+
+    // Latitude is always −90…+90; longitude −180…+180
+    let lat, lon;
+    if (Math.abs(a) <= 90 && Math.abs(b) > 90)       { lat = a; lon = b; }
+    else if (Math.abs(b) <= 90 && Math.abs(a) > 90)  { lat = b; lon = a; }
+    else                                               { lat = a; lon = b; } // assume lat, lon
+
+    document.getElementById('coordX').value = lon.toFixed(6);
+    document.getElementById('coordY').value = lat.toFixed(6);
+    const crsField = document.getElementById('coordCRS');
+    if (!crsField.value.trim()) crsField.value = 'WGS84 (EPSG:4326)';
+    onCoordChange();
+    _gpsStatus('ok', `✓ Coordinates set — Lat: ${lat.toFixed(6)}°, Lon: ${lon.toFixed(6)}°`);
+    document.getElementById('btnGPS').querySelector('.gps-label').textContent = 'Update GPS';
+}
+
+function _gpsStatus(type, msg) {
+    const el          = document.getElementById('gpsStatus');
+    el.innerHTML      = msg;
+    el.className      = `gps-status ${type}`;
+    el.style.display  = 'block';
+}
+
+function depthToElev(depthM) {
+    const z = getSurfaceElev();
+    if (z === null) return null;
+    return (z - depthM).toFixed(2);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SOIL CLASSIFICATION
+// ═══════════════════════════════════════════════════════════════
+function translateSoil(desc) {
+    // Run German→English first, then classify
+    const normalized = translateGermanToEnglish(desc);
+    const d = normalized.toLowerCase();
+    let main = '-', mainMatchLen = -1, mainPos = -1, modifiers = [];
+
+    // Prefer the LONGEST matching key (most specific); break ties by position (latest wins)
+    for (const [key, val] of Object.entries(SOIL_MAINS)) {
+        const lastIdx = d.lastIndexOf(key);
+        if (lastIdx === -1) continue;
+        if (key.length > mainMatchLen || (key.length === mainMatchLen && lastIdx > mainPos)) {
+            mainMatchLen = key.length;
+            mainPos      = lastIdx;
+            main         = val;
+        }
+    }
+
+    // Build a modifier-cleaned string: remove the matched main-type phrase so its
+    // sub-words (e.g. "sand" inside "fine sand") don't accidentally trigger modifiers
+    const cleanedForMods = mainMatchLen > 0
+        ? d.slice(0, mainPos) + d.slice(mainPos + mainMatchLen)
+        : d;
+
+    for (const [key, val] of Object.entries(SOIL_MODIFIERS)) {
+        if (cleanedForMods.includes(key)) modifiers.push(val);
+    }
+    modifiers = [...new Set(modifiers)].sort();
+    if (main === '-') return '-';
+    return modifiers.length ? `${main}(${modifiers.join(',')})` : main;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADD LAYER
+// ═══════════════════════════════════════════════════════════════
+function addLayer() {
+    const id   = document.getElementById('coreId').value || 'N/A';
+    const from = parseFloat(document.getElementById('depthFrom').value);
+    const to   = parseFloat(document.getElementById('depthTo').value);
+    const hex  = document.getElementById('soilColor').value;
+    const desc = document.getElementById('soilDesc').value.trim();
+    const mD   = parseFloat(document.getElementById('markerDepth').value);
+    const mL   = document.getElementById('markerLabel').value.trim();
+
+    if (isNaN(from) || isNaN(to) || !desc) { alert('Please fill in depth and description.'); return; }
+
+    const marker    = (!isNaN(mD) && mL) ? {depth:mD, label:mL} : null;
+    const layerType = document.querySelector('input[name="layerType"]:checked')?.value || 'normal';
+    const lang      = detectLanguage(desc);
+
+    layers.push({
+        id, depthFrom:from, depthTo:to, color:hex, lang,
+        officialDesc: translateSoil(desc),
+        originalDesc: desc,
+        markers: marker ? [marker] : [],
+        layerType,
+        addedAt: new Date().toISOString()
+    });
+
+    updateTable(); drawGraph();
+
+    document.getElementById('depthFrom').value   = to;
+    document.getElementById('depthTo').value     = '';
+    document.getElementById('soilDesc').value    = '';
+    document.getElementById('markerDepth').value = '';
+    document.getElementById('markerLabel').value = '';
+    document.getElementById('depthTo').focus();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADD STANDALONE MARKER
+// ═══════════════════════════════════════════════════════════════
+function addStandaloneMarker() {
+    const mD = parseFloat(document.getElementById('markerDepth').value);
+    const mL = document.getElementById('markerLabel').value.trim();
+    if (isNaN(mD) || !mL) { alert('Please enter marker depth and label.'); return; }
+    if (!layers.length)   { alert('Add at least one layer first.');        return; }
+    const target = layers.find(l => mD >= l.depthFrom && mD <= l.depthTo) || layers[layers.length-1];
+    target.markers.push({depth:mD, label:mL});
+    updateTable(); drawGraph();
+    document.getElementById('markerDepth').value = '';
+    document.getElementById('markerLabel').value = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADD COMPACTION
+// ═══════════════════════════════════════════════════════════════
+function addCompaction() {
+    const d = parseFloat(document.getElementById('compactionDepth').value);
+    const n = document.getElementById('compactionNote').value.trim();
+    if (isNaN(d)) { alert('Please enter compaction depth.'); return; }
+    compactions.push({depth:d, note: n || 'Compaction'});
+    compactions.sort((a,b) => a.depth - b.depth);
+    updateTable(); drawGraph();
+    document.getElementById('compactionDepth').value = '';
+    document.getElementById('compactionNote').value  = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UPDATE TABLE
+// ═══════════════════════════════════════════════════════════════
+function updateTable() {
+    const tbody = document.querySelector('#logTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const z = getSurfaceElev();
+
+    layers.forEach((l, idx) => {
+        const markHtml = l.markers.map(m =>
+            `<div class="marker-tag">● ${escXml(m.label)} @ ${m.depth}m</div>`).join('');
+        const compHtml = compactions
+            .filter(c => c.depth >= l.depthFrom && c.depth <= l.depthTo)
+            .map(c => `<div class="compact-tag">⊕ Compaction @ ${c.depth.toFixed(2)} m — ${escXml(c.note)}</div>`).join('');
+
+        const badge = l.layerType !== 'normal'
+            ? `<span class="layer-type-badge badge-${l.layerType}">${l.layerType}</span>` : '';
+        const langBadge = l.lang === 'de'
+            ? `<span class="de-badge">DE→EN</span>` : '';
+
+        const elevCell = z !== null
+            ? `<td>${depthToElev(l.depthFrom)} – ${depthToElev(l.depthTo)} m</td>` : '';
+
+        const row = document.createElement('tr');
+        if (l.layerType !== 'normal') row.classList.add(`row-${l.layerType}`);
+        row.innerHTML = `
+            <td>${escXml(l.id)}</td>
+            <td style="text-align:center;font-weight:bold;color:#555;">${idx+1}</td>
+            <td>${l.depthFrom.toFixed(2)}–${l.depthTo.toFixed(2)} m</td>
+            ${z !== null ? `<td class="elev-col">${depthToElev(l.depthFrom)} – ${depthToElev(l.depthTo)} m</td>` : ''}
+            <td style="background:${l.color};color:${isDark(l.color)?'white':'black'};text-align:center;font-family:monospace;font-size:.7rem;line-height:1.4;">${l.color}<br><span style="font-size:.65rem;opacity:.85;">${getMunsell(l.color)}</span></td>
+            <td><strong>${escXml(l.officialDesc)}</strong></td>
+            <td>${escXml(l.originalDesc)}${langBadge}${badge}${markHtml}${compHtml}</td>
+            <td><button class="btn-edit" data-index="${idx}" title="Edit" onclick="openEditModal(${idx})">✎</button></td>
+            <td><button class="btn-delete" data-index="${idx}" title="Delete">✖</button></td>`;
+        tbody.appendChild(row);
+    });
+
+    // Show/hide elevation column header
+    document.querySelectorAll('.elev-col').forEach(c => c.style.display = z !== null ? '' : 'none');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GRAPH — shared layout constants
+// ═══════════════════════════════════════════════════════════════
+const SCALE        = 2000;   // px per metre
+const PAD_TOP      = 40;
+const PAD_BOTTOM   = 70;
+const PAD_RIGHT    = 220;    // wider for labels
+const DEPTH_LBL_W  = 72;
+const ELEV_LBL_W   = 72;
+const TICK_W       = 6;
+const CORE_W       = 110;    // widened profile column
+
+function getPadLeft() {
+    const z = getSurfaceElev();
+    // If elevation shown: extra left column for elev labels
+    return (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W + 8 + TICK_W;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LABEL RESOLVER (pushes overlapping labels apart)
+// ═══════════════════════════════════════════════════════════════
+function resolveLabels(items, lineH) {
+    if (!items.length) return [];
+    const sorted = items.map((it,i) => ({...it, origIndex:i})).sort((a,b) => a.idealY - b.idealY);
+    for (let i=1; i<sorted.length; i++) {
+        if (sorted[i].idealY < sorted[i-1].idealY + lineH)
+            sorted[i].idealY = sorted[i-1].idealY + lineH;
+    }
+    const out = new Array(items.length);
+    sorted.forEach(it => { out[it.origIndex] = it.idealY; });
+    return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DRAW GRAPH (canvas)
+// ═══════════════════════════════════════════════════════════════
+function drawGraph(exportMult = null) {
+    const canvas = document.getElementById('coreCanvas');
+    const ctx    = canvas.getContext('2d');
+    if (!layers.length) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+
+    const totalDepth  = Math.max(...layers.map(l => l.depthTo));
+    const dpr         = exportMult || window.devicePixelRatio || 1;
+    const PAD_LEFT    = getPadLeft();
+    const logW        = PAD_LEFT + CORE_W + PAD_RIGHT;
+    const logH        = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+
+    canvas.width  = logW * dpr;
+    canvas.height = logH * dpr;
+    canvas.style.width  = logW + 'px';
+    canvas.style.height = logH + 'px';
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, logW, logH);
+
+    const cX = PAD_LEFT;   // left edge of core column
+    const z  = getSurfaceElev();
+
+    // ── Draw layers ──
+    layers.forEach(layer => {
+    const yT = layer.depthFrom * SCALE + PAD_TOP;
+    const hL = (layer.depthTo - layer.depthFrom) * SCALE;
+
+    if (layer.layerType === 'missing') {
+        ctx.fillStyle = '#f5f5f5';
+        ctx.fillRect(cX, yT, CORE_W, hL);
+        ctx.strokeStyle = '#aaa'; ctx.lineWidth = .8;
+        for (let y = yT; y < yT + hL; y += 8) {
+            ctx.beginPath(); ctx.moveTo(cX, y); ctx.lineTo(cX + CORE_W, y); ctx.stroke();
+        }
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1; ctx.strokeRect(cX, yT, CORE_W, hL);
+    } else if (layer.layerType === 'disturbed') {
+        ctx.fillStyle = layer.color; ctx.fillRect(cX, yT, CORE_W, hL);
+        ctx.save(); ctx.beginPath(); ctx.rect(cX, yT, CORE_W, hL); ctx.clip();
+        ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 1.2;
+        for (let x = cX - hL; x < cX + CORE_W + hL; x += 10) {
+            ctx.beginPath(); ctx.moveTo(x, yT); ctx.lineTo(x + hL, yT + hL); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1;
+        ctx.setLineDash([4,4]); ctx.strokeRect(cX, yT, CORE_W, hL); ctx.setLineDash([]);
+    } else if (layer.layerType === 'anthropogenic') {
+        // --- 1. Draw Glow Underneath ---
+        ctx.save();
+        ctx.shadowColor = 'rgba(255, 128, 0, 2)'; // Beautiful bright light yellow
+        ctx.shadowBlur = 12;                          // Controls the distance/radius of glow
+        ctx.fillStyle = layer.color;
+        ctx.fillRect(cX, yT, CORE_W, hL);
+        ctx.restore(); // Clears shadow parameters immediately so textures stay crisp
+
+        // --- 2. Draw regular texture styles on top ---
+        drawTextureOverlay(ctx, layer.originalDesc, cX, yT, CORE_W, hL);
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1; ctx.strokeRect(cX, yT, CORE_W, hL);
+    } else {
+        ctx.fillStyle = layer.color; ctx.fillRect(cX, yT, CORE_W, hL);
+        drawTextureOverlay(ctx, layer.originalDesc, cX, yT, CORE_W, hL);
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1; ctx.strokeRect(cX, yT, CORE_W, hL);
+    }
+});
+
+    // ── Compaction markers (blue zigzag lines) ──
+    compactions.forEach(c => {
+        const yC = c.depth * SCALE + PAD_TOP;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(29,78,216,0.7)'; ctx.lineWidth = 2;
+        ctx.setLineDash([4,3]);
+        ctx.beginPath(); ctx.moveTo(cX, yC); ctx.lineTo(cX + CORE_W, yC); ctx.stroke();
+        ctx.setLineDash([]);
+        // Arrow left side
+        ctx.fillStyle = '#1d4ed8';
+        ctx.beginPath();
+        ctx.moveTo(cX - 2, yC);
+        ctx.lineTo(cX - 10, yC - 5); ctx.lineTo(cX - 10, yC + 5);
+        ctx.fill();
+        // Label
+        ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#1d4ed8'; ctx.textAlign = 'left';
+        ctx.fillText('⊕ ' + c.note, cX + CORE_W + 6, yC + 3);
+        ctx.restore();
+    });
+
+    // ── Left axis: depth labels & ticks ──
+    const bdSet = new Map();
+    layers.forEach(l => {
+        bdSet.set(l.depthFrom, l.depthFrom * SCALE + PAD_TOP);
+        bdSet.set(l.depthTo,   l.depthTo   * SCALE + PAD_TOP);
+    });
+    const boundaries = Array.from(bdSet.entries()).sort((a,b) => a[0]-b[0]);
+    const lblItems   = boundaries.map(([d, y]) => ({idealY:y}));
+    const resolvedY  = resolveLabels(lblItems, 14);
+
+    boundaries.forEach(([depth, tickY], i) => {
+        const labelY = resolvedY[i];
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(cX - TICK_W, tickY); ctx.lineTo(cX, tickY); ctx.stroke();
+
+        if (Math.abs(labelY - tickY) > 3) {
+            ctx.strokeStyle = '#b0b8c8'; ctx.lineWidth = .6; ctx.setLineDash([2,3]);
+            ctx.beginPath(); ctx.moveTo(cX - TICK_W - 1, tickY); ctx.lineTo(cX - TICK_W - 3, labelY - 2); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        // Depth label (right-aligned into DEPTH_LBL_W column)
+        const depthLblX = (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W;
+        ctx.fillStyle = '#2d3748'; ctx.font = "11px 'Courier New',monospace"; ctx.textAlign = 'right';
+        ctx.fillText(`${depth.toFixed(2)} m`, depthLblX, labelY + 1);
+
+        // Elevation label (if surface elev set) — in the left ELEV column
+        if (z !== null) {
+            const elev = (z - depth).toFixed(2);
+            ctx.fillStyle = '#16a34a'; ctx.font = "9px 'Courier New',monospace"; ctx.textAlign = 'right';
+            ctx.fillText(`${elev} m`, ELEV_LBL_W, labelY + 1);
+        }
+    });
+
+    // Column header for elevation axis
+    if (z !== null) {
+        ctx.save();
+        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('m a.s.l.', ELEV_LBL_W / 2, PAD_TOP - 10);
+        ctx.restore();
+    }
+
+    // Thickness labels (mid-left of each layer)
+    layers.forEach(l => {
+        const yT = l.depthFrom * SCALE + PAD_TOP;
+        const hL = (l.depthTo - l.depthFrom) * SCALE;
+        if (hL < 10) return;
+        const midY  = yT + hL / 2;
+        const depthX = (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W;
+        ctx.fillStyle = '#94a3b8'; ctx.font = "bold 9px 'Courier New',monospace"; ctx.textAlign = 'right';
+        ctx.fillText(`Δ${(l.depthTo - l.depthFrom).toFixed(2)}m`, depthX - 2, midY + 4);
+    });
+
+    // ── Right side: soil class labels ──
+    const rightItems = layers.map(l => {
+        const yT = l.depthFrom * SCALE + PAD_TOP;
+        const hL = (l.depthTo  - l.depthFrom) * SCALE;
+        return {idealY: yT + hL / 2};
+    });
+    const resolvedR = resolveLabels(rightItems, 16);
+
+    layers.forEach((l, i) => {
+        const yT    = l.depthFrom * SCALE + PAD_TOP;
+        const hL    = (l.depthTo  - l.depthFrom) * SCALE;
+        const midY  = yT + hL / 2;
+        const lblY  = resolvedR[i];
+        const lblX  = cX + CORE_W + 12;
+
+        if (Math.abs(lblY - midY) > 4) {
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = .5; ctx.setLineDash([3,3]);
+            ctx.beginPath(); ctx.moveTo(cX + CORE_W + 2, midY); ctx.lineTo(lblX - 2, lblY); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#0f172a'; ctx.textAlign = 'left';
+        ctx.fillText(l.officialDesc, lblX, lblY + 4);
+    });
+
+    // ── Markers ──
+    layers.forEach(l => {
+        l.markers.forEach(m => {
+            const yM = m.depth * SCALE + PAD_TOP;
+            ctx.strokeStyle = 'rgba(200,0,0,.45)'; ctx.lineWidth = .8; ctx.setLineDash([3,3]);
+            ctx.beginPath(); ctx.moveTo(cX, yM); ctx.lineTo(cX + CORE_W, yM); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#cc0000';
+            ctx.beginPath();
+            ctx.moveTo(cX + CORE_W, yM); ctx.lineTo(cX + CORE_W + 12, yM - 5); ctx.lineTo(cX + CORE_W + 12, yM + 5); ctx.fill();
+            ctx.font = 'italic 10px sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText(m.label, cX + CORE_W + 16, yM + 4);
+        });
+    });
+
+    // ── Bottom total label ──
+    const yBot = totalDepth * SCALE + PAD_TOP;
+    ctx.fillStyle = '#2d3748'; ctx.font = "bold 11px 'Courier New',monospace"; ctx.textAlign = 'center';
+    ctx.fillText(`↕ ${totalDepth.toFixed(2)} m total`, cX + CORE_W / 2, yBot + 22);
+    if (z !== null) {
+        ctx.fillStyle = '#16a34a'; ctx.font = "9px 'Courier New',monospace";
+        ctx.fillText(`(${(z - totalDepth).toFixed(2)} m a.s.l. base)`, cX + CORE_W / 2, yBot + 36);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TEXTURE OVERLAY (unchanged from original, applied to canvas)
+// ═══════════════════════════════════════════════════════════════
+function drawTextureOverlay(ctx, desc, x, y, w, h) {
+    if (!desc) return;
+    // translate German so texture keywords are found in English too
+    const d = translateGermanToEnglish(desc).toLowerCase();
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+
+    // Break down the text by list separators (commas, semicolons, periods)
+    const textSegments = d.split(/[,;\.]+/);
+
+    // Helper to extract modifiers by checking which segment contains the target texture
+    const getModifiers = (targetRegex) => {
+        let intensity = 1.0;
+        let density = 1.0;
+
+        // Find the specific segment that contains our texture keyword
+        const matchingSegment = textSegments.find(segment => targetRegex.test(segment)) || "";
+
+        if (matchingSegment) {
+            if (/strong|intense|stark|viele/.test(matchingSegment)) {
+                intensity = 1.8;
+                density = 2.0;
+            } else if (/little|few|wenig|vereinzelt|view/.test(matchingSegment)) {
+                intensity = 0.4;
+                density = 0.35;
+            }
+        }
+        return { intensity, density };
+    };
+
+    if (/marbled|mottled/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/marbled|mottled/);
+        let seed = x*7+y*13+w*3+h*5;
+        const rand = () => { seed=(seed*16807)%2147483647; return (seed-1)/2147483646; };
+        const bc = Math.max(4, Math.floor((h/18) * dm));
+        for (let i=0;i<bc;i++) {
+            const bx=x+rand()*w, by=y+rand()*h, rx=4+rand()*(w*.35), ry=3+rand()*(h*.12), ang=rand()*Math.PI;
+            ctx.save(); ctx.translate(bx,by); ctx.rotate(ang); ctx.beginPath(); ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,255,255,${Math.min(1, (.10+rand()*.12) * im)})`; ctx.fill(); ctx.restore();
+            ctx.save(); ctx.translate(bx+rx*.4,by+ry*.4); ctx.rotate(ang+.5); ctx.beginPath(); ctx.ellipse(0,0,rx*.6,ry*.6,0,0,Math.PI*2);
+            ctx.fillStyle=`rgba(0,0,0,${Math.min(1, (.06+rand()*.08) * im)})`; ctx.fill(); ctx.restore();
+        }
+    }
+    if (/spotted|speckled|patchy/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/spotted|speckled|patchy/);
+        let seed=x*11+y*17+w*5+h*7;
+        const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const dc=Math.max(6, Math.floor(((w*h)/80) * dm));
+        for(let i=0;i<dc;i++){const dx=x+rand()*w,dy=y+rand()*h,r=1.5+rand()*3.5;ctx.beginPath();ctx.arc(dx,dy,r,0,Math.PI*2);ctx.fillStyle=rand()>.5?`rgba(255,255,255,${Math.min(1, (.18+rand()*.18) * im)})`:`rgba(0,0,0,${Math.min(1, (.12+rand()*.14) * im)})`;ctx.fill();}
+    }
+    if (/layered|banded|laminated/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/layered|banded|laminated/);
+        let seed=x*3+y*19+h*11; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const bs=(5+rand()*4) * (1 / dm);
+        let cy=y+bs*rand();
+        while(cy<y+h){const t=.8+rand()*1.4;ctx.fillStyle=rand()>.45?`rgba(0,0,0,${Math.min(1, (.05+rand()*.05) * im)})`:`rgba(255,255,255,${Math.min(1, (.05+rand()*.05) * im)})`;ctx.fillRect(x,cy,w,t);cy+=bs+rand()*3;}
+    }
+    if (/disturbed|bioturbated/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/disturbed|bioturbated/);
+        ctx.strokeStyle=`rgba(0,0,0,${Math.min(1, .13 * im)})`;ctx.lineWidth=1.0;
+        const step = Math.max(4, Math.floor(12 * (1 / dm)));
+        for(let lx=x-h;lx<x+w+h;lx+=step){ctx.beginPath();ctx.moveTo(lx,y);ctx.lineTo(lx+h,y+h);ctx.stroke();}
+        ctx.strokeStyle=`rgba(0,0,0,${Math.min(1, .07 * im)})`;
+        for(let lx=x+w+h;lx>x-h;lx-=step){ctx.beginPath();ctx.moveTo(lx,y);ctx.lineTo(lx-h,y+h);ctx.stroke();}
+    }
+    if (/calcareous/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/calcareous/);
+        let seed=x*23+y*7+h*13; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const dc=Math.max(8, Math.floor(((w*h)/55) * dm));
+        for(let i=0;i<dc;i++){const dx=x+rand()*w,dy=y+rand()*h;ctx.beginPath();ctx.arc(dx,dy,.9+rand()*1.2,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${Math.min(1, (.30+rand()*.25) * im)})`;ctx.fill();}
+    }
+    if (/charcoal|char coal|coal|holzkohle/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/charcoal|char coal|coal|holzkohle/);
+        let seed=x*41+y*29+h*17; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const fc=Math.max(4, Math.floor(((w*h)/180) * dm));
+        for(let i=0;i<fc;i++){const fx=x+rand()*w,fy=y+rand()*h,sides=3+Math.floor(rand()*3),rx=1.5+rand()*4,ry=.8+rand()*2.5,rot=rand()*Math.PI;ctx.save();ctx.translate(fx,fy);ctx.rotate(rot);ctx.beginPath();for(let s=0;s<sides;s++){const ang=(s/sides)*Math.PI*2;s===0?ctx.moveTo(Math.cos(ang)*rx,Math.sin(ang)*ry):ctx.lineTo(Math.cos(ang)*rx*(0.7+rand()*.6),Math.sin(ang)*ry*(0.7+rand()*.6));}ctx.closePath();ctx.fillStyle=`rgba(10,10,10,${Math.min(1, (.55+rand()*.30) * im)})`;ctx.fill();ctx.restore();}
+    }
+    if (/humic|humos/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/humic|humos/);
+        let seed=x*31+y*11+h*7; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const dc=Math.max(10, Math.floor(((w*h)/40) * dm));
+        for(let i=0;i<dc;i++){const dx=x+rand()*w,dy=y+rand()*h;ctx.beginPath();ctx.arc(dx,dy,.6+rand()*1,0,Math.PI*2);ctx.fillStyle=`rgba(0,0,0,${Math.min(1, (.18+rand()*.18) * im)})`;ctx.fill();}
+    }
+    if (/iron oxide|iron-oxide|ferruginous|eisenoxid/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/iron oxide|iron-oxide|ferruginous|eisenoxid/);
+        let seed=x*37+y*53+h*19; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const bc=Math.max(3, Math.floor(((w*h)/600) * dm));
+        for(let i=0;i<bc;i++){const bx=x+rand()*w,by=y+rand()*h,rx=3+rand()*(w*.28),ry=2+rand()*(h*.10),ang=rand()*Math.PI;ctx.save();ctx.translate(bx,by);ctx.rotate(ang);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=`rgba(180,80,10,${Math.min(1, (.02+rand()*.02) * im)})`;ctx.fill();ctx.restore();}
+        const sc=Math.max(6, Math.floor(((w*h)/90) * dm));  
+        for(let i=0;i<sc;i++){const sx=x+rand()*w,sy=y+rand()*h;ctx.beginPath();ctx.arc(sx,sy,.8+rand()*2.2,0,Math.PI*2);ctx.fillStyle=`rgba(160,55,5,${Math.min(1, (.10+rand()*.10) * im)})`;ctx.fill();}
+    }
+    if (/root|wurzel|durchwurzelt/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/root|wurzel|durchwurzelt/);
+        let seed=x*13+y*43+h*23; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const rc=Math.max(2, Math.floor((w/30) * dm));
+        for(let i=0;i<rc;i++){const sx=x+rand()*w;let cx1=sx,cy=y;ctx.beginPath();ctx.moveTo(cx1,cy);const segs=Math.max(2,Math.floor(h/12));for(let s=0;s<segs;s++){const sh=h/segs,nx=cx1+(rand()-.5)*w*.45,ny=cy+sh,c1x=cx1+(rand()-.5)*w*.3,c1y=cy+sh*.35,c2x=nx+(rand()-.5)*w*.3,c2y=ny-sh*.35;ctx.bezierCurveTo(c1x,c1y,c2x,c2y,nx,ny);cx1=nx;cy=ny;}const thick=.8+rand();ctx.strokeStyle=`rgba(100,60,20,${Math.min(1, (.20+rand()*.10) * im)})`;ctx.lineWidth=thick;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);ctx.stroke();}
+    }
+    ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SVG EXPORT  (fully vectorised — Illustrator-ready)
+// ═══════════════════════════════════════════════════════════════
+function buildSVG() {
+    if (!layers.length) { alert('Add at least one layer first.'); return null; }
+
+    const totalDepth = Math.max(...layers.map(l => l.depthTo));
+    const PAD_LEFT   = getPadLeft();
+    const z          = getSurfaceElev();
+
+    const W = PAD_LEFT + CORE_W + PAD_RIGHT;
+    const H = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+    const cX = PAD_LEFT;
+    const S  = SCALE;
+
+    const p = [];   // SVG parts accumulator
+
+    p.push(`<?xml version="1.0" encoding="UTF-8"?>`);
+    p.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`);
+    p.push(`<rect width="${W}" height="${H}" fill="white"/>`);
+
+    // ── Layers ──
+    layers.forEach((l, idx) => {
+    const yT = l.depthFrom * S + PAD_TOP;
+    const hL = (l.depthTo - l.depthFrom) * S;
+
+    if (l.layerType === 'missing') {
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="#f5f5f5" stroke="#2c3e50" stroke-width="1"/>`);
+        for (let ly = yT + 4; ly < yT + hL; ly += 8)
+            p.push(`<line x1="${cX}" y1="${ly}" x2="${cX+CORE_W}" y2="${ly}" stroke="#aaa" stroke-width="0.8"/>`);
+    } else if (l.layerType === 'disturbed') {
+        const pid = `dh${idx}`;
+        p.push(`<defs><pattern id="${pid}" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="rgba(0,0,0,0.18)" stroke-width="1.2"/></pattern></defs>`);
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="${l.color}"/>`);
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="url(#${pid})" stroke="#2c3e50" stroke-width="1" stroke-dasharray="4,4"/>`);
+    } else if (l.layerType === 'anthropogenic') {
+        const fid = `glow${idx}`;
+        // 1. Define the yellow glow filter. 
+        // We set x, y, width, height slightly larger than 100% so the blur doesn't get clipped.
+        p.push(`
+            <defs>
+                <filter id="${fid}" x="-20%" y="-20%" width="140%" height="140%">
+                    <!-- Blur the source element to create the glow foundation -->
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <!-- Color the blur light yellow (#fffdd0 or #fff59d) and set its opacity -->
+                    <feColorMatrix type="matrix" values="
+                        0 0 0 0 1.0
+                        0 0 0 0 0.98
+                        0 0 0 0 0.75
+                        0 0 0 0.85 0" in="blur" result="coloredGlow"/>
+                    <!-- Merge the original sharp layer on top of the blurred yellow glow -->
+                    <feMerge>
+                        <feMergeNode in="coloredGlow" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+        `);
+        
+        // 2. Render the base layer rect, applying the texture overlay inside if it exists
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="${l.color}" stroke="#2c3e50" stroke-width="1" filter="url(#${fid})"/>`);
+        
+        const texSvg = buildSVGTexture(l.originalDesc, cX, yT, CORE_W, hL, idx);
+        if (texSvg) p.push(texSvg);
+
+    } else {
+        // Soil texture patterns as SVG
+        const texSvg = buildSVGTexture(l.originalDesc, cX, yT, CORE_W, hL, idx);
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="${l.color}" stroke="#2c3e50" stroke-width="1"/>`);
+        if (texSvg) p.push(texSvg);
+    }
+});
+
+    // ── Compaction markers ──
+    compactions.forEach((c, ci) => {
+        const yC = c.depth * S + PAD_TOP;
+        p.push(`<line x1="${cX}" y1="${yC}" x2="${cX+CORE_W}" y2="${yC}" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="4,3" opacity="0.7"/>`);
+        p.push(`<polygon points="${cX-2},${yC} ${cX-10},${yC-5} ${cX-10},${yC+5}" fill="#1d4ed8"/>`);
+        p.push(`<text x="${cX+CORE_W+6}" y="${yC+3}" font-family="sans-serif" font-size="9" font-weight="bold" fill="#1d4ed8">⊕ ${escXml(c.note)}</text>`);
+    });
+
+    // ── Depth labels & ticks ──
+    const bdSet = new Map();
+    layers.forEach(l => {
+        bdSet.set(l.depthFrom, l.depthFrom * S + PAD_TOP);
+        bdSet.set(l.depthTo,   l.depthTo   * S + PAD_TOP);
+    });
+    const boundaries = Array.from(bdSet.entries()).sort((a,b) => a[0]-b[0]);
+    const lblItems   = boundaries.map(([d,y]) => ({idealY:y}));
+    const resolvedY  = resolveLabels(lblItems, 14);
+    const depthLblX  = (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W;
+
+    boundaries.forEach(([depth, tickY], i) => {
+        const labelY = resolvedY[i];
+        p.push(`<line x1="${cX-TICK_W}" y1="${tickY}" x2="${cX}" y2="${tickY}" stroke="#2c3e50" stroke-width="1"/>`);
+        if (Math.abs(labelY - tickY) > 3)
+            p.push(`<line x1="${cX-TICK_W-1}" y1="${tickY}" x2="${cX-TICK_W-3}" y2="${labelY-2}" stroke="#b0b8c8" stroke-width="0.6" stroke-dasharray="2,3"/>`);
+        p.push(`<text x="${depthLblX}" y="${labelY+1}" font-family="Courier New,monospace" font-size="11" fill="#2d3748" text-anchor="end">${depth.toFixed(2)} m</text>`);
+
+        if (z !== null) {
+            const elev = (z - depth).toFixed(2);
+            p.push(`<text x="${ELEV_LBL_W}" y="${labelY+1}" font-family="Courier New,monospace" font-size="9" fill="#16a34a" text-anchor="end">${elev} m</text>`);
+        }
+    });
+
+    // Elevation column header
+    if (z !== null)
+        p.push(`<text x="${ELEV_LBL_W/2}" y="${PAD_TOP-10}" font-family="sans-serif" font-size="8" font-weight="bold" fill="#16a34a" text-anchor="middle">m a.s.l.</text>`);
+
+    // Thickness labels
+    layers.forEach(l => {
+        const yT  = l.depthFrom * S + PAD_TOP;
+        const hL  = (l.depthTo - l.depthFrom) * S;
+        if (hL < 10) return;
+        const midY = yT + hL / 2;
+        p.push(`<text x="${depthLblX-2}" y="${midY+4}" font-family="Courier New,monospace" font-size="9" font-weight="bold" fill="#94a3b8" text-anchor="end">Δ${(l.depthTo-l.depthFrom).toFixed(2)}m</text>`);
+    });
+
+    // ── Right labels ──
+    const rightItems = layers.map(l => {
+        const yT = l.depthFrom * S + PAD_TOP;
+        const hL = (l.depthTo  - l.depthFrom) * S;
+        return {idealY: yT + hL / 2};
+    });
+    const resolvedR = resolveLabels(rightItems, 16);
+
+    layers.forEach((l, i) => {
+        const yT   = l.depthFrom * S + PAD_TOP;
+        const hL   = (l.depthTo - l.depthFrom) * S;
+        const midY = yT + hL / 2;
+        const lblY = resolvedR[i];
+        const lblX = cX + CORE_W + 12;
+        if (Math.abs(lblY - midY) > 4)
+            p.push(`<line x1="${cX+CORE_W+2}" y1="${midY}" x2="${lblX-2}" y2="${lblY}" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="3,3"/>`);
+        p.push(`<text x="${lblX}" y="${lblY+4}" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">${escXml(l.officialDesc)}</text>`);
+    });
+
+    // ── Markers ──
+    layers.forEach(l => {
+        l.markers.forEach(m => {
+            const yM = m.depth * S + PAD_TOP;
+            p.push(`<line x1="${cX}" y1="${yM}" x2="${cX+CORE_W}" y2="${yM}" stroke="rgba(200,0,0,0.45)" stroke-width="0.8" stroke-dasharray="3,3"/>`);
+            p.push(`<polygon points="${cX+CORE_W},${yM} ${cX+CORE_W+12},${yM-5} ${cX+CORE_W+12},${yM+5}" fill="#cc0000"/>`);
+            p.push(`<text x="${cX+CORE_W+16}" y="${yM+4}" font-family="sans-serif" font-size="10" font-style="italic" fill="#cc0000">${escXml(m.label)}</text>`);
+        });
+    });
+
+    // ── Bottom label ──
+    const yBot = totalDepth * S + PAD_TOP;
+    p.push(`<text x="${cX+CORE_W/2}" y="${yBot+22}" font-family="Courier New,monospace" font-size="11" font-weight="bold" fill="#2d3748" text-anchor="middle">↕ ${totalDepth.toFixed(2)} m total</text>`);
+    if (z !== null)
+        p.push(`<text x="${cX+CORE_W/2}" y="${yBot+36}" font-family="Courier New,monospace" font-size="9" fill="#16a34a" text-anchor="middle">(${(z-totalDepth).toFixed(2)} m a.s.l. base)</text>`);
+
+    p.push(`</svg>`);
+    return p.join('\n');
+}
+
+// Build SVG texture patterns (deterministic, Illustrator-editable)
+function buildSVGTexture(desc, x, y, w, h, idx) {
+    if (!desc) return '';
+    const d = translateGermanToEnglish(desc).toLowerCase();
+    const parts = [];
+    const pid = `tex${idx}`;
+
+    // Clip path so textures stay inside the layer rect
+    parts.push(`<clipPath id="${pid}cp"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>`);
+
+    if (/laminated|layered|banded/.test(d)) {
+        // Horizontal bands every 6px
+        for (let ly = y + 4; ly < y + h; ly += 7)
+            parts.push(`<line x1="${x}" y1="${ly}" x2="${x+w}" y2="${ly}" stroke="rgba(0,0,0,0.08)" stroke-width="1" clip-path="url(#${pid}cp)"/>`);
+    }
+    if (/calcareous|kalkhaltig/.test(d)) {
+        // Regular dot grid
+        let seed = x*23+y*7+h*13;
+        const rand = ()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const cnt = Math.max(8, Math.floor((w*h)/60));
+        for (let i=0;i<cnt;i++)
+            parts.push(`<circle cx="${x+rand()*w}" cy="${y+rand()*h}" r="${0.9+rand()*1.2}" fill="rgba(255,255,255,0.4)" clip-path="url(#${pid}cp)"/>`);
+    }
+    if (/humic|humos/.test(d)) {
+        let seed=x*31+y*11+h*7; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const cnt=Math.max(10,Math.floor((w*h)/45));
+        for(let i=0;i<cnt;i++)
+            parts.push(`<circle cx="${x+rand()*w}" cy="${y+rand()*h}" r="${0.6+rand()}" fill="rgba(0,0,0,0.2)" clip-path="url(#${pid}cp)"/>`);
+    }
+    if (/spotted|speckled|patchy/.test(d)) {
+        let seed=x*11+y*17+h*7; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const cnt=Math.max(6,Math.floor((w*h)/90));
+        for(let i=0;i<cnt;i++){
+            const col=rand()>.5?`rgba(255,255,255,0.22)`:`rgba(0,0,0,0.15)`;
+            parts.push(`<circle cx="${x+rand()*w}" cy="${y+rand()*h}" r="${1.5+rand()*3.5}" fill="${col}" clip-path="url(#${pid}cp)"/>`);
+        }
+    }
+    return parts.join('\n');
+}
+
+function exportSVG() {
+    const svg = buildSVG();
+    if (!svg) return;
+    triggerDownload(new Blob([svg], {type:'image/svg+xml;charset=utf-8'}), 'core-log.svg');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PDF EXPORT  (vectorised via jsPDF / SVG fallback)
+//  We embed the SVG inside a minimal hand-crafted PDF so users
+//  can open it in Illustrator. For full vector PDF we use the
+//  canvas-to-SVG approach: output SVG embedded in PDF stream.
+// ═══════════════════════════════════════════════════════════════
+function exportPDF() {
+    if (!layers.length) { alert('Add at least one layer first.'); return; }
+
+    const svg = buildSVG();
+    if (!svg) return;
+
+    const totalDepth = Math.max(...layers.map(l => l.depthTo));
+    const PAD_LEFT   = getPadLeft();
+    const W = PAD_LEFT + CORE_W + PAD_RIGHT;
+    const H = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+
+    // ── Mobile: window.open() is blocked as a popup.
+    //    Share the SVG file instead — the user can open it in any
+    //    PDF/vector viewer or "Print to PDF" from their Files app.
+    if (isMobile()) {
+        const svgBlob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+        const ts = getTimestamp().replace(/[: ]/g,'-');
+        triggerDownload(svgBlob, `core-log-${ts}.svg`);
+        return;
+    }
+
+    // ── Desktop: open a minimal HTML page that auto-triggers print ──
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Core Log Export</title>
+<style>
+  @page { margin:0; size:${W}px ${H}px; }
+  body  { margin:0; padding:0; background:white; }
+  svg   { display:block; width:${W}px; height:${H}px; }
+  @media print {
+    html,body { width:${W}px; height:${H}px; }
+  }
+</style>
+</head><body>
+${svg}
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => window.print(), 400);
+  });
+<\/script>
+</body></html>`;
+
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (!win) alert('Please allow pop-ups to export PDF, then use the browser print dialog (Save as PDF).');
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  IMAGE EXPORT (JPG / PNG)
+// ═══════════════════════════════════════════════════════════════
+function exportImage(fmt) {
+    if (!layers.length) { alert('Add at least one layer first.'); return; }
+    drawGraph(3);   // 3× resolution
+    const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+    document.getElementById('coreCanvas').toBlob(blob => {
+        if (!blob) { alert('Could not generate image.'); drawGraph(); return; }
+        triggerDownload(blob, `core-log.${fmt}`);
+        drawGraph();
+    }, mime, .95);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  JSON EXPORT / IMPORT  (for re-editing a saved profile)
+// ═══════════════════════════════════════════════════════════════
+function exportJSON() {
+    if (!layers.length) { alert('Add at least one layer first.'); return; }
+    const profile = {
+        _version: 1,
+        exportedAt: new Date().toISOString(),
+        coordinates: {
+            x:   document.getElementById('coordX').value.trim(),
+            y:   document.getElementById('coordY').value.trim(),
+            z:   document.getElementById('coordZ').value.trim(),
+            crs: document.getElementById('coordCRS').value.trim()
+        },
+        layers:      layers,
+        compactions: compactions
+    };
+    const ts = getTimestamp().replace(/[: ]/g,'-');
+    triggerDownload(
+        new Blob([JSON.stringify(profile, null, 2)], {type:'application/json;charset=utf-8'}),
+        `core-profile-${ts}.json`
+    );
+}
+
+function importJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const profile = JSON.parse(e.target.result);
+            if (!profile.layers || !Array.isArray(profile.layers)) {
+                alert('Invalid profile file: missing layers array.'); return;
+            }
+            // Confirm if data already present
+            if (layers.length > 0) {
+                if (!confirm('This will replace your current profile. Continue?')) {
+                    event.target.value = ''; return;
+                }
+            }
+            // Restore layers and compactions (mutate in place — arrays are declared const)
+            layers.splice(0, layers.length, ...profile.layers);
+            const incoming = Array.isArray(profile.compactions) ? profile.compactions : [];
+            compactions.splice(0, compactions.length, ...incoming);
+            // Restore coordinates
+            if (profile.coordinates) {
+                const c = profile.coordinates;
+                if (c.x   !== undefined) document.getElementById('coordX').value   = c.x;
+                if (c.y   !== undefined) document.getElementById('coordY').value   = c.y;
+                if (c.z   !== undefined) document.getElementById('coordZ').value   = c.z;
+                if (c.crs !== undefined) document.getElementById('coordCRS').value = c.crs;
+                onCoordChange();
+            }
+            updateTable();
+            drawGraph();
+            // Pre-fill borehole ID from the first layer for convenience
+            if (layers.length > 0 && layers[0].id) {
+                document.getElementById('coreId').value = layers[0].id;
+            }
+        } catch(err) {
+            alert('Could not read profile: ' + err.message);
+        }
+        event.target.value = ''; // reset so the same file can be re-imported
+    };
+    reader.readAsText(file);
+}
+
+function importTSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/);
+
+            // ── Parse coordinate header lines (start with #) ──
+            const coords = { x:'', y:'', z:'', crs:'' };
+            for (const line of lines) {
+                if (!line.startsWith('#')) break;
+                const parts = line.slice(1).split('\t');
+                const val   = (parts[1] || '').trim();
+                if (/Easting/i.test(parts[0]))   coords.x   = val;
+                if (/Northing/i.test(parts[0]))  coords.y   = val;
+                if (/Surface/i.test(parts[0]))   coords.z   = val.replace(/\s*m\s*a\.s\.l\./i,'').trim();
+                if (/CRS/i.test(parts[0]))       coords.crs = val;
+            }
+
+            // ── Find the header row ──
+            const headerIdx = lines.findIndex(l => /^ID\t/.test(l));
+            if (headerIdx === -1) { alert('Could not find data header row (expected line starting with "ID").'); return; }
+
+            const headers = lines[headerIdx].split('\t');
+            const col = name => headers.findIndex(h => h.trim().toLowerCase() === name.toLowerCase());
+
+            const iID    = col('ID');
+            const iFrom  = col('From (m)');
+            const iTo    = col('To (m)');
+            const iColor = col('Color');
+            const iDesc  = col('Description');
+            const iMk    = col('Markers');
+            const iCp    = col('Compaction');
+
+            if (iID === -1 || iFrom === -1 || iTo === -1 || iDesc === -1) {
+                alert('File is missing required columns (ID, From (m), To (m), Description).'); return;
+            }
+
+            // ── Confirm overwrite ──
+            if (layers.length > 0) {
+                if (!confirm('This will replace your current profile. Continue?')) {
+                    event.target.value = ''; return;
+                }
+            }
+
+            const newLayers      = [];
+            const newCompactions = [];
+            const compactionSeen = new Set();
+
+            for (let i = headerIdx + 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const c = lines[i].split('\t');
+
+                const depthFrom = parseFloat(c[iFrom]);
+                const depthTo   = parseFloat(c[iTo]);
+                if (isNaN(depthFrom) || isNaN(depthTo)) continue;
+
+                const originalDesc = (c[iDesc] || '').trim();
+                const color        = (iColor !== -1 ? c[iColor] : '#ffffff').trim() || '#ffffff';
+                const id           = (c[iID]  || 'N/A').trim();
+
+                // Parse markers: "label(depth); label2(depth2)"
+                const markers = [];
+                if (iMk !== -1 && c[iMk] && c[iMk].trim() !== '-') {
+                    for (const mk of c[iMk].split(';')) {
+                        const m = mk.trim().match(/^(.+)\(([0-9.]+)\)$/);
+                        if (m) markers.push({ label: m[1].trim(), depth: parseFloat(m[2]) });
+                    }
+                }
+
+                // Parse compactions: "depth m:note; ..."
+                if (iCp !== -1 && c[iCp] && c[iCp].trim() !== '-') {
+                    for (const cp of c[iCp].split(';')) {
+                        const m = cp.trim().match(/^([0-9.]+)m:(.*)$/);
+                        if (m) {
+                            const key = m[1];
+                            if (!compactionSeen.has(key)) {
+                                compactionSeen.add(key);
+                                newCompactions.push({ depth: parseFloat(m[1]), note: m[2].trim() || 'Compaction' });
+                            }
+                        }
+                    }
+                }
+
+                // Detect layer type from description badges (disturbed / missing)
+                let layerType = 'normal';
+                if (/disturbed/i.test(originalDesc)) layerType = 'disturbed';
+                if (/missing|gap/i.test(originalDesc))  layerType = 'missing';
+
+                const lang = detectLanguage(originalDesc);
+                newLayers.push({
+                    id, depthFrom, depthTo, color, lang,
+                    officialDesc: translateSoil(originalDesc),
+                    originalDesc,
+                    markers,
+                    layerType,
+                    addedAt: new Date().toISOString()
+                });
+            }
+
+            if (!newLayers.length) { alert('No valid data rows found in the file.'); return; }
+
+            // ── Commit ──
+            layers.splice(0, layers.length, ...newLayers);
+            newCompactions.sort((a,b) => a.depth - b.depth);
+            compactions.splice(0, compactions.length, ...newCompactions);
+
+            // Restore coordinates
+            document.getElementById('coordX').value   = coords.x;
+            document.getElementById('coordY').value   = coords.y;
+            document.getElementById('coordZ').value   = coords.z;
+            document.getElementById('coordCRS').value = coords.crs;
+            onCoordChange();
+
+            // Pre-fill borehole ID
+            if (newLayers[0].id) document.getElementById('coreId').value = newLayers[0].id;
+
+            updateTable();
+            drawGraph();
+
+        } catch(err) {
+            alert('Could not read file: ' + err.message);
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SEP-3 / GeODin-Shuttle CSV EXPORT
+//  Produces a semicolon-delimited CSV whose column headers match
+//  the SEP-3 / GeODin internal field names (German) so that the
+//  file can be imported directly into GeODin-Shuttle via
+//  File → Import → CSV/Excel Import.
+//
+//  Mapping:
+//    Bohrungsname   → layer ID (borehole name)
+//    Rechtswert     → Easting / coordX
+//    Hochwert       → Northing / coordY
+//    Ansatzhöhe     → Surface elevation / coordZ
+//    Koordinatensystem → CRS / coordCRS
+//    Tiefe_von      → depthFrom (m)
+//    Tiefe_bis      → depthTo   (m)
+//    Petrographie   → originalDesc (raw description)
+//    Bemerkung      → translated English description + markers
+//    Farbe          → Munsell-style name (from colour selector)
+//    Bodengruppe    → layer type flag (normal/disturbed/missing)
+//    Probenahme     → markers (finds / samples)
+//    Verdichtung    → compaction notes at this depth interval
+// ═══════════════════════════════════════════════════════════════
+function exportSEP3CSV() {
+    if (!layers.length) { alert('Add at least one layer first.'); return; }
+
+    const sep = ';';   // European CSV standard — required by GeODin
+    const q   = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+
+    // Borehole metadata (from first layer / coordinate fields)
+    const bohrName = layers[0].id || 'N/A';
+    const rw  = document.getElementById('coordX').value.trim();   // Rechtswert / Easting
+    const hw  = document.getElementById('coordY').value.trim();   // Hochwert  / Northing
+    const ah  = document.getElementById('coordZ').value.trim();   // Ansatzhöhe
+    const kos = document.getElementById('coordCRS').value.trim(); // Koordinatensystem
+
+    // Column headers — match GeODin/SEP-3 parameter names exactly
+    const headers = [
+        'Bohrungsname',
+        'Rechtswert',
+        'Hochwert',
+        'Ansatzhöhe',
+        'Koordinatensystem',
+        'Tiefe_von',
+        'Tiefe_bis',
+        'Petrographie',
+        'Bemerkung',
+        'Farbe',
+        'Bodengruppe',
+        'Probenahme',
+        'Verdichtung'
+    ];
+
+    const rows = [headers.map(q).join(sep)];
+
+    layers.forEach(l => {
+        // Layer-type → Bodengruppe code (loosely mapped to DIN 4022 / SEP-3 codes)
+        let bodengruppe = '';
+        if (l.layerType === 'disturbed')          bodengruppe = 'gestört';
+        else if (l.layerType === 'missing')       bodengruppe = 'Kernverlust';
+        else if (l.layerType === 'anthropogenic') bodengruppe = 'anthropogen';
+
+        // Markers / finds
+        const probenahme = l.markers && l.markers.length
+            ? l.markers.map(m => `${m.label} (${m.depth} m)`).join('; ')
+            : '';
+
+        // Compaction notes within this interval
+        const verdichtung = compactions
+            .filter(c => c.depth >= l.depthFrom && c.depth <= l.depthTo)
+            .map(c => `${c.depth} m: ${c.note}`)
+            .join('; ');
+
+        // Bemerkung = English translation + any extra context
+        let bemerkung = l.officialDesc || '';
+        if (l.layerType === 'disturbed')          bemerkung += ' [disturbed/reworked]';
+        if (l.layerType === 'missing')            bemerkung += ' [core loss / gap]';
+        if (l.layerType === 'anthropogenic')      bemerkung += ' [anthropogenic]';
+
+        const row = [
+            bohrName,
+            rw,
+            hw,
+            ah,
+            kos,
+            l.depthFrom.toFixed(2),
+            l.depthTo.toFixed(2),
+            bemerkung,            // translated + flags → Petrographie
+            l.originalDesc,       // raw German/English description → Bemerkung
+            `${l.color}${getMunsell(l.color) ? ' ' + getMunsell(l.color) : ''}`, // hex + Munsell → Farbe
+            bodengruppe,
+            probenahme,
+            verdichtung
+        ].map(q).join(sep);
+
+        rows.push(row);
+    });
+
+    // BOM prefix (U+FEFF) ensures Excel / GeODin opens UTF-8 correctly
+    const bom     = '\uFEFF';
+    const content = bom + rows.join('\r\n') + '\r\n';
+    const ts      = getTimestamp().replace(/[: ]/g, '-');
+    triggerDownload(
+        new Blob([content], { type: 'text/csv;charset=utf-8' }),
+        `${bohrName}-SEP3-${ts}.csv`
+    );
+}
+
+function buildCoordHeader() {
+    const x   = document.getElementById('coordX').value.trim();
+    const y   = document.getElementById('coordY').value.trim();
+    const z   = document.getElementById('coordZ').value.trim();
+    const crs = document.getElementById('coordCRS').value.trim();
+    if (!x && !y && !z && !crs) return '';
+    const lines = ['# Borehole Coordinates'];
+    if (x)   lines.push(`# Easting / Longitude:\t${x}`);
+    if (y)   lines.push(`# Northing / Latitude:\t${y}`);
+    if (z)   lines.push(`# Surface Elevation:\t${z} m a.s.l.`);
+    if (crs) lines.push(`# CRS / Datum:\t${crs}`);
+    return lines.join('\n') + '\n#\n';
+}
+
+function buildTSV(ts) {
+    const z  = getSurfaceElev();
+    let tsv  = 'ID\tLayer#\tExported At\tFrom (m)\tTo (m)' +
+               (z !== null ? '\tFrom (m a.s.l.)\tTo (m a.s.l.)' : '') +
+               '\tColor\tMunsell\tClass\tDescription\tMarkers\tCompaction\n';
+    layers.forEach((l, i) => {
+        const mk = l.markers.length ? l.markers.map(m=>`${m.label}(${m.depth})`).join('; ') : '-';
+        const cp = compactions.filter(c=>c.depth>=l.depthFrom&&c.depth<=l.depthTo)
+                              .map(c=>`${c.depth}m:${c.note}`).join('; ') || '-';
+        const elevFrom = z !== null ? `\t${(z-l.depthFrom).toFixed(2)}\t${(z-l.depthTo).toFixed(2)}` : '';
+        const munsell  = getMunsell(l.color);
+        tsv += `${l.id}\t${i+1}\t${ts}\t${l.depthFrom.toFixed(2)}\t${l.depthTo.toFixed(2)}${elevFrom}\t${l.color}\t${munsell}\t${l.officialDesc}\t${l.originalDesc}\t${mk}\t${cp}\n`;
+    });
+    return tsv;
+}
+
+function copyToClipboard() {
+    const ts      = getTimestamp();
+    const content = buildCoordHeader() + buildTSV(ts);
+
+    // Modern clipboard API (desktop + Android Chrome)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(content)
+            .then(() => alert('Copied as TSV!'))
+            .catch(() => _fallbackCopy(content));
+    } else {
+        _fallbackCopy(content);
+    }
+}
+
+function _fallbackCopy(text) {
+    // execCommand fallback — works in older browsers and iOS WebViews
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    // iOS: expand selection to full content
+    ta.setSelectionRange(0, text.length);
+    try {
+        document.execCommand('copy');
+        alert('Copied as TSV!');
+    } catch(e) {
+        alert('Copy failed — please select and copy the text manually.');
+    }
+    document.body.removeChild(ta);
+}
+
+function exportTXT() {
+    const ts      = getTimestamp();
+    const content = buildCoordHeader() + buildTSV(ts);
+    triggerDownload(new Blob([content], {type:'text/plain;charset=utf-8'}),
+        `core-log-${ts.replace(/[: ]/g,'-')}.txt`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EDIT LAYER MODAL
+// ═══════════════════════════════════════════════════════════════
+function openEditModal(idx) {
+    const l = layers[idx];
+    if (!l) return;
+
+    document.getElementById('editIndex').value     = idx;
+    document.getElementById('editCoreId').value    = l.id;
+    document.getElementById('editDepthFrom').value = l.depthFrom;
+    document.getElementById('editDepthTo').value   = l.depthTo;
+    document.getElementById('editSoilDesc').value  = l.originalDesc;
+    document.getElementById('editSoilColor').value = l.color;
+
+    const radio = document.querySelector(`input[name="editLayerType"][value="${l.layerType}"]`);
+    if (radio) radio.checked = true;
+
+    document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal(e) {
+    if (e && e.target !== document.getElementById('editModal')) return;
+    document.getElementById('editModal').classList.remove('open');
+}
+
+function saveEditLayer() {
+    const idx      = parseInt(document.getElementById('editIndex').value, 10);
+    const id       = document.getElementById('editCoreId').value.trim() || 'N/A';
+    const from     = parseFloat(document.getElementById('editDepthFrom').value);
+    const to       = parseFloat(document.getElementById('editDepthTo').value);
+    const hex      = document.getElementById('editSoilColor').value;
+    const desc     = document.getElementById('editSoilDesc').value.trim();
+    const ltype    = document.querySelector('input[name="editLayerType"]:checked')?.value || 'normal';
+
+    if (isNaN(from) || isNaN(to) || !desc) {
+        alert('Please fill in depth and description.'); return;
+    }
+
+    const lang = detectLanguage(desc);
+    layers[idx] = {
+        ...layers[idx],
+        id, depthFrom: from, depthTo: to, color: hex, lang,
+        officialDesc: translateSoil(desc),
+        originalDesc: desc,
+        layerType: ltype
+    };
+
+    document.getElementById('editModal').classList.remove('open');
+    updateTable();
+    drawGraph();
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('editModal').classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function isDark(hex) {
+    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    return (r*.299 + g*.587 + b*.114) < 128;
+}
+function getMunsell(hex) {
+    const c = SOIL_DATA.colors.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+    return (c && c.munsell) ? c.munsell : '';
+}
+function getTimestamp() {
+    const n=new Date(), p=x=>String(x).padStart(2,'0');
+    return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+function escXml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                    .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+// ═══════════════════════════════════════════════════════════════
+//  CROSS-PLATFORM DOWNLOAD  (desktop anchor + mobile share sheet)
+//  iOS Safari blocks <a download> for blobs entirely. We detect
+//  mobile and use the Web Share API (navigator.share) instead,
+//  which opens the native iOS/Android share sheet so the user can
+//  save to Files, Photos, send to an app, etc.
+//  Falls back to anchor download on desktop / unsupported browsers.
+// ═══════════════════════════════════════════════════════════════
+function isMobile() {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
+async function triggerDownload(blob, filename) {
+    // ── Mobile: try Web Share API first ──
+    if (isMobile() && navigator.canShare) {
+        const file = new File([blob], filename, { type: blob.type });
+        if (navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({ files: [file], title: filename });
+                return; // handled — user got native share sheet
+            } catch(err) {
+                // User cancelled (AbortError) or share failed — fall through
+                if (err.name !== 'AbortError') console.warn('Share failed:', err);
+                else return; // user dismissed sheet intentionally
+            }
+        }
+    }
+
+    // ── Fallback: object URL + anchor click (works on all desktop browsers
+    //    and Android Chrome; does NOT work on iOS Safari for most types) ──
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 5000);
+}
+</script>
+
+<script>
+// Gesture prevention
+document.addEventListener('gesturestart',  e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive:false});
+</script>
+</body>
+</html>
