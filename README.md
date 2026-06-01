@@ -2,6 +2,8 @@
 
 A single-file, offline-capable web app for logging sediment core and borehole stratigraphy in the field. Built for geoarchaeologists and geologists working on excavation sites, it runs entirely in the browser with no server or installation required.
 
+⚠ Early Access — This project is under active development. Features, exports, and data formats may change between versions. If you use this tool, I'd love to hear what works, what doesn't, and what's missing.
+
 *by PLF*
 
 ---
