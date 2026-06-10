@@ -310,6 +310,13 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 }
 
 /* ── Gradational shift within a layer ── */
+.munsell-toggle {
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    font-size:.62rem; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--ga-subdued); font-weight:500; font-family:var(--ga-mono);
+    margin-bottom:6px; -webkit-user-select:none; user-select:none;
+}
+.munsell-toggle input { width:15px; height:15px; accent-color:var(--ga-accent); cursor:pointer; }
 .grade-row { margin:-2px 0 12px; }
 .grade-toggle {
     display:inline-flex; align-items:center; gap:8px; cursor:pointer;
@@ -687,14 +694,23 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
         </label>
         <div id="gradeDetail" class="grade-detail" style="display:none;">
             <span class="grade-arrow" title="Top of layer">top</span>
-            <select id="gradePrimary" class="grade-select" title="Main soil at the BASE of this layer">
+            <select id="gradePrimary" class="grade-select" title="Main soil at the BASE of this layer" onchange="onGradeChange()">
                 <option value="">— soil at base —</option>
+            </select>
+            <select id="gradeSecondary" class="grade-select" title="Add a modifier to the BASE soil" onchange="onGradeSecondary()">
+                <option value="">— add modifier —</option>
             </select>
             <span class="grade-hint">The column tapers &amp; texture blends from top to base.</span>
         </div>
     </div>
     <div class="input-grid">
-        <select id="soilColor"></select>
+        <div>
+            <label class="munsell-toggle">
+                <input type="checkbox" id="munsellToggle" onchange="onMunsellToggle()">
+                <span>Use Munsell colours</span>
+            </label>
+            <select id="soilColor"></select>
+        </div>
         <textarea id="soilDesc" placeholder="Description — English or Deutsch&#10;e.g. sandy silt / schluffiger Sand, humic"></textarea>
     </div>
     <div class="layer-type-row">
@@ -715,16 +731,16 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 
     <!-- Tab bar -->
     <div class="finds-tab-bar" id="findsTabBar">
-        <button class="finds-tab active" data-tab="marker"     onclick="switchFindsTab('marker')">📍 Marker</button>
-        <button class="finds-tab"        data-tab="shells"     onclick="switchFindsTab('shells')">🐚 Shells</button>
-        <button class="finds-tab"        data-tab="charcoal"   onclick="switchFindsTab('charcoal')">🔥 Charcoal</button>
-        <button class="finds-tab"        data-tab="wood"       onclick="switchFindsTab('wood')">🪵 Wood</button>
-        <button class="finds-tab"        data-tab="ceramics"   onclick="switchFindsTab('ceramics')">🏺 Ceramics</button>
-        <button class="finds-tab"        data-tab="humic"      onclick="switchFindsTab('humic')">🌿 Humic</button>
-        <button class="finds-tab"        data-tab="roots"      onclick="switchFindsTab('roots')">🌱 Roots</button>
-        <button class="finds-tab"        data-tab="stones"     onclick="switchFindsTab('stones')">🪨 Stones</button>
-        <button class="finds-tab"        data-tab="ironoxide"  onclick="switchFindsTab('ironoxide')">🟠 Iron oxide</button>
-        <button class="finds-tab"        data-tab="compaction" onclick="switchFindsTab('compaction')">⊕ Compaction</button>
+        <button class="finds-tab active" data-tab="marker"     onclick="switchFindsTab('marker')"> Marker</button>
+        <button class="finds-tab"        data-tab="shells"     onclick="switchFindsTab('shells')"> Shells</button>
+        <button class="finds-tab"        data-tab="charcoal"   onclick="switchFindsTab('charcoal')"> Charcoal</button>
+        <button class="finds-tab"        data-tab="wood"       onclick="switchFindsTab('wood')"> Wood</button>
+        <button class="finds-tab"        data-tab="ceramics"   onclick="switchFindsTab('ceramics')"> Ceramics</button>
+        <button class="finds-tab"        data-tab="humic"      onclick="switchFindsTab('humic')"> Humic</button>
+        <button class="finds-tab"        data-tab="roots"      onclick="switchFindsTab('roots')"> Roots</button>
+        <button class="finds-tab"        data-tab="stones"     onclick="switchFindsTab('stones')"> Stones</button>
+        <button class="finds-tab"        data-tab="ironoxide"  onclick="switchFindsTab('ironoxide')"> Iron oxide</button>
+        <button class="finds-tab"        data-tab="compaction" onclick="switchFindsTab('compaction')"> Compaction</button>
     </div>
 
     <!-- ── TAB: Marker (generic) ── -->
@@ -1342,6 +1358,10 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         <div class="input-grid">
             <div>
                 <label class="field-label">Colour</label>
+                <label class="munsell-toggle">
+                    <input type="checkbox" id="editMunsellToggle" onchange="onEditMunsellToggle()">
+                    <span>Use Munsell colours</span>
+                </label>
                 <select id="editSoilColor"></select>
             </div>
             <div>
@@ -1364,8 +1384,11 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
             </label>
             <div id="editGradeDetail" class="grade-detail" style="display:none;">
                 <span class="grade-arrow" title="Top of layer">top</span>
-                <select id="editGradePrimary" class="grade-select" title="Main soil at the BASE of this layer">
+                <select id="editGradePrimary" class="grade-select" title="Main soil at the BASE of this layer" onchange="onEditGradeChange()">
                     <option value="">— soil at base —</option>
+                </select>
+                <select id="editGradeSecondary" class="grade-select" title="Add a modifier to the BASE soil" onchange="onEditGradeSecondary()">
+                    <option value="">— add modifier —</option>
                 </select>
                 <span class="grade-hint">The column tapers &amp; texture blends from top to base.</span>
             </div>
@@ -1636,7 +1659,27 @@ const SOIL_DATA =
     { "name": "Black",                          "hex": "#211f1e", "munsell": "N 2/"       },
     { "name": "Brownish Black",                 "hex": "#231f20", "munsell": "7.5YR 2/1" },
 
-    { "name": "No Colour",                      "hex": "#ffffff", "munsell": ""           }
+    { "name": "No Colour",                      "hex": "#ffffff", "munsell": ""           },
+
+   { "name": "Pale Yellow / Cream",         "hex": "#F5F3C4", "munsell": "" },
+  { "name": "Light Yellowish Orange",      "hex": "#FCD8A7", "munsell": "" },
+  { "name": "Medium Muted Yellow",         "hex": "#D4A357", "munsell": "" },
+  { "name": "Light Reddish Orange",        "hex": "#E69555", "munsell": "" },
+  { "name": "Medium Reddish Brown",        "hex": "#C86A4B", "munsell": "" },
+  { "name": "Dark Reddish Brown",          "hex": "#8E3E2B", "munsell": "" },
+  { "name": "Light Pale Green",            "hex": "#82CFB3", "munsell": "" },
+  { "name": "Medium Olive Green",          "hex": "#6B7A4F", "munsell": "" },
+  { "name": "Dark Forest Green",           "hex": "#4A6B56", "munsell": "" },
+  { "name": "Light Pale Blue",             "hex": "#9BE3F2", "munsell": "" },
+  { "name": "Medium Muted Blue",           "hex": "#5A7D9A", "munsell": "" },
+  { "name": "Light Grey",                  "hex": "#C2C2C2", "munsell": "" },
+  { "name": "Light Greyish Brown",         "hex": "#967E6E", "munsell": "" },
+  { "name": "Medium Muted Brown",          "hex": "#7D6656", "munsell": "" },
+  { "name": "Dark Brown",                  "hex": "#5C4A3C", "munsell": "" },
+  { "name": "Very Dark Brown",             "hex": "#3D2F24", "munsell": "" },
+  { "name": "Dark Grey",                   "hex": "#555A60", "munsell": "" },
+  { "name": "Very Dark Grey / Near Black", "hex": "#2B2D2F", "munsell": "" }
+
 ],
      
     "soilMains": {
@@ -1701,6 +1744,10 @@ const SOIL_DATA =
         "fine sandy": "fs",
         "medium sandy": "ms",
         "coarse sandy": "gs",
+        "loamy": "l",
+        "slightly loamy": "l2",
+        "moderately loamy": "l3",
+        "strongly loamy": "l4",
         "gravelly": "g",
         "humic": "h",
         "calcareous": "ca",
@@ -1804,6 +1851,47 @@ const PETRO_SECONDARY = [
 ];
 // Working selection for the current (not yet added) layer
 let petroState = { primary: null, secondaries: [] };
+// Working selection for the gradational base soil (Add panel + Edit modal).
+// secondaries stacks modifier codes applied to the base soil, mirroring
+// petroState.secondaries for the top soil.
+let gradeState     = { secondaries: [] };
+let editGradeState = { secondaries: [] };
+
+// ═══════════════════════════════════════════════════════════════
+//  COLOUR DROPDOWNS (Munsell filter)
+//  The "Use Munsell colours" checkbox decides which palette a colour
+//  <select> shows:
+//    checked   → ONLY colours that carry a Munsell code
+//    unchecked → ONLY colours WITHOUT a Munsell code (the plain swatches)
+//  Repopulating preserves the current selection if it still exists in the
+//  filtered list; otherwise it falls back to the first available option.
+// ═══════════════════════════════════════════════════════════════
+function populateColorSelect(sel, useMunsell) {
+    if (!sel) return;
+    const prev = sel.value;
+    const list = SOIL_DATA.colors.filter(c =>
+        useMunsell ? !!(c.munsell && c.munsell.trim()) : !(c.munsell && c.munsell.trim()));
+    sel.innerHTML = '';
+    list.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.hex;
+        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
+        opt.style.backgroundColor = c.hex;
+        opt.style.color = isDark(c.hex) ? 'white' : 'black';
+        sel.appendChild(opt);
+    });
+    // keep the old selection if it survives the filter
+    if (prev && list.some(c => c.hex === prev)) sel.value = prev;
+}
+
+function onMunsellToggle() {
+    populateColorSelect(document.getElementById('soilColor'),
+        document.getElementById('munsellToggle')?.checked);
+}
+function onEditMunsellToggle() {
+    populateColorSelect(document.getElementById('editSoilColor'),
+        document.getElementById('editMunsellToggle')?.checked);
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  INIT
@@ -1813,25 +1901,11 @@ window.onload = function() {
     SOIL_MODIFIERS = SOIL_DATA.soilModifiers;
 
     const sel = document.getElementById('soilColor');
-    SOIL_DATA.colors.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.hex;
-        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
-        opt.style.backgroundColor = c.hex;
-        opt.style.color = isDark(c.hex) ? 'white' : 'black';
-        sel.appendChild(opt);
-    });
+    populateColorSelect(sel, document.getElementById('munsellToggle')?.checked);
 
     // Populate edit modal colour dropdown
     const editSel = document.getElementById('editSoilColor');
-    SOIL_DATA.colors.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.hex;
-        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
-        opt.style.backgroundColor = c.hex;
-        opt.style.color = isDark(c.hex) ? 'white' : 'black';
-        editSel.appendChild(opt);
-    });
+    populateColorSelect(editSel, document.getElementById('editMunsellToggle')?.checked);
 
     // Populate petrography (KA5) dropdowns
     const pPrim = document.getElementById('petroPrimary');
@@ -1857,6 +1931,18 @@ window.onload = function() {
             const opt = document.createElement('option');
             opt.value = p.code;
             opt.text  = `${capitalize(p.en)} – ${p.code}`;
+            gsel.appendChild(opt);
+        });
+    });
+
+    // Populate the base-soil modifier dropdowns (Add + Edit)
+    ['gradeSecondary', 'editGradeSecondary'].forEach(selId => {
+        const gsel = document.getElementById(selId);
+        if (!gsel) return;
+        PETRO_SECONDARY.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.code;
+            opt.text  = `${p.en} – ${p.code}`;
             gsel.appendChild(opt);
         });
     });
@@ -2164,13 +2250,43 @@ function depthToElev(depthM) {
 // ═══════════════════════════════════════════════════════════════
 function translateSoil(desc) {
     // Run German→English first, then classify
-    const normalized = translateGermanToEnglish(desc);
+    let normalized = translateGermanToEnglish(desc);
+    // The gradual-shift feature appends " → <base soil>" to the description.
+    // That suffix describes the BASE of the layer and is classified separately
+    // (see gradeBaseCode); the layer's own code must come from the TOP soil
+    // only, so drop everything from the arrow onward before classifying.
+    const arrowIdx = normalized.indexOf('→');
+    if (arrowIdx !== -1) normalized = normalized.slice(0, arrowIdx);
+    // Normalise hyphenated compound modifiers ("fine-sandy" → "fine sandy")
+    // so they match the dictionary keys, which use spaces.
+    normalized = normalized.replace(/-/g, ' ');
     const d = normalized.toLowerCase();
-    let main = '-', mainMatchLen = -1, mainPos = -1, modifiers = [];
 
-    // Prefer the LONGEST matching key (most specific); break ties by position (latest wins)
+    // ── Pass 1: extract MODIFIER phrases first ──────────────────────────
+    // KA5 order is "<adjectives> <noun>": the trailing noun is the main soil,
+    // the adjectives before it are modifiers. Compound modifier phrases like
+    // "fine sandy" contain a main-type substring ("fine sand"), so if we
+    // matched mains first we'd wrongly pick fine sand. Instead we strip the
+    // longest modifier phrases out of the text first (longest-first so
+    // "fine sandy" wins over "sandy"), then classify the main from the rest.
+    let residue = ' ' + d.replace(/[(),]/g, ' ').replace(/\s+/g, ' ') + ' ';
+    const modifiers = [];
+    const modKeys = Object.keys(SOIL_MODIFIERS).sort((a, b) => b.length - a.length);
+    for (const key of modKeys) {
+        const re = new RegExp('(?<![a-z])' + key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?![a-z])', 'g');
+        if (re.test(residue)) {
+            modifiers.push(SOIL_MODIFIERS[key]);
+            residue = residue.replace(re, ' ');   // remove so its words can't re-trigger
+        }
+    }
+
+    // ── Pass 2: find the MAIN soil type in what's left ──────────────────
+    // Word-boundary match, prefer the LONGEST key, break ties by latest pos.
+    let main = '-', mainMatchLen = -1, mainPos = -1;
     for (const [key, val] of Object.entries(SOIL_MAINS)) {
-        const lastIdx = d.lastIndexOf(key);
+        const re = new RegExp('(?<![a-z])' + key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?![a-z])', 'g');
+        let m, lastIdx = -1;
+        while ((m = re.exec(residue)) !== null) lastIdx = m.index;
         if (lastIdx === -1) continue;
         if (key.length > mainMatchLen || (key.length === mainMatchLen && lastIdx > mainPos)) {
             mainMatchLen = key.length;
@@ -2179,18 +2295,28 @@ function translateSoil(desc) {
         }
     }
 
-    // Build a modifier-cleaned string: remove the matched main-type phrase so its
-    // sub-words (e.g. "sand" inside "fine sand") don't accidentally trigger modifiers
-    const cleanedForMods = mainMatchLen > 0
-        ? d.slice(0, mainPos) + d.slice(mainPos + mainMatchLen)
-        : d;
-
-    for (const [key, val] of Object.entries(SOIL_MODIFIERS)) {
-        if (cleanedForMods.includes(key)) modifiers.push(val);
-    }
-    modifiers = [...new Set(modifiers)].sort();
+    const uniqueMods = [...new Set(modifiers)].sort();
     if (main === '-') return '-';
-    return modifiers.length ? `${main}(${modifiers.join(',')})` : main;
+    return uniqueMods.length ? `${main}(${uniqueMods.join(',')})` : main;
+}
+
+// Reconstruct structured grade fields { gradeTo, gradeSecondaries } from a
+// base-soil phrase such as "gravelly clay". Used when importing TXT/CSV,
+// where the gradual shift survives only as the " → <base>" clause in the
+// Description text. Returns null primary if the phrase doesn't classify to a
+// known petrography primary (so callers can ignore unsupported bases).
+function classifyGradeCodes(phrase) {
+    const code = translateSoil(phrase);            // e.g. "T(g)" or "U(l,h)" or "-"
+    if (!code || code === '-') return { gradeTo: null, gradeSecondaries: [] };
+    const m = code.match(/^([A-Za-z]+)(?:\(([^)]*)\))?$/);
+    if (!m) return { gradeTo: null, gradeSecondaries: [] };
+    const primary = m[1];
+    // gradeTo must be a known petrography primary (S, U, T, L, G, …)
+    const gradeTo = (typeof petroLookupPrimary === 'function' && petroLookupPrimary(primary)) ? primary : null;
+    if (!gradeTo) return { gradeTo: null, gradeSecondaries: [] };
+    const secs = (m[2] ? m[2].split(',').map(s => s.trim()).filter(Boolean) : [])
+        .filter(c => typeof petroLookupSecondary === 'function' && petroLookupSecondary(c));
+    return { gradeTo, gradeSecondaries: secs };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2208,6 +2334,102 @@ const PETRO_SEP = ' — ';   // separates auto petrography prefix from free text
 
 function petroLookupPrimary(code)   { return PETRO_PRIMARY.find(p => p.code === code) || null; }
 function petroLookupSecondary(code) { return PETRO_SECONDARY.find(p => p.code === code) || null; }
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED: detect which finds/observations a layer contains.
+//  Looks at BOTH the typed description AND the structured markers
+//  added via the Finds panel. Returns flags + a quantity label.
+//  Used by the table and the profile so they always agree.
+// ═══════════════════════════════════════════════════════════════
+function summarizeFinds(l) {
+    const descLow = (l.originalDesc + ' ' +
+        (typeof translateGermanToEnglish === 'function' ? translateGermanToEnglish(l.originalDesc) : '')).toLowerCase();
+    const markerTypes = new Set((l.markers || []).map(m => m.findType).filter(Boolean));
+    const markerText  = (l.markers || []).map(m => (m.label || '')).join(' ').toLowerCase();
+    const combined    = descLow + ' ' + markerText;
+
+    const f = {
+        shell:     markerTypes.has('shells')   || /shell|mussel|mollusc|gastropod|oyster|muschel|schale|schnecke|auster/.test(descLow),
+        charcoal:  markerTypes.has('charcoal') || /charcoal|holzkohle/.test(descLow),
+        wood:      markerTypes.has('wood')     || /\bwood\b|twig|bark|\bseed\b|plant remains|holz|zweig|rinde/.test(descLow),
+        ceramics:  markerTypes.has('ceramics') || /ceramic|pottery|sherd|keramik|scherbe|ziegel/.test(descLow),
+        humic:     markerTypes.has('humic')    || /humic|humos|organic matter/.test(descLow),
+        roots:     markerTypes.has('roots')    || /\broot/.test(descLow),
+        stones:    markerTypes.has('stones')   || /\bstone|pebble|cobble|flint|artefact|feuerstein/.test(descLow),
+        ironoxide: markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|ferruginous|eisenoxid|rostfleck/.test(descLow)
+    };
+    f.intact = /intact|complete|whole|ganz|intakt/.test(combined);
+    const many = /abundant|many|lot|viele|zahlreich|reich/.test(combined);
+    const few  = /few|rare|vereinzelt|wenig|selten/.test(combined);
+    f.qtyLabel = many ? 'abundant' : few ? 'rare' : 'present';
+    return f;
+}
+
+// Short, human-readable find chips (text, no HTML) for the profile label.
+// Bullet lines describing a layer's finds/observations, WITHOUT icons.
+// Prefers the structured markers (their label + depth range), e.g.
+//   "pottery sherd, Drehscheibenware @ 0.00–0.20 m"
+//   "wood @ 0.00–0.20 m"
+// If a layer has no structured markers but finds were detected from the
+// typed description, falls back to short type words so nothing is lost.
+function findBulletLines(l) {
+    const lines = [];
+    const markers = (l.markers || []);
+    markers.forEach(m => {
+        const label = (m.label || (m.findType ? m.findType : 'find')).trim();
+        let depthTxt = '';
+        if (typeof m.depth === 'number' && isFinite(m.depth)) {
+            depthTxt = (m.depthTo != null && isFinite(m.depthTo))
+                ? ` @ ${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m`
+                : ` @ ${m.depth.toFixed(2)} m`;
+        }
+        lines.push(`${label}${depthTxt}`);
+    });
+
+    // Fallback: finds present in the description but not as markers.
+    if (!markers.length) {
+        const f = summarizeFinds(l);
+        const words = [];
+        if (f.shell)     words.push('shells' + (f.intact ? ' (intact)' : ''));
+        if (f.charcoal)  words.push('charcoal');
+        if (f.wood)      words.push('wood / plant');
+        if (f.ceramics)  words.push('ceramics');
+        if (f.humic)     words.push('humic');
+        if (f.roots)     words.push('roots');
+        if (f.stones)    words.push('stones');
+        if (f.ironoxide) words.push('iron oxide');
+        words.forEach(w => lines.push(w));
+    }
+    return lines;
+}
+
+// Build the KA5 code shown for the BASE soil of a gradational layer.
+// If the user gave explicit base-soil modifiers (gradeSecondaries) we use
+// those; otherwise we fall back to reusing the top soil's modifiers so the
+// shift still reads sensibly (e.g. "S(h) → U(h)").
+function gradeBaseCode(l) {
+    if (!l.gradeTo) return null;
+    const secs = nonRedundantMods(l.gradeTo,
+        Array.isArray(l.gradeSecondaries) ? l.gradeSecondaries.filter(Boolean) : []).slice().sort();
+    if (secs.length) return `${l.gradeTo}(${secs.join(',')})`;
+    if (Array.isArray(l.gradeSecondaries) && l.gradeSecondaries.length) return l.gradeTo;
+    const top = l.officialDesc || (typeof translateSoil === 'function' ? translateSoil(l.originalDesc || '') : '-');
+    const mods = (top && top.indexOf('(') !== -1) ? top.slice(top.indexOf('(')) : '';   // "(h)" or ""
+    return l.gradeTo + mods;
+}
+
+// Assemble the label model for a layer in the profile:
+//   code:      "S(h)"  (or "S(h) → U(h)" when grading)
+//   descText:  the human soil description (one short line)
+//   bullets:   ["pottery sherd … @ 0.00–0.20 m", "wood @ 0.00–0.20 m", …]
+function buildProfileLabel(l) {
+    let code = l.officialDesc || '-';
+    const baseCode = gradeBaseCode(l);
+    if (baseCode) code = `${code} → ${baseCode}`;
+    const descText = (l.originalDesc || '').trim();
+    const bullets  = findBulletLines(l);
+    return { code, descText, bullets };
+}
 
 // Build the English phrase: "<sec1> <sec2> <primary>" (KA5 word order)
 function buildPetroPhrase() {
@@ -2302,22 +2524,141 @@ function resetPetro() {
     const gt = document.getElementById('gradeToggle');
     const gd = document.getElementById('gradeDetail');
     const gp = document.getElementById('gradePrimary');
+    const gs = document.getElementById('gradeSecondary');
     if (gt) gt.checked = false;
     if (gd) gd.style.display = 'none';
     if (gp) gp.value = '';
+    if (gs) gs.value = '';
+    gradeState = { secondaries: [] };
+    lastGradePhrase = '';
+}
+
+// ── Gradational base-soil description sync ──────────────────────────
+// The gradual shift is reflected in the free-text description as a short,
+// non-destructive suffix: " → silty silt". We remember exactly what we last
+// appended (lastGradePhrase) and strip precisely that before re-applying, so
+// toggling/changing the base soil never duplicates text, never touches the
+// petrography prefix at the front, and never eats the user's own free text.
+const GRADE_SEP = ' → ';
+let lastGradePhrase     = '';   // for the Add panel (#soilDesc)
+let lastEditGradePhrase = '';   // for the Edit modal (#editSoilDesc)
+
+// Build "silty silt" style phrase from a base primary code + modifier codes.
+// Modifier codes that mean "made of the same material" as a given primary
+// soil. Used to suppress nonsensical phrasings like "loamy loam" or
+// "clayey clay" when a base-soil modifier duplicates its own primary.
+const PRIMARY_REDUNDANT_MODS = {
+    S: ['s', 'fs', 'ms', 'gs'],   // sand ↔ sandy / fine-/medium-/coarse-sandy
+    U: ['u'],                     // silt ↔ silty
+    T: ['t'],                     // clay ↔ clayey
+    L: ['l'],                     // loam ↔ loamy
+    G: ['g'],                     // gravel ↔ gravelly
+    // fine/medium/coarse sands also count as "sand" for the sandy modifiers
+    Fs: ['s', 'fs', 'ms', 'gs'],
+    Ms: ['s', 'fs', 'ms', 'gs'],
+    Gs: ['s', 'fs', 'ms', 'gs'],
+    Fk: ['g'], Mk: ['g'], Gk: ['g']
+};
+function nonRedundantMods(primaryCode, secondaryCodes) {
+    const banned = PRIMARY_REDUNDANT_MODS[primaryCode] || [];
+    return (secondaryCodes || []).filter(c => c && !banned.includes(c));
+}
+
+function buildGradePhrase(primaryCode, secondaryCodes) {
+    if (!primaryCode) return '';
+    const prim = petroLookupPrimary(primaryCode)?.en;
+    if (!prim) return '';
+    const secs = nonRedundantMods(primaryCode, secondaryCodes)
+        .map(c => petroLookupSecondary(c)?.en).filter(Boolean);
+    return [...secs, prim].join(' ');
+}
+
+// Apply/refresh the grade suffix on a given textarea, tracking the last
+// phrase via a ref object { value } so Add and Edit stay independent.
+function applyGradeToDescription(taId, primaryId, secondaryCodes, lastRef) {
+    const ta = document.getElementById(taId);
+    if (!ta) return;
+    const primaryCode = document.getElementById(primaryId)?.value || '';
+    const phrase = buildGradePhrase(primaryCode, secondaryCodes);
+
+    let text = ta.value;
+    // Remove the previously-appended grade suffix from the end (with sep).
+    if (lastRef.value) {
+        if (text.endsWith(GRADE_SEP + lastRef.value)) {
+            text = text.slice(0, text.length - (GRADE_SEP + lastRef.value).length);
+        } else if (text.endsWith(lastRef.value)) {
+            text = text.slice(0, text.length - lastRef.value.length);
+        }
+    }
+    text = text.replace(/[\s]+$/, '');   // trim trailing whitespace
+
+    ta.value = phrase ? (text ? `${text}${GRADE_SEP}${phrase}` : phrase) : text;
+    lastRef.value = phrase;
 }
 
 // Show/hide the "soil at base" picker (Add Layer panel)
 function onGradeToggle() {
     const gt = document.getElementById('gradeToggle');
     const gd = document.getElementById('gradeDetail');
-    if (gd) gd.style.display = gt && gt.checked ? 'flex' : 'none';
+    const on = !!(gt && gt.checked);
+    if (gd) gd.style.display = on ? 'flex' : 'none';
+    if (!on) {
+        // Clear selection + strip the suffix from the description.
+        gradeState.secondaries = [];
+        const gp = document.getElementById('gradePrimary');
+        const gs = document.getElementById('gradeSecondary');
+        if (gp) gp.value = '';
+        if (gs) gs.value = '';
+        applyGradeToDescription('soilDesc', 'gradePrimary', gradeState.secondaries,
+            { get value(){ return lastGradePhrase; }, set value(v){ lastGradePhrase = v; } });
+    }
 }
-// Same, for the Edit Layer modal
+// Base soil (primary) changed in the Add panel.
+function onGradeChange() {
+    applyGradeToDescription('soilDesc', 'gradePrimary', gradeState.secondaries,
+        { get value(){ return lastGradePhrase; }, set value(v){ lastGradePhrase = v; } });
+}
+// Base soil modifier picked in the Add panel (stacks, like the top soil).
+function onGradeSecondary() {
+    const sel = document.getElementById('gradeSecondary');
+    const code = sel.value;
+    if (code && !gradeState.secondaries.includes(code)) {
+        gradeState.secondaries.push(code);
+        applyGradeToDescription('soilDesc', 'gradePrimary', gradeState.secondaries,
+            { get value(){ return lastGradePhrase; }, set value(v){ lastGradePhrase = v; } });
+    }
+    sel.value = '';
+}
+
+// Same trio, for the Edit Layer modal.
 function onEditGradeToggle() {
     const gt = document.getElementById('editGradeToggle');
     const gd = document.getElementById('editGradeDetail');
-    if (gd) gd.style.display = gt && gt.checked ? 'flex' : 'none';
+    const on = !!(gt && gt.checked);
+    if (gd) gd.style.display = on ? 'flex' : 'none';
+    if (!on) {
+        editGradeState.secondaries = [];
+        const gp = document.getElementById('editGradePrimary');
+        const gs = document.getElementById('editGradeSecondary');
+        if (gp) gp.value = '';
+        if (gs) gs.value = '';
+        applyGradeToDescription('editSoilDesc', 'editGradePrimary', editGradeState.secondaries,
+            { get value(){ return lastEditGradePhrase; }, set value(v){ lastEditGradePhrase = v; } });
+    }
+}
+function onEditGradeChange() {
+    applyGradeToDescription('editSoilDesc', 'editGradePrimary', editGradeState.secondaries,
+        { get value(){ return lastEditGradePhrase; }, set value(v){ lastEditGradePhrase = v; } });
+}
+function onEditGradeSecondary() {
+    const sel = document.getElementById('editGradeSecondary');
+    const code = sel.value;
+    if (code && !editGradeState.secondaries.includes(code)) {
+        editGradeState.secondaries.push(code);
+        applyGradeToDescription('editSoilDesc', 'editGradePrimary', editGradeState.secondaries,
+            { get value(){ return lastEditGradePhrase; }, set value(v){ lastEditGradePhrase = v; } });
+    }
+    sel.value = '';
 }
 
 function addLayer() {
@@ -2338,6 +2679,7 @@ function addLayer() {
     // Optional gradational shift of primary soil (top → base)
     const gradeOn   = document.getElementById('gradeToggle')?.checked;
     const gradeTo   = gradeOn ? (document.getElementById('gradePrimary')?.value || null) : null;
+    const gradeSecondaries = gradeOn ? [...gradeState.secondaries] : [];
 
     layers.push({
         id, depthFrom:from, depthTo:to, color:hex, lang,
@@ -2346,6 +2688,7 @@ function addLayer() {
         markers: marker ? [marker] : [],
         layerType,
         gradeTo,
+        gradeSecondaries,
         addedAt: new Date().toISOString()
     });
 
@@ -2396,6 +2739,27 @@ function refreshLayerPickers() {
     });
 }
 
+// Resolve which layer a find/marker belongs to.
+//  1. If the user explicitly picked a layer in the tab's "Layer #" dropdown,
+//     honour that choice — it is the most reliable signal of intent.
+//  2. Otherwise fall back to matching by depth. At a shared boundary depth
+//     (e.g. 0.30 m where layer 1 = 0.00–0.30 and layer 2 = 0.30–0.40) we
+//     prefer the layer that STARTS at that depth, so a find entered at the
+//     top of a layer lands in that layer rather than the one above it.
+function resolveTargetLayer(pickerId, depth) {
+    const sel = document.getElementById(pickerId);
+    if (sel && sel.value !== '') {
+        const l = layers[Number(sel.value)];
+        if (l) return l;
+    }
+    // Prefer a layer that begins exactly at this depth (start-inclusive)…
+    let target = layers.find(l => depth >= l.depthFrom && depth < l.depthTo);
+    // …then any layer that contains it (including its lower boundary)…
+    if (!target) target = layers.find(l => depth >= l.depthFrom && depth <= l.depthTo);
+    // …finally, default to the last layer.
+    return target || layers[layers.length - 1];
+}
+
 // When a layer is picked, fill that tab's From/To fields.
 function fillDepthFromLayer(type) {
     const sel = document.getElementById(`${type}Layer`);
@@ -2419,7 +2783,7 @@ function addStandaloneMarker() {
     if (isNaN(mD) || !mL) { alert('Please enter a depth and label.'); return; }
     if (!layers.length)   { alert('Add at least one layer first.'); return; }
     const depthTo = (!isNaN(mDTO) && mDTO > mD) ? mDTO : null;
-    const target  = layers.find(l => mD >= l.depthFrom && mD <= l.depthTo) || layers[layers.length-1];
+    const target  = resolveTargetLayer('markerLayer', mD);
     target.markers.push({ depth: mD, depthTo, label: mL });
     updateTable(); drawGraph();
     document.getElementById('markerDepth').value   = '';
@@ -2472,8 +2836,7 @@ function addFindMarker(type) {
     if (note)      parts.push(note);
     const label = parts.join(', ');
 
-    const target = layers.find(l => depth >= l.depthFrom && depth <= l.depthTo)
-                || layers[layers.length - 1];
+    const target = resolveTargetLayer(`${type}Layer`, depth);
 
     // Store depthTo + findType on the marker so the drawing code can render
     // the texture ONLY within the find's area (zone) or around its point.
@@ -2518,8 +2881,7 @@ function addShellMarker() {
     if (note)      parts.push(note);
     const label = parts.join(', ');
 
-    const target = layers.find(l => depth >= l.depthFrom && depth <= l.depthTo)
-                || layers[layers.length - 1];
+    const target = resolveTargetLayer('shellLayer', depth);
 
     target.markers.push({ depth, depthTo, label, findType: 'shells' });
 
@@ -2590,14 +2952,14 @@ function updateTable() {
         const shellQtyLabel = shellMany ? 'abundant' : shellFew ? 'rare' : 'present';
         const intactBadge = hasIntact ? '<span class="intact-badge">★ intact</span>' : '';
 
-        const shellTag    = hasShell    ? `<div class="shell-tag">🐚 shells — ${shellQtyLabel}${intactBadge}</div>` : '';
-        const charcoalTag = hasCharcoal ? `<div class="find-tag find-tag-charcoal">🔥 charcoal — ${shellQtyLabel}</div>` : '';
-        const woodTag     = hasWood     ? `<div class="find-tag find-tag-wood">🪵 wood / plant${intactBadge}</div>` : '';
-        const ceramicsTag = hasCeramics ? `<div class="find-tag find-tag-ceramics">🏺 ceramics${intactBadge}</div>` : '';
-        const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic">🌿 humic</div>` : '';
-        const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots">🌱 roots</div>` : '';
-        const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones">🪨 stones${intactBadge}</div>` : '';
-        const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide">🟠 iron oxide — ${shellQtyLabel}</div>` : '';
+        const shellTag    = hasShell    ? `<div class="shell-tag"> shells — ${shellQtyLabel}${intactBadge}</div>` : '';
+        const charcoalTag = hasCharcoal ? `<div class="find-tag find-tag-charcoal"> charcoal — ${shellQtyLabel}</div>` : '';
+        const woodTag     = hasWood     ? `<div class="find-tag find-tag-wood"> wood / plant${intactBadge}</div>` : '';
+        const ceramicsTag = hasCeramics ? `<div class="find-tag find-tag-ceramics"> ceramics${intactBadge}</div>` : '';
+        const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic"> humic</div>` : '';
+        const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots"> roots</div>` : '';
+        const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones"> stones${intactBadge}</div>` : '';
+        const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide"> iron oxide — ${shellQtyLabel}</div>` : '';
         const allFindTags = shellTag + charcoalTag + woodTag + ceramicsTag + humicTag + rootsTag + stonesTag + ironoxideTag;
 
         const elevCell = z !== null
@@ -2630,11 +2992,19 @@ const SCALE        = 2000;   // px per metre
 const TITLE_H      = 34;     // title band above the profile (borehole ID)
 const PAD_TOP      = 40 + TITLE_H;
 const PAD_BOTTOM   = 70;
-const PAD_RIGHT    = 220;    // wider for labels
+const PAD_RIGHT    = 430;    // room for finds column + description column
 const DEPTH_LBL_W  = 72;
 const ELEV_LBL_W   = 72;
 const TICK_W       = 6;
 const CORE_W       = 110;    // widened profile column = MAX width (coarsest soils)
+
+// Right-of-core label columns (offsets measured from the core's right edge
+// at cX + CORE_W). Finds sit closer to the core; the soil description is
+// pushed further right so the two never overlap.
+const FIND_COL_DX  = 16;     // finds (red) labels start here
+const FIND_COL_W   = 132;    // reserved width for the finds column
+const DESC_COL_DX  = FIND_COL_DX + FIND_COL_W;   // description column start
+const DESC_COL_W   = PAD_RIGHT - DESC_COL_DX - 14;
 
 // ── Variable column width by main soil type ──────────────────────
 // Convention (sedimentological grain-size profile / Korngrößenprofil):
@@ -2749,6 +3119,61 @@ function resolveLabels(items, lineH) {
     const out = new Array(items.length);
     sorted.forEach(it => { out[it.origIndex] = it.idealY; });
     return out;
+}
+
+// Variant of resolveLabels for blocks of varying height. Each item is
+// { idealY, h }. Returns the resolved TOP y of each block, pushed down so
+// consecutive blocks never overlap (top of next ≥ top of prev + prev.h).
+function resolveLabelBlocks(items) {
+    if (!items.length) return [];
+    const sorted = items.map((it, i) => ({ ...it, origIndex: i })).sort((a, b) => a.idealY - b.idealY);
+    for (let i = 1; i < sorted.length; i++) {
+        const minY = sorted[i-1].idealY + sorted[i-1].h;
+        if (sorted[i].idealY < minY) sorted[i].idealY = minY;
+    }
+    const out = new Array(items.length);
+    sorted.forEach(it => { out[it.origIndex] = it.idealY; });
+    return out;
+}
+
+// Truncate a label to fit maxW px using a measure(text,font) function,
+// for the italic 10px find-label font used in the SVG export.
+function fitSvgLabel(text, maxW, measure) {
+    if (!text) return '';
+    const font = 'italic 10px sans-serif';
+    if (measure(text, font) <= maxW) return text;
+    let s = text;
+    while (s.length > 1 && measure(s + '…', font) > maxW) s = s.slice(0, -1);
+    return s + '…';
+}
+
+// Truncate a string with an ellipsis so it fits maxW px at the current font.
+function fitText(ctx, text, maxW) {
+    if (!text) return '';
+    if (ctx.measureText(text).width <= maxW) return text;
+    let s = text;
+    while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+    return s + '…';
+}
+
+// Wrap a string to a max pixel width for the given (already-set) ctx font.
+// Returns an array of lines. Emoji + words are kept whole.
+function wrapText(ctx, text, maxW) {
+    if (!text) return [];
+    const words = String(text).split(/\s+/);
+    const lines = [];
+    let line = '';
+    words.forEach(w => {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && line) {
+            lines.push(line);
+            line = w;
+        } else {
+            line = test;
+        }
+    });
+    if (line) lines.push(line);
+    return lines;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2966,33 +3391,95 @@ function drawGraph(exportMult = null) {
         ctx.fillText(`Δ${(l.depthTo - l.depthFrom).toFixed(2)}m`, depthX - 2, midY + 4);
     });
 
-    // ── Right side: soil class labels ──
-    const rightItems = layers.map(l => {
+    // ── Right side: soil description labels (code + description + finds) ──
+    // Drawn in a dedicated column pushed well clear of the finds column.
+    const descX  = cX + CORE_W + DESC_COL_DX;
+    const codeFont = 'bold 12px sans-serif';
+    const descFont = '11px sans-serif';
+    const lineH    = 14;
+    const BULLET   = '\u25CF ';   // ●
+
+    // Build the wrapped description lines for one layer's block.
+    // Returns [{text, indent}] where indent is the x-offset for wrapped
+    // continuation lines of a bullet (so they hang under the text).
+    function buildDescLines(lab) {
+        ctx.font = descFont;
+        const lines = [];
+        // soil description (free text) — wrapped, no bullet
+        wrapText(ctx, lab.descText, DESC_COL_W).forEach(t => lines.push({ text: t, indent: 0 }));
+        // one bullet per find/observation, wrapped with a hanging indent
+        const bulletIndent = ctx.measureText(BULLET).width;
+        lab.bullets.forEach(b => {
+            const wrapped = wrapText(ctx, b, DESC_COL_W - bulletIndent);
+            wrapped.forEach((t, k) => lines.push({ text: (k === 0 ? BULLET + t : t), indent: k === 0 ? 0 : bulletIndent }));
+        });
+        return lines;
+    }
+
+    // Pre-measure each layer's label block height so we can space them apart.
+    const labelBlocks = layers.map(l => {
+        const lab = buildProfileLabel(l);
+        const descLines = buildDescLines(lab);
+        const nLines = 1 + descLines.length;                 // code line + desc/bullet lines
+        return { lab, descLines, height: nLines * lineH };
+    });
+
+    const rightItems = layers.map((l, i) => {
         const yT = l.depthFrom * SCALE + PAD_TOP;
         const hL = (l.depthTo  - l.depthFrom) * SCALE;
-        return {idealY: yT + hL / 2};
+        // anchor near the layer midpoint, but bias upward by half the block
+        return { idealY: yT + hL / 2 - labelBlocks[i].height / 2 + lineH };
     });
-    const resolvedR = resolveLabels(rightItems, 16);
+    // Resolve so blocks don't overlap: spacing = each block's own height + gap.
+    const resolvedR = resolveLabelBlocks(rightItems.map((it, i) => ({
+        idealY: it.idealY, h: labelBlocks[i].height + 8
+    })));
 
     layers.forEach((l, i) => {
         const yT    = l.depthFrom * SCALE + PAD_TOP;
         const hL    = (l.depthTo  - l.depthFrom) * SCALE;
         const wL    = layerCoreWidth(l);
         const midY  = yT + hL / 2;
-        const lblY  = resolvedR[i];
-        const lblX  = cX + CORE_W + 12;   // labels share one clean column (widest edge)
+        const topY  = resolvedR[i];          // top baseline of this label block
+        const { lab, descLines } = labelBlocks[i];
 
-        // Leader line: start at THIS layer's right edge, run to the label.
-        if (Math.abs(lblY - midY) > 4 || wL < CORE_W) {
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = .5; ctx.setLineDash([3,3]);
-            ctx.beginPath(); ctx.moveTo(cX + wL + 2, midY); ctx.lineTo(lblX - 2, lblY); ctx.stroke();
-            ctx.setLineDash([]);
-        }
-        ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#0f172a'; ctx.textAlign = 'left';
-        ctx.fillText(l.officialDesc, lblX, lblY + 4);
+        // Leader line: from this layer's right edge to the label block.
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = .5; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(cX + wL + 2, midY); ctx.lineTo(descX - 6, topY - 4); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Code line (bold) — shows gradational shift "S(h) → U(h)" when present.
+        ctx.font = codeFont; ctx.fillStyle = '#0f172a'; ctx.textAlign = 'left';
+        ctx.fillText(lab.code, descX, topY);
+
+        // Description + find bullets (wrapped, lighter).
+        ctx.font = descFont; ctx.fillStyle = '#475569';
+        descLines.forEach((ln, k) => ctx.fillText(ln.text, descX + (ln.indent || 0), topY + (k + 1) * lineH));
     });
 
     // ── Markers & Find zones ──
+    // Pass 1: draw the geometry (textures, brackets, arrows) at true depths.
+    // Collect each label's ideal Y so pass 2 can push them apart and avoid
+    // the overlap that happens when several finds sit at the same depth.
+
+    // Draw a find/observation texture so that it (a) follows the layer's
+    // actual silhouette (clipped to the trapezoidal/tapered body, never
+    // bleeding past a sloped edge) and (b) is semi-transparent (60% alpha)
+    // so the sediment grain texture stays visible underneath it. The zone
+    // rectangle clip inside drawTextureOverlay intersects with this layer
+    // clip, so the texture only paints within "find zone ∩ layer body".
+    const drawFindTexture = (lyr, typeDesc, rx, ry, rw, rh) => {
+        const lyT = lyr.depthFrom * SCALE + PAD_TOP;
+        const lhL = (lyr.depthTo - lyr.depthFrom) * SCALE;
+        ctx.save();
+        ctx.globalAlpha = 0.6;
+        layerBodyPath(ctx, lyr, cX, lyT, lhL);
+        ctx.clip();
+        drawTextureOverlay(ctx, typeDesc, rx, ry, rw, rh);
+        ctx.restore();
+    };
+
+    const findLabelItems = [];   // { idealY, anchorY, text, depthTxt }
     layers.forEach(l => {
         const wL = layerCoreWidth(l);
         l.markers.forEach(m => {
@@ -3002,10 +3489,7 @@ function drawGraph(exportMult = null) {
 
             if (hasZone) {
                 const zoneH = yTo - yFrom;
-
-                // Find-type texture scoped only to the zone rectangle
                 if (m.findType) {
-                    // Map findType to a description keyword that triggers the right texture
                     const typeDesc = {
                         shells:   'shells abundant', charcoal: 'charcoal abundant',
                         wood:     'wood abundant',   ceramics: 'ceramics abundant',
@@ -3013,28 +3497,20 @@ function drawGraph(exportMult = null) {
                         stones:   'stones abundant',
                         ironoxide: 'iron oxide abundant'
                     }[m.findType] || m.label;
-                    // Draw texture clipped to zone, slightly inset from edges
-                    drawTextureOverlay(ctx, typeDesc, cX + 2, yFrom, wL - 4, zoneH);
+                    drawFindTexture(l, typeDesc, cX + 2, yFrom, wL - 4, zoneH);
                 }
-
-                // Zone bracket — left edge bar
+                // Zone bracket
                 ctx.save();
-                ctx.strokeStyle = 'rgba(200,0,0,.55)';
-                ctx.lineWidth = 1.5;
-                // Top bracket line across core
+                ctx.strokeStyle = 'rgba(200,0,0,.55)'; ctx.lineWidth = 1.5;
                 ctx.setLineDash([4, 3]);
                 ctx.beginPath(); ctx.moveTo(cX, yFrom); ctx.lineTo(cX + wL, yFrom); ctx.stroke();
-                // Bottom bracket line across core
-                ctx.beginPath(); ctx.moveTo(cX, yTo); ctx.lineTo(cX + wL, yTo); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cX, yTo);   ctx.lineTo(cX + wL, yTo);   ctx.stroke();
                 ctx.setLineDash([]);
-                // Left vertical bracket bar
                 ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.moveTo(cX - 5, yFrom); ctx.lineTo(cX - 5, yTo); ctx.stroke();
-                // Tick marks at top and bottom of bracket
                 ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(cX - 9, yFrom); ctx.lineTo(cX - 2, yFrom); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(cX - 9, yTo);   ctx.lineTo(cX - 2, yTo);   ctx.stroke();
-                // Arrow pointing right at midpoint on the right side
                 const midY = (yFrom + yTo) / 2;
                 ctx.fillStyle = '#cc0000';
                 ctx.beginPath();
@@ -3042,18 +3518,10 @@ function drawGraph(exportMult = null) {
                 ctx.lineTo(cX + CORE_W + 10, midY - 5);
                 ctx.lineTo(cX + CORE_W + 10, midY + 5);
                 ctx.fill();
-                // Label at arrow tip
-                ctx.font = 'italic 10px sans-serif'; ctx.fillStyle = '#cc0000'; ctx.textAlign = 'left';
-                ctx.fillText(m.label, cX + CORE_W + 14, midY + 4);
-                // Zone depth span below label
-                ctx.font = `9px 'Courier New',monospace`; ctx.fillStyle = 'rgba(180,0,0,.65)';
-                ctx.fillText(`${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m`, cX + CORE_W + 14, midY + 15);
                 ctx.restore();
-
+                findLabelItems.push({ idealY: midY, anchorY: midY,
+                    text: m.label, depthTxt: `${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m` });
             } else {
-                // ── Single-point marker ──
-                // If it's a typed find, draw a small clustered texture patch
-                // centred on the depth (not the whole layer).
                 if (m.findType) {
                     const typeDesc = {
                         shells:   'shells abundant', charcoal: 'charcoal abundant',
@@ -3062,21 +3530,40 @@ function drawGraph(exportMult = null) {
                         stones:   'stones abundant',
                         ironoxide: 'iron oxide abundant'
                     }[m.findType] || m.label;
-                    const bandH = 28;   // px tall cluster band around the point
-                    const bandY = Math.max(yFrom - bandH/2,
-                                           l.depthFrom * SCALE + PAD_TOP);
-                    drawTextureOverlay(ctx, typeDesc, cX + 2, bandY, wL - 4, bandH);
+                    const bandH = 28;
+                    const bandY = Math.max(yFrom - bandH/2, l.depthFrom * SCALE + PAD_TOP);
+                    drawFindTexture(l, typeDesc, cX + 2, bandY, wL - 4, bandH);
                 }
                 ctx.strokeStyle = 'rgba(200,0,0,.45)'; ctx.lineWidth = .8; ctx.setLineDash([3,3]);
                 ctx.beginPath(); ctx.moveTo(cX, yFrom); ctx.lineTo(cX + wL, yFrom); ctx.stroke(); ctx.setLineDash([]);
                 ctx.fillStyle = '#cc0000';
                 ctx.beginPath();
                 ctx.moveTo(cX + CORE_W, yFrom); ctx.lineTo(cX + CORE_W + 12, yFrom - 5); ctx.lineTo(cX + CORE_W + 12, yFrom + 5); ctx.fill();
-                ctx.font = 'italic 10px sans-serif'; ctx.fillStyle = '#cc0000'; ctx.textAlign = 'left';
-                ctx.fillText(m.label, cX + CORE_W + 16, yFrom + 4);
+                findLabelItems.push({ idealY: yFrom, anchorY: yFrom,
+                    text: m.label, depthTxt: `${m.depth.toFixed(2)} m` });
             }
         });
     });
+
+    // Pass 2: place labels without overlap. Each find needs two text lines
+    // (label + depth), so reserve ~22px per entry.
+    if (findLabelItems.length) {
+        const resolvedF = resolveLabels(findLabelItems.map(it => ({ idealY: it.idealY })), 24);
+        const findLabelX = cX + CORE_W + 16;
+        findLabelItems.forEach((it, k) => {
+            const ly = resolvedF[k];
+            // thin connector if the label was nudged away from its anchor
+            if (Math.abs(ly - it.anchorY) > 6) {
+                ctx.strokeStyle = 'rgba(200,0,0,.30)'; ctx.lineWidth = .6; ctx.setLineDash([2,2]);
+                ctx.beginPath(); ctx.moveTo(cX + CORE_W + 11, it.anchorY); ctx.lineTo(findLabelX - 2, ly - 3); ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            ctx.font = 'italic 10px sans-serif'; ctx.fillStyle = '#cc0000'; ctx.textAlign = 'left';
+            ctx.fillText(fitText(ctx, it.text, FIND_COL_W - 22), findLabelX, ly);
+            ctx.font = `9px 'Courier New',monospace`; ctx.fillStyle = 'rgba(180,0,0,.65)';
+            ctx.fillText(it.depthTxt, findLabelX, ly + 11);
+        });
+    }
 
     // ── Transition boundaries (between layers) ──
     transitions.forEach(t => {
@@ -3733,27 +4220,70 @@ function buildSVG() {
         p.push(`<text x="${depthLblX-2}" y="${midY+4}" font-family="Courier New,monospace" font-size="9" font-weight="bold" fill="#94a3b8" text-anchor="end">Δ${(l.depthTo-l.depthFrom).toFixed(2)}m</text>`);
     });
 
-    // ── Right labels ──
-    const rightItems = layers.map(l => {
-        const yT = l.depthFrom * S + PAD_TOP;
-        const hL = (l.depthTo  - l.depthFrom) * S;
-        return {idealY: yT + hL / 2};
+    // ── Right labels: code (+ gradational shift) + description + finds ──
+    const measCtx = (function(){ try { return document.createElement('canvas').getContext('2d'); } catch(e){ return null; } })();
+    const measure = (txt, font) => {
+        if (measCtx) { measCtx.font = font; return measCtx.measureText(txt).width; }
+        return txt.length * 6;   // rough fallback
+    };
+    const wrapSvg = (txt, maxW, font) => {
+        if (!txt) return [];
+        const words = String(txt).split(/\s+/); const lines = []; let line = '';
+        words.forEach(w => {
+            const test = line ? line + ' ' + w : w;
+            if (measure(test, font) > maxW && line) { lines.push(line); line = w; }
+            else line = test;
+        });
+        if (line) lines.push(line);
+        return lines;
+    };
+    const sDescX   = cX + CORE_W + DESC_COL_DX;
+    const sCodeFont = 'bold 12px sans-serif';
+    const sDescFont = '11px sans-serif';
+    const sLineH    = 14;
+    const sBullet   = '\u25CF ';
+
+    // Build [{text, indent}] lines for a layer: soil description, then one
+    // bullet per find/observation (hanging-indented when wrapped).
+    const buildSvgDescLines = (lab) => {
+        const lines = [];
+        wrapSvg(lab.descText, DESC_COL_W, sDescFont).forEach(t => lines.push({ text: t, indent: 0 }));
+        const bulletIndent = measure(sBullet, sDescFont);
+        lab.bullets.forEach(b => {
+            wrapSvg(b, DESC_COL_W - bulletIndent, sDescFont).forEach((t, k) =>
+                lines.push({ text: (k === 0 ? sBullet + t : t), indent: k === 0 ? 0 : bulletIndent }));
+        });
+        return lines;
+    };
+
+    const sBlocks = layers.map(l => {
+        const lab = buildProfileLabel(l);
+        const descLines = buildSvgDescLines(lab);
+        return { lab, descLines, height: (1 + descLines.length) * sLineH };
     });
-    const resolvedR = resolveLabels(rightItems, 16);
+    const sItems = layers.map((l, i) => {
+        const yT = l.depthFrom * S + PAD_TOP;
+        const hL = (l.depthTo - l.depthFrom) * S;
+        return { idealY: yT + hL/2 - sBlocks[i].height/2 + sLineH, h: sBlocks[i].height + 8 };
+    });
+    const sResolved = resolveLabelBlocks(sItems);
 
     layers.forEach((l, i) => {
         const yT   = l.depthFrom * S + PAD_TOP;
         const hL   = (l.depthTo - l.depthFrom) * S;
         const wL   = layerCoreWidth(l);
         const midY = yT + hL / 2;
-        const lblY = resolvedR[i];
-        const lblX = cX + CORE_W + 12;
-        if (Math.abs(lblY - midY) > 4 || wL < CORE_W)
-            p.push(`<line x1="${cX+wL+2}" y1="${midY}" x2="${lblX-2}" y2="${lblY}" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="3,3"/>`);
-        p.push(`<text x="${lblX}" y="${lblY+4}" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">${escXml(l.officialDesc)}</text>`);
+        const topY = sResolved[i];
+        const { lab, descLines } = sBlocks[i];
+
+        p.push(`<line x1="${cX+wL+2}" y1="${midY}" x2="${sDescX-6}" y2="${topY-4}" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="3,3"/>`);
+        p.push(`<text x="${sDescX}" y="${topY}" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">${escXml(lab.code)}</text>`);
+        descLines.forEach((ln, k) =>
+            p.push(`<text x="${sDescX + (ln.indent || 0)}" y="${topY + (k+1)*sLineH}" font-family="sans-serif" font-size="11" fill="#475569">${escXml(ln.text)}</text>`));
     });
 
-    // ── Markers ──
+    // ── Markers ── (pass 1: geometry; pass 2: collision-resolved labels)
+    const svgFindLabels = [];   // { idealY, anchorY, text, depthTxt }
     layers.forEach((l, li) => {
         const wL = layerCoreWidth(l);
         l.markers.forEach((m, mi) => {
@@ -3771,38 +4301,49 @@ function buildSVG() {
                         ironoxide: 'iron oxide abundant'
                 }[m.findType] || m.label;
                 if (hasZone) {
-                    const tex = buildSVGTexture(typeDesc, cX + 2, yFrom, wL - 4, yTo - yFrom, `mz${li}_${mi}`);
+                    const lyT = l.depthFrom * S + PAD_TOP;
+                    const lhL = (l.depthTo - l.depthFrom) * S;
+                    const lpts = svgLayerBodyPoints(l, cX, lyT, lhL);
+                    const tex = buildSVGTexture(typeDesc, cX + 2, yFrom, wL - 4, yTo - yFrom, `mz${li}_${mi}`, lpts);
                     if (tex) p.push(tex);
                 } else {
                     const bandH = 28;
                     const bandY = Math.max(yFrom - bandH/2, l.depthFrom * S + PAD_TOP);
-                    const tex = buildSVGTexture(typeDesc, cX + 2, bandY, wL - 4, bandH, `mp${li}_${mi}`);
+                    const lyT = l.depthFrom * S + PAD_TOP;
+                    const lhL = (l.depthTo - l.depthFrom) * S;
+                    const lpts = svgLayerBodyPoints(l, cX, lyT, lhL);
+                    const tex = buildSVGTexture(typeDesc, cX + 2, bandY, wL - 4, bandH, `mp${li}_${mi}`, lpts);
                     if (tex) p.push(tex);
                 }
             }
 
             if (hasZone) {
                 const midY = (yFrom + yTo) / 2;
-                // Top & bottom dashed bracket lines
                 p.push(`<line x1="${cX}" y1="${yFrom}" x2="${cX+wL}" y2="${yFrom}" stroke="rgba(200,0,0,0.55)" stroke-width="1.5" stroke-dasharray="4,3"/>`);
                 p.push(`<line x1="${cX}" y1="${yTo}"   x2="${cX+wL}" y2="${yTo}"   stroke="rgba(200,0,0,0.55)" stroke-width="1.5" stroke-dasharray="4,3"/>`);
-                // Left vertical bracket bar + tick marks
                 p.push(`<line x1="${cX-5}" y1="${yFrom}" x2="${cX-5}" y2="${yTo}" stroke="rgba(200,0,0,0.55)" stroke-width="2"/>`);
                 p.push(`<line x1="${cX-9}" y1="${yFrom}" x2="${cX-2}" y2="${yFrom}" stroke="rgba(200,0,0,0.55)" stroke-width="1.5"/>`);
                 p.push(`<line x1="${cX-9}" y1="${yTo}"   x2="${cX-2}" y2="${yTo}"   stroke="rgba(200,0,0,0.55)" stroke-width="1.5"/>`);
-                // Arrow at mid-right
                 p.push(`<polygon points="${cX+CORE_W},${midY} ${cX+CORE_W+10},${midY-5} ${cX+CORE_W+10},${midY+5}" fill="#cc0000"/>`);
-                // Label + depth span
-                p.push(`<text x="${cX+CORE_W+14}" y="${midY+4}" font-family="sans-serif" font-size="10" font-style="italic" fill="#cc0000">${escXml(m.label)}</text>`);
-                p.push(`<text x="${cX+CORE_W+14}" y="${midY+15}" font-family="Courier New,monospace" font-size="8" fill="rgba(180,0,0,0.65)">${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m</text>`);
+                svgFindLabels.push({ idealY: midY, anchorY: midY, text: m.label, depthTxt: `${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m` });
             } else {
-                // Single-point marker (original style)
                 p.push(`<line x1="${cX}" y1="${yFrom}" x2="${cX+wL}" y2="${yFrom}" stroke="rgba(200,0,0,0.45)" stroke-width="0.8" stroke-dasharray="3,3"/>`);
                 p.push(`<polygon points="${cX+CORE_W},${yFrom} ${cX+CORE_W+12},${yFrom-5} ${cX+CORE_W+12},${yFrom+5}" fill="#cc0000"/>`);
-                p.push(`<text x="${cX+CORE_W+16}" y="${yFrom+4}" font-family="sans-serif" font-size="10" font-style="italic" fill="#cc0000">${escXml(m.label)}</text>`);
+                svgFindLabels.push({ idealY: yFrom, anchorY: yFrom, text: m.label, depthTxt: `${m.depth.toFixed(2)} m` });
             }
         });
     });
+    if (svgFindLabels.length) {
+        const resF = resolveLabels(svgFindLabels.map(it => ({ idealY: it.idealY })), 24);
+        const fX = cX + CORE_W + 16;
+        svgFindLabels.forEach((it, k) => {
+            const ly = resF[k];
+            if (Math.abs(ly - it.anchorY) > 6)
+                p.push(`<line x1="${cX+CORE_W+11}" y1="${it.anchorY}" x2="${fX-2}" y2="${ly-3}" stroke="rgba(200,0,0,0.30)" stroke-width="0.6" stroke-dasharray="2,2"/>`);
+            p.push(`<text x="${fX}" y="${ly}" font-family="sans-serif" font-size="10" font-style="italic" fill="#cc0000">${escXml(fitSvgLabel(it.text, FIND_COL_W-22, measure))}</text>`);
+            p.push(`<text x="${fX}" y="${ly+11}" font-family="Courier New,monospace" font-size="8" fill="rgba(180,0,0,0.65)">${it.depthTxt}</text>`);
+        });
+    }
 
     // ── Transition boundaries ──
     transitions.forEach(t => {
@@ -3822,14 +4363,20 @@ function buildSVG() {
 }
 
 // Build SVG texture patterns (deterministic, Illustrator-editable)
-function buildSVGTexture(desc, x, y, w, h, idx) {
+function buildSVGTexture(desc, x, y, w, h, idx, layerClipPts) {
     if (!desc) return '';
     const d = translateGermanToEnglish(desc).toLowerCase();
     const parts = [];
     const pid = `tex${idx}`;
 
-    // Clip path so textures stay inside the layer rect
+    // Clip path so textures stay inside the find zone rect
     parts.push(`<clipPath id="${pid}cp"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>`);
+    // Optional second clip path: the layer body silhouette, so the find
+    // texture follows the layer's (possibly tapered/sloped) shape instead of
+    // a plain rectangle.
+    if (layerClipPts) {
+        parts.push(`<clipPath id="${pid}lp"><polygon points="${layerClipPts}"/></clipPath>`);
+    }
 
     if (/laminated|layered|banded/.test(d)) {
         // Horizontal bands every 6px
@@ -3957,7 +4504,16 @@ function buildSVGTexture(desc, x, y, w, h, idx) {
             parts.push(`<circle cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" r="${(0.8+rand()*2.2).toFixed(1)}" fill="rgba(160,55,5,0.45)" clip-path="url(#${pid}cp)"/>`);
         }
     }
-    return parts.join('\n');
+    // Separate the clip-path <defs> (which must live at the top level, not
+    // inside an opacity group) from the drawable texture elements.
+    const defCount = layerClipPts ? 2 : 1;
+    const defs = parts.slice(0, defCount);
+    const body = parts.slice(defCount);
+    if (!body.length) return '';
+    const groupOpen = layerClipPts
+        ? `<g clip-path="url(#${pid}lp)" opacity="0.6">`
+        : `<g opacity="0.6">`;
+    return defs.join('\n') + '\n' + groupOpen + '\n' + body.join('\n') + '\n</g>';
 }
 // ═══════════════════════════════════════════════════════════════
 //  TRANSITION BOUNDARY (SVG)
@@ -4117,42 +4673,194 @@ function exportJSON() {
     );
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  PROFILE VALIDATION / NORMALISATION (for import)
+//  Older or hand-edited JSON files may be missing fields or contain
+//  wrong types. This coerces everything into the shapes the app expects,
+//  dropping only entries that are unrecoverable (e.g. a layer with no
+//  usable depths). Returns { layers, compactions, transitions, coordinates,
+//  warnings: [] } — warnings are surfaced to the user but never block a
+//  best-effort import.
+// ═══════════════════════════════════════════════════════════════
+const VALID_LAYER_TYPES = ['normal', 'disturbed', 'missing', 'anthropogenic'];
+const VALID_FIND_TYPES   = ['shells','charcoal','wood','ceramics','humic','roots','stones','ironoxide'];
+
+function _num(v) {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (typeof v === 'string' && v.trim() !== '') { const n = parseFloat(v); if (isFinite(n)) return n; }
+    return null;
+}
+
+function sanitizeProfile(profile) {
+    const warnings = [];
+    const out = { layers: [], compactions: [], transitions: [], coordinates: null, warnings };
+
+    // ── Layers ──
+    const rawLayers = Array.isArray(profile.layers) ? profile.layers : [];
+    rawLayers.forEach((l, i) => {
+        if (!l || typeof l !== 'object') { warnings.push(`Layer ${i+1} skipped (not an object).`); return; }
+        let from = _num(l.depthFrom);
+        let to   = _num(l.depthTo);
+        if (from === null || to === null) { warnings.push(`Layer ${i+1} skipped (missing/invalid depth).`); return; }
+        if (to < from) { [from, to] = [to, from]; warnings.push(`Layer ${i+1}: depths were reversed and have been swapped.`); }
+
+        let layerType = (typeof l.layerType === 'string' && VALID_LAYER_TYPES.includes(l.layerType)) ? l.layerType : 'normal';
+        if (l.layerType && !VALID_LAYER_TYPES.includes(l.layerType)) warnings.push(`Layer ${i+1}: unknown layer type "${l.layerType}" → set to normal.`);
+
+        const originalDesc = (typeof l.originalDesc === 'string' && l.originalDesc.trim()) ? l.originalDesc
+                           : (typeof l.desc === 'string' ? l.desc : '');
+        if (!originalDesc) warnings.push(`Layer ${i+1}: empty description.`);
+
+        // gradeTo must be a known primary code, else cleared
+        let gradeTo = null;
+        if (l.gradeTo) {
+            gradeTo = (typeof petroLookupPrimary === 'function' && petroLookupPrimary(l.gradeTo)) ? l.gradeTo : null;
+            if (!gradeTo) warnings.push(`Layer ${i+1}: unknown "grades to" code "${l.gradeTo}" → ignored.`);
+        }
+        // gradeSecondaries: keep only known modifier codes, only if grading
+        let gradeSecondaries = [];
+        if (gradeTo && Array.isArray(l.gradeSecondaries)) {
+            gradeSecondaries = l.gradeSecondaries.filter(c =>
+                typeof petroLookupSecondary === 'function' && petroLookupSecondary(c));
+        }
+
+        // markers / finds
+        const rawMarkers = Array.isArray(l.markers) ? l.markers : [];
+        const markers = [];
+        rawMarkers.forEach((m, j) => {
+            if (!m || typeof m !== 'object') return;
+            const md = _num(m.depth);
+            if (md === null) { warnings.push(`Layer ${i+1}, marker ${j+1} skipped (no depth).`); return; }
+            const mdTo = _num(m.depthTo);
+            const marker = {
+                depth: md,
+                depthTo: (mdTo !== null && mdTo > md) ? mdTo : null,
+                label: (typeof m.label === 'string') ? m.label : ''
+            };
+            if (m.findType) {
+                if (VALID_FIND_TYPES.includes(m.findType)) marker.findType = m.findType;
+                else warnings.push(`Layer ${i+1}, marker ${j+1}: unknown find type "${m.findType}" → kept as plain marker.`);
+            }
+            markers.push(marker);
+        });
+
+        out.layers.push({
+            id:           (typeof l.id === 'string' && l.id.trim()) ? l.id : 'N/A',
+            depthFrom:    from,
+            depthTo:      to,
+            color:        (typeof l.color === 'string' && /^#?[0-9a-fA-F]{3,8}$/.test(l.color))
+                              ? (l.color[0] === '#' ? l.color : '#' + l.color)
+                              : '#cccccc',
+            lang:         (typeof l.lang === 'string') ? l.lang : (typeof detectLanguage === 'function' ? detectLanguage(originalDesc) : 'en'),
+            officialDesc: (typeof l.officialDesc === 'string' && l.officialDesc)
+                              ? l.officialDesc
+                              : (typeof translateSoil === 'function' ? translateSoil(originalDesc) : '-'),
+            originalDesc,
+            markers,
+            layerType,
+            gradeTo,
+            gradeSecondaries,
+            addedAt:      (typeof l.addedAt === 'string') ? l.addedAt : new Date().toISOString()
+        });
+    });
+
+    if (rawLayers.length && !out.layers.length)
+        warnings.push('No usable layers were found in this file.');
+
+    // ── Compactions ──
+    (Array.isArray(profile.compactions) ? profile.compactions : []).forEach((c, i) => {
+        if (!c || typeof c !== 'object') return;
+        const d = _num(c.depth);
+        if (d === null) { warnings.push(`Compaction ${i+1} skipped (no depth).`); return; }
+        out.compactions.push({ depth: d, note: (typeof c.note === 'string' && c.note.trim()) ? c.note : 'Compaction' });
+    });
+    out.compactions.sort((a, b) => a.depth - b.depth);
+
+    // ── Transitions ──
+    (Array.isArray(profile.transitions) ? profile.transitions : []).forEach((t, i) => {
+        if (!t || typeof t !== 'object') return;
+        const d = _num(t.depth);
+        if (d === null) { warnings.push(`Transition ${i+1} skipped (no depth).`); return; }
+        let type = (typeof t.type === 'string' && TRANSITION_TYPES[t.type]) ? t.type : 'sharp';
+        if (t.type && !TRANSITION_TYPES[t.type]) warnings.push(`Transition ${i+1}: unknown type "${t.type}" → set to sharp.`);
+        let sharp = _num(t.sharpness); sharp = (sharp === null) ? 1 : Math.max(0, Math.min(1, sharp));
+        let amp   = _num(t.amplitude); amp   = (amp === null) ? 6 : Math.max(0, Math.min(48, amp));
+        out.transitions.push({ depth: d, type, sharpness: sharp, amplitude: amp });
+    });
+
+    // ── Coordinates ──
+    if (profile.coordinates && typeof profile.coordinates === 'object') {
+        const c = profile.coordinates;
+        out.coordinates = {
+            x:   c.x   != null ? String(c.x)   : '',
+            y:   c.y   != null ? String(c.y)   : '',
+            z:   c.z   != null ? String(c.z)   : '',
+            crs: c.crs != null ? String(c.crs) : ''
+        };
+    }
+
+    return out;
+}
+
 function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const profile = JSON.parse(e.target.result);
-            if (!profile.layers || !Array.isArray(profile.layers)) {
-                alert('Invalid profile file: missing layers array.'); return;
+            let profile;
+            try { profile = JSON.parse(e.target.result); }
+            catch (parseErr) { alert('This file is not valid JSON, so it could not be imported.'); event.target.value = ''; return; }
+
+            if (!profile || typeof profile !== 'object' || !Array.isArray(profile.layers)) {
+                alert('This does not look like a CoreLogger profile (no "layers" list found).');
+                event.target.value = ''; return;
             }
+
+            // Validate & normalise before touching the current profile
+            const clean = sanitizeProfile(profile);
+
+            if (!clean.layers.length) {
+                alert('Import aborted — no usable layers in this file.' +
+                      (clean.warnings.length ? '\n\n' + clean.warnings.slice(0, 8).join('\n') : ''));
+                event.target.value = ''; return;
+            }
+
             // Confirm if data already present
             if (layers.length > 0) {
                 if (!confirm('This will replace your current profile. Continue?')) {
                     event.target.value = ''; return;
                 }
             }
-            // Restore layers and compactions (mutate in place — arrays are declared const)
-            layers.splice(0, layers.length, ...profile.layers);
-            const incoming = Array.isArray(profile.compactions) ? profile.compactions : [];
-            compactions.splice(0, compactions.length, ...incoming);
-            const incomingTrans = Array.isArray(profile.transitions) ? profile.transitions : [];
-            transitions.splice(0, transitions.length, ...incomingTrans);
+
+            // Restore (mutate in place — arrays are declared const)
+            layers.splice(0, layers.length, ...clean.layers);
+            compactions.splice(0, compactions.length, ...clean.compactions);
+            transitions.splice(0, transitions.length, ...clean.transitions);
+
             // Restore coordinates
-            if (profile.coordinates) {
-                const c = profile.coordinates;
-                if (c.x   !== undefined) document.getElementById('coordX').value   = c.x;
-                if (c.y   !== undefined) document.getElementById('coordY').value   = c.y;
-                if (c.z   !== undefined) document.getElementById('coordZ').value   = c.z;
-                if (c.crs !== undefined) document.getElementById('coordCRS').value = c.crs;
+            if (clean.coordinates) {
+                document.getElementById('coordX').value   = clean.coordinates.x;
+                document.getElementById('coordY').value   = clean.coordinates.y;
+                document.getElementById('coordZ').value   = clean.coordinates.z;
+                document.getElementById('coordCRS').value = clean.coordinates.crs;
                 onCoordChange();
             }
+
             updateTable();
             drawGraph();
             // Pre-fill borehole ID from the first layer for convenience
             if (layers.length > 0 && layers[0].id) {
                 document.getElementById('coreId').value = layers[0].id;
+            }
+
+            // Surface any non-fatal issues that were auto-corrected
+            if (clean.warnings.length) {
+                const shown = clean.warnings.slice(0, 12);
+                const extra = clean.warnings.length - shown.length;
+                alert('Profile imported with ' + clean.warnings.length + ' note' +
+                      (clean.warnings.length === 1 ? '' : 's') + ':\n\n' +
+                      shown.join('\n') + (extra > 0 ? `\n…and ${extra} more.` : ''));
             }
         } catch(err) {
             alert('Could not read profile: ' + err.message);
@@ -4290,6 +4998,20 @@ function importTSV(event) {
                 if (/disturbed/i.test(originalDesc)) layerType = 'disturbed';
                 if (/missing|gap/i.test(originalDesc))  layerType = 'missing';
 
+                // ── Reconstruct gradational shift ───────────────────────────
+                // On export the shift survives only as a " → <base soil>"
+                // clause in the Description. Recover the structured base-soil
+                // code + modifiers so the column taper, base texture and the
+                // "X → Y" code line render exactly as before.
+                let gradeTo = null, gradeSecondaries = [];
+                const arrowIdx = originalDesc.indexOf('→');
+                if (arrowIdx !== -1) {
+                    const basePhrase = originalDesc.slice(arrowIdx + 1).trim();
+                    const g = classifyGradeCodes(basePhrase);
+                    gradeTo = g.gradeTo;
+                    gradeSecondaries = g.gradeSecondaries;
+                }
+
                 // ── Determine officialDesc ──────────────────────────────────
                 // Priority: use the imported Class column if it has a value,
                 // but also scan the Description for any modifier keywords
@@ -4310,17 +5032,16 @@ function importTSV(event) {
                         ? new Set(parenMatch[2].split(',').map(m => m.trim()).filter(Boolean))
                         : new Set();
 
-                    // Derive any extra modifiers from the description text
-                    const descNorm = translateGermanToEnglish(originalDesc).toLowerCase();
-                    // Remove the matched main-type phrase so sub-words don't double-trigger
-                    let cleanDesc = descNorm;
-                    for (const [key] of Object.entries(SOIL_MAINS)) {
-                        const idx = cleanDesc.lastIndexOf(key);
-                        if (idx !== -1) { cleanDesc = cleanDesc.slice(0, idx) + cleanDesc.slice(idx + key.length); break; }
-                    }
-                    for (const [key, val] of Object.entries(SOIL_MODIFIERS)) {
-                        if (cleanDesc.includes(key)) importedMods.add(val);
-                    }
+                    // Derive any extra modifiers from the TOP description text only
+                    // (everything before the " → " grade clause), using the same
+                    // word-boundary, modifier-first logic as translateSoil so e.g.
+                    // "fine sandy" is not mistaken for the main type "fine sand".
+                    let topPhrase = originalDesc;
+                    const ai = topPhrase.indexOf('→');
+                    if (ai !== -1) topPhrase = topPhrase.slice(0, ai);
+                    const topCode = translateSoil(topPhrase);   // "U(l,h)" etc.
+                    const tm = topCode.match(/^[A-Za-z]+(?:\(([^)]*)\))?$/);
+                    if (tm && tm[1]) tm[1].split(',').forEach(c => { const v = c.trim(); if (v) importedMods.add(v); });
 
                     const sortedMods = [...importedMods].sort();
                     officialDesc = sortedMods.length
@@ -4328,6 +5049,7 @@ function importTSV(event) {
                         : importedBase;
                 } else {
                     // No Class column or empty — derive from description as usual
+                    // (translateSoil already strips the " → " grade clause).
                     officialDesc = translateSoil(originalDesc);
                 }
                 // ────────────────────────────────────────────────────────────
@@ -4338,6 +5060,8 @@ function importTSV(event) {
                     originalDesc,
                     markers,
                     layerType,
+                    gradeTo,
+                    gradeSecondaries,
                     addedAt: new Date().toISOString()
                 });
             }
@@ -4572,6 +5296,13 @@ function openEditModal(idx) {
     document.getElementById('editDepthFrom').value = l.depthFrom;
     document.getElementById('editDepthTo').value   = l.depthTo;
     document.getElementById('editSoilDesc').value  = l.originalDesc;
+    // Match the Munsell filter to the layer's saved colour so its swatch is
+    // actually present in the dropdown, then select it.
+    const savedColor = SOIL_DATA.colors.find(c => c.hex.toLowerCase() === (l.color || '').toLowerCase());
+    const colorHasMunsell = !!(savedColor && savedColor.munsell && savedColor.munsell.trim());
+    const emt = document.getElementById('editMunsellToggle');
+    if (emt) emt.checked = colorHasMunsell;
+    populateColorSelect(document.getElementById('editSoilColor'), colorHasMunsell);
     document.getElementById('editSoilColor').value = l.color;
 
     const radio = document.querySelector(`input[name="editLayerType"][value="${l.layerType}"]`);
@@ -4581,10 +5312,17 @@ function openEditModal(idx) {
     const gt = document.getElementById('editGradeToggle');
     const gd = document.getElementById('editGradeDetail');
     const gp = document.getElementById('editGradePrimary');
+    const gs = document.getElementById('editGradeSecondary');
     const hasGrade = !!l.gradeTo;
     if (gt) gt.checked = hasGrade;
     if (gp) gp.value = l.gradeTo || '';
+    if (gs) gs.value = '';
     if (gd) gd.style.display = hasGrade ? 'flex' : 'none';
+    // Mirror the saved base-soil modifiers into the working edit state. We do
+    // NOT re-write the description here (it already contains whatever was
+    // saved); we just seed lastEditGradePhrase so future edits strip cleanly.
+    editGradeState = { secondaries: Array.isArray(l.gradeSecondaries) ? [...l.gradeSecondaries] : [] };
+    lastEditGradePhrase = hasGrade ? buildGradePhrase(l.gradeTo || '', editGradeState.secondaries) : '';
 
     document.getElementById('editModal').classList.add('open');
 }
@@ -4609,6 +5347,7 @@ function saveEditLayer() {
 
     const gradeOn  = document.getElementById('editGradeToggle')?.checked;
     const gradeTo  = gradeOn ? (document.getElementById('editGradePrimary')?.value || null) : null;
+    const gradeSecondaries = gradeOn ? [...editGradeState.secondaries] : [];
 
     const lang = detectLanguage(desc);
     layers[idx] = {
@@ -4617,7 +5356,8 @@ function saveEditLayer() {
         officialDesc: translateSoil(desc),
         originalDesc: desc,
         layerType: ltype,
-        gradeTo
+        gradeTo,
+        gradeSecondaries
     };
 
     document.getElementById('editModal').classList.remove('open');
