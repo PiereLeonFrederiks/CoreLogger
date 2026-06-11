@@ -1823,6 +1823,7 @@ const PETRO_PRIMARY = [
     { code: 'G',  en: 'gravel',        de: 'Kies' },
     { code: 'X',  en: 'stones',        de: 'Steine' },
     { code: 'H',  en: 'peat',          de: 'Torf' },
+    { code: 'Ha', en: 'amorphic peat', de: 'armorpher Torf'},
     { code: 'Mu', en: 'mud',           de: 'Mudde' },
     { code: 'Hn', en: 'fen peat',      de: 'Niedermoortorf' },
     { code: 'Hh', en: 'bog peat',      de: 'Hochmoortorf' },
@@ -3033,9 +3034,10 @@ const SOIL_WIDTH_FRAC = {
     'G':  0.92,   // gravel (unspecified)
     'Fk': 0.86,   // fine gravel
     'Mk': 0.94,   // medium gravel
-    'Gk': 1.00,   // coarse gravel
+    'Gk': 0.00,   // coarse gravel
     // stones → widest
-    'X':  1.00    // stones
+    'X':  1.00,    // stones
+    '': 0.00
 };
 
 // Resolve a layer's main soil code, preferring the classifier result.
