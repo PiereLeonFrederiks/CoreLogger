@@ -678,6 +678,12 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <option value="">— add modifier —</option>
             </select>
         </div>
+        <div class="petro-field">
+            <label class="field-label" title="Substrate origin (recorded as a note; informs the horizon classifier — not a KA5 horizon)">Genesis (origin)</label>
+            <select id="genesisSelect" onchange="onGenesis()">
+                <option value="">— add genesis —</option>
+            </select>
+        </div>
         <div class="petro-code-box" title="KA5 short code built from your selection">
             <span class="field-label" style="margin:0;">KA5 code</span>
             <div class="petro-code-line">
@@ -1123,6 +1129,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <th class="elev-col" style="display:none">Elevation (m)</th>
                 <th>Colour</th>
                 <th>Class</th>
+                <th title="Auto-generated KA5 soil horizon (editable). ◓ = medium, ○ = low confidence">Horizon (KA5)</th>
                 <th>Description / Finds</th>
                 <th>Edit</th>
                 <th>Del</th>
@@ -1131,6 +1138,19 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
         <tbody></tbody>
     </table>
 </div>
+<!-- ── Data Tools (operate on the profile / on old exports) ── -->
+<div class="input-section" style="margin-top:14px;">
+    <div class="section-label">Data Tools</div>
+    <p class="section-hint">Generate KA5 horizons for the current profile, or correct the Munsell colours in a previously exported core.</p>
+    <div class="export-data-row">
+        <button onclick="generateHorizons()" class="btn-secondary" id="btnGenHorizons" title="Suggest KA5 soil horizons from colour, petrography & observations. Results are editable; low-confidence guesses are flagged." style="border-color:var(--ga-accent);color:var(--ga-accent);font-weight:700;">⚙ Generate soil horizons</button>
+        <label class="btn-secondary" style="cursor:pointer;border-color:var(--ga-accent);color:var(--ga-accent);" title="Re-map colours in an OLD exported core (JSON/TXT/CSV) to the authoritative Munsell soil-chart hex values, then download the corrected file. Your current profile is not affected.">
+            🎨 Convert old core colours
+            <input type="file" id="convertColoursInput" accept=".json,.txt,.tsv,.csv,application/json,text/plain,text/tab-separated-values,text/csv" style="display:none" onchange="convertLegacyColours(event)">
+        </label>
+    </div>
+</div>
+
 <div class="export-data-row">
     <button onclick="copyToClipboard()" class="btn-secondary">Copy as TSV</button>
     <button onclick="exportTXT()" class="btn-secondary">Download TXT (Excel)</button>
@@ -1375,7 +1395,48 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
                 <label class="radio-label"><input type="radio" name="editLayerType" value="normal" checked> Normal</label>
                 <label class="radio-label"><input type="radio" name="editLayerType" value="disturbed"> Disturbed / reworked</label>
                 <label class="radio-label"><input type="radio" name="editLayerType" value="missing"> Sediment gap / missing</label>
+                <label class="radio-label"><input type="radio" name="editLayerType" value="anthropogenic"> Anthropogenic</label>
             </div>
+        </div>
+        <!-- ── Petrography quick-entry (KA5) ── -->
+        <div class="petro-row" style="margin-top:8px;">
+            <div class="petro-field">
+                <label class="field-label">Primary soil (main)</label>
+                <select id="editPetroPrimary" onchange="onEditPetroPrimary()">
+                    <option value="">— select —</option>
+                </select>
+            </div>
+            <div class="petro-field">
+                <label class="field-label">Secondary (modifier)</label>
+                <select id="editPetroSecondary" onchange="onEditPetroSecondary()">
+                    <option value="">— add modifier —</option>
+                </select>
+            </div>
+            <div class="petro-field">
+                <label class="field-label" title="Substrate origin (recorded as a note; informs the horizon classifier — not a KA5 horizon)">Genesis (origin)</label>
+                <select id="editGenesisSelect" onchange="onEditGenesis()">
+                    <option value="">— add genesis —</option>
+                </select>
+            </div>
+            <div class="petro-code-box" title="KA5 short code built from your selection">
+                <span class="field-label" style="margin:0;">KA5 code</span>
+                <div class="petro-code-line">
+                    <span id="editPetroCode" class="petro-code">—</span>
+                    <button type="button" class="btn-petro-refresh" title="Recalculate KA5 code from the current description" onclick="refreshEditPetroCode()">⟳</button>
+                </div>
+            </div>
+        </div>
+        <!-- ── Soil horizon (KA5) ── -->
+        <div class="input-grid" style="margin-top:8px;">
+            <div>
+                <label class="field-label" title="KA5 soil horizon. Edit directly, or regenerate from colour/petrography/observations.">Soil horizon (KA5)</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input type="text" id="editHorizon" placeholder="e.g. Ah, Bv, Go, Cv, fAh" style="flex:1;" oninput="this.dataset.auto='0'">
+                    <button type="button" class="btn-petro-refresh" title="Suggest horizon for THIS layer from its data" onclick="regenEditHorizon()" style="white-space:nowrap; width:auto; padding:0 10px;">⚙ suggest</button>
+                </div>
+                <span id="editHorizonWhy" class="grade-hint" style="display:block; margin-top:4px;"></span>
+            </div>
+            <div></div>
         </div>
         <div class="grade-row" style="margin-top:4px;">
             <label class="grade-toggle">
@@ -1588,76 +1649,76 @@ function detectLanguage(desc) {
 const SOIL_DATA = 
 {
     "colors": [
-    { "name": "White",                          "hex": "#d6d1c9", "munsell": "10YR 8/1"  },
-    { "name": "Pale Yellow",                    "hex": "#F1E4B8", "munsell": "2.5Y 8/4"  },
-    { "name": "Pale Yellow",                    "hex": "#FCD683", "munsell": "2.5Y 8/8"  },
-    { "name": "Brownish Yellow",                "hex": "#C1A365", "munsell": "10YR 6/6"  },
+    { "name": "White",                          "hex": "#D1C9BC", "munsell": "10YR 8/1"  },
+    { "name": "Pale Yellow",                    "hex": "#DFC896", "munsell": "2.5Y 8/4"  },
+    { "name": "Yellow",                    "hex": "#EFC562", "munsell": "2.5Y 8/8"  },
+    { "name": "Brownish Yellow",                "hex": "#B88D51", "munsell": "10YR 6/6"  },
 
-    { "name": "Light Yellowish Brown",          "hex": "#CCBC9A", "munsell": "10YR 7/3"  },
-    { "name": "Light Yellowish Brown",          "hex": "#D3C79F", "munsell": "10YR 7/4"  },
-    { "name": "Light Yellowish Brown",          "hex": "#c9bda5", "munsell": "10YR 7/3"  },
-    { "name": "Light Yellowish Brown",          "hex": "#a79273", "munsell": "10YR 6/4"  },
-    { "name": "Light Olive Brown",              "hex": "#8d7f57", "munsell": "2.5Y 5/4"  },
-    { "name": "Light Olive Brown",              "hex": "#958A6C", "munsell": "2.5Y 6/4"  },
-    { "name": "Light Reddish Brown",            "hex": "#BAA391", "munsell": "5YR 6/4"   },
-    { "name": "Light Brown",                    "hex": "#a18d75", "munsell": "7.5YR 6/4" },
-    { "name": "Yellowish Brown",                "hex": "#877353", "munsell": "10YR 5/4"  },
-    { "name": "Yellowish Brown",                "hex": "#958261", "munsell": "10YR 5/6"  },
-    { "name": "Grayish Yellowish Brown",        "hex": "#857f76", "munsell": "10YR 5/2"  },
-    { "name": "Brown",                          "hex": "#857766", "munsell": "7.5YR 5/4" },
-    { "name": "Moderate Brown",                 "hex": "#705c42", "munsell": "7.5YR 4/4" },
-    { "name": "Strong Brown",                   "hex": "#7a593e", "munsell": "7.5YR 5/6" },
-    { "name": "Moderate Reddish Brown",         "hex": "#A0887C", "munsell": "5YR 5/4"   },
-    { "name": "Moderate Reddish Brown",         "hex": "#7e5241", "munsell": "5YR 4/4"   },
-    { "name": "Dark Reddish Brown",             "hex": "#6e460b", "munsell": "5YR 3/4"   },
-    { "name": "Dark Yellowish Brown",           "hex": "#69563c", "munsell": "10YR 4/4"  },
-    { "name": "Dark Yellowish Brown",           "hex": "#68583F", "munsell": "10YR 4/6"  },
-    { "name": "Dark Brown",                     "hex": "#675949", "munsell": "7.5YR 4/2" },
-    { "name": "Dark Brown",                     "hex": "#4e4131", "munsell": "7.5YR 3/2" },
-    { "name": "Dark Brown",                     "hex": "#4d3f33", "munsell": "7.5YR 3/3" },
-    { "name": "Dark Brown",                     "hex": "#3b3022", "munsell": "7.5YR 2/2" },
-    { "name": "Dark Grayish Yellowish Brown",   "hex": "#736757", "munsell": "10YR 4/2"  },
-    { "name": "Dark Grayish Yellowish Brown",   "hex": "#645b50", "munsell": "10YR 4/1"  },
-    { "name": "Dark Reddish Brown",             "hex": "#503932", "munsell": "5YR 3/3"   },
-    { "name": "Dark Grayish Brown",             "hex": "#59554f", "munsell": "2.5Y 3/2"  },
-    { "name": "Brownish Black",                 "hex": "#24201b", "munsell": "7.5YR 2/1" },
-    { "name": "Very Dark Brown",                "hex": "#4A4339", "munsell": "10YR 3/2"  },
-    { "name": "Very Dark Brown",                "hex": "#2c2621", "munsell": "10YR 2/1"  },
-    { "name": "Very Dark Grayish Brown",        "hex": "#5E5649", "munsell": "10YR 3/1"  },
-    { "name": "Very Dark Grayish Brown",        "hex": "#4b443b", "munsell": "2.5Y 3/1"  },
+    { "name": "Very Pale Brown",          "hex": "#C4AC8C", "munsell": "10YR 7/3"  },
+    { "name": "Very Pale Brown",          "hex": "#C9AB81", "munsell": "10YR 7/4"  },
+    { "name": "Very Pale Brown",          "hex": "#C4AC8C", "munsell": "10YR 7/3"  },
+    { "name": "Light Yellowish Brown",          "hex": "#AE9068", "munsell": "10YR 6/4"  },
+    { "name": "Light Olive Brown",              "hex": "#8F774B", "munsell": "2.5Y 5/4"  },
+    { "name": "Light Yellowish Brown",              "hex": "#A99264", "munsell": "2.5Y 6/4"  },
+    { "name": "Reddish Yellow",            "hex": "#B48C72", "munsell": "5YR 6/4"   },
+    { "name": "Light Brown",                    "hex": "#B28E6E", "munsell": "7.5YR 6/4" },
+    { "name": "Yellowish Brown",                "hex": "#93754F", "munsell": "10YR 5/4"  },
+    { "name": "Yellowish Brown",                "hex": "#9C7337", "munsell": "10YR 5/6"  },
+    { "name": "Grayish Brown",        "hex": "#887865", "munsell": "10YR 5/2"  },
+    { "name": "Brown",                          "hex": "#977354", "munsell": "7.5YR 5/4" },
+    { "name": "Brown",                 "hex": "#7D593A", "munsell": "7.5YR 4/4" },
+    { "name": "Strong Brown",                   "hex": "#A2703F", "munsell": "7.5YR 5/6" },
+    { "name": "Yellowish Red",         "hex": "#997259", "munsell": "5YR 5/4"   },
+    { "name": "Reddish Brown",         "hex": "#7F583F", "munsell": "5YR 4/4"   },
+    { "name": "Dark Reddish Brown",             "hex": "#633F2A", "munsell": "5YR 3/4"   },
+    { "name": "Dark Yellowish Brown",           "hex": "#795B36", "munsell": "10YR 4/4"  },
+    { "name": "Dark Yellowish Brown",           "hex": "#805921", "munsell": "10YR 4/6"  },
+    { "name": "Brown",                     "hex": "#715D4E", "munsell": "7.5YR 4/2" },
+    { "name": "Dark Brown",                     "hex": "#564436", "munsell": "7.5YR 3/2" },
+    { "name": "Dark Brown",                     "hex": "#5B422E", "munsell": "7.5YR 3/3" },
+    { "name": "Dark Brown",                     "hex": "#3C2C22", "munsell": "7.5YR 2/2" },
+    { "name": "Dark Grayish Brown",   "hex": "#6E5E4B", "munsell": "10YR 4/2"  },
+    { "name": "Dark Gray",   "hex": "#685F55", "munsell": "10YR 4/1"  },
+    { "name": "Dark Reddish Brown",             "hex": "#5E4131", "munsell": "5YR 3/3"   },
+    { "name": "Very Dark Grayish Brown",             "hex": "#514634", "munsell": "2.5Y 3/2"  },
+    { "name": "Black",                 "hex": "#362E28", "munsell": "7.5YR 2/1" },
+    { "name": "Very Dark Grayish Brown",                "hex": "#544535", "munsell": "10YR 3/2"  },
+    { "name": "Black",                "hex": "#352E28", "munsell": "10YR 2/1"  },
+    { "name": "Very Dark Gray",        "hex": "#4E463D", "munsell": "10YR 3/1"  },
+    { "name": "Very Dark Gray",        "hex": "#4C473D", "munsell": "2.5Y 3/1"  },
 
-    { "name": "Light Brownish Gray",            "hex": "#bcb6ad", "munsell": "10YR 7/1"  },
-    { "name": "Light Brownish Gray",            "hex": "#C9BDA5", "munsell": "2.5Y 7/2"  },
-    { "name": "Light Brownish Gray",            "hex": "#AFA48E", "munsell": "10YR 6/2"  },
-    { "name": "Light Greenish Gray",            "hex": "#BFC1B3", "munsell": "5Y 7/1"    },
-    { "name": "Light Olive Gray",               "hex": "#AEAC93", "munsell": "5Y 6/2"    },
-    { "name": "Light Gray",                     "hex": "#C7C6BF", "munsell": "2.5Y 7/1"  },
-    { "name": "Medium Gray",                    "hex": "#828282", "munsell": "N 5/"       },
-    { "name": "Greenish Gray",                  "hex": "#A6A89B", "munsell": "5Y 6/1"    },
-    { "name": "Dark Greenish Gray",             "hex": "#7a8279", "munsell": "5GY 5/1"   },
-    { "name": "Light Bluish Green",             "hex": "#99C1C2", "munsell": "5BG 7/2"   },
-    { "name": "Moderate Greenish Blue",         "hex": "#778385", "munsell": "5B 5/2"    },
-    { "name": "Olive Gray",                     "hex": "#8b8773", "munsell": "5Y 5/2"    },
-    { "name": "Olive Gray",                     "hex": "#716E5B", "munsell": "5Y 4/2"    },
-    { "name": "Dark Brownish Gray",             "hex": "#706C63", "munsell": "10YR 4/1"  },
-    { "name": "Dark Gray",                      "hex": "#616363", "munsell": "N 4/"       },
-    { "name": "Dark Gray",                      "hex": "#48494B", "munsell": "N 3/"       },
-    { "name": "Dark Olive Gray",                "hex": "#605D4E", "munsell": "5Y 4/1"    },
-    { "name": "Dark Greenish Gray",             "hex": "#6E7168", "munsell": "5GY 4/1"   },
-    { "name": "Very Dark Grayish Brown",        "hex": "#59554C", "munsell": "2.5Y 3/1"  },
-    { "name": "Black",                          "hex": "#433f3c", "munsell": "N 2/"       },
+    { "name": "Light Gray",            "hex": "#B6AEA3", "munsell": "10YR 7/1"  },
+    { "name": "Light Gray",            "hex": "#BAAE95", "munsell": "2.5Y 7/2"  },
+    { "name": "Light Brownish Gray",            "hex": "#A3927E", "munsell": "10YR 6/2"  },
+    { "name": "Light Gray",            "hex": "#B4AFA0", "munsell": "5Y 7/1"    },
+    { "name": "Light Olive Gray",               "hex": "#9D957A", "munsell": "5Y 6/2"    },
+    { "name": "Light Gray",                     "hex": "#B4AFA1", "munsell": "2.5Y 7/1"  },
+    { "name": "Gray",                    "hex": "#797979", "munsell": "N 5/"       },
+    { "name": "Gray",                  "hex": "#999586", "munsell": "5Y 6/1"    },
+    { "name": "Greenish Gray",             "hex": "#797C71", "munsell": "5GY 5/1"   },
+    { "name": "Light Greenish Gray",             "hex": "#97B5B0", "munsell": "5BG 7/2"   },
+    { "name": "Bluish Gray",         "hex": "#687E84", "munsell": "5B 5/2"    },
+    { "name": "Olive Gray",                     "hex": "#827A62", "munsell": "5Y 5/2"    },
+    { "name": "Olive Gray",                     "hex": "#696049", "munsell": "5Y 4/2"    },
+    { "name": "Dark Gray",             "hex": "#685F55", "munsell": "10YR 4/1"  },
+    { "name": "Dark Gray",                      "hex": "#606060", "munsell": "N 4/"       },
+    { "name": "Dark Gray",                      "hex": "#484848", "munsell": "N 3/"       },
+    { "name": "Dark Gray",                "hex": "#646054", "munsell": "5Y 4/1"    },
+    { "name": "Dark Greenish Gray",             "hex": "#5F6259", "munsell": "5GY 4/1"   },
+    { "name": "Very Dark Gray",        "hex": "#4C473D", "munsell": "2.5Y 3/1"  },
+    { "name": "Black",                          "hex": "#313131", "munsell": "N 2/"       },
 
-    { "name": "Light Grayish Olive",            "hex": "#ABAC8D", "munsell": "5Y 6/3"    },
-    { "name": "Grayish Olive",                  "hex": "#8D8F79", "munsell": "5Y 5/3"    },
-    { "name": "Light Olive",                    "hex": "#8F8B66", "munsell": "5Y 5/4"    },
-    { "name": "Grayish Olive Green",            "hex": "#8B947F", "munsell": "5GY 5/2"   },
+    { "name": "Pale Olive",            "hex": "#A0946E", "munsell": "5Y 6/3"    },
+    { "name": "Olive",                  "hex": "#867A56", "munsell": "5Y 5/3"    },
+    { "name": "Olive",                    "hex": "#897A49", "munsell": "5Y 5/4"    },
+    { "name": "Greenish Gray",            "hex": "#767D66", "munsell": "5GY 5/2"   },
 
-    { "name": "Moderate Reddish Orange",        "hex": "#a15b35", "munsell": "5YR 4/6"   },
-    { "name": "Deep Reddish Brown",             "hex": "#662a22", "munsell": "2.5YR 3/6" },
+    { "name": "Reddish Brown",        "hex": "#89542F", "munsell": "5YR 4/6"   },
+    { "name": "Dark Red",             "hex": "#703720", "munsell": "2.5YR 3/6" },
 
-    { "name": "Greenish Black",                 "hex": "#484A3F", "munsell": "5GY 2/1"   },
-    { "name": "Black",                          "hex": "#211f1e", "munsell": "N 2/"       },
-    { "name": "Brownish Black",                 "hex": "#231f20", "munsell": "7.5YR 2/1" },
+    { "name": "Black",                 "hex": "#2F302C", "munsell": "5GY 2/1"   },
+    { "name": "Black",                          "hex": "#313131", "munsell": "N 2/"       },
+    { "name": "Black",                 "hex": "#362E28", "munsell": "7.5YR 2/1" },
 
     { "name": "No Colour",                      "hex": "#ffffff", "munsell": ""           },
 
@@ -1679,7 +1740,268 @@ const SOIL_DATA =
   { "name": "Very Dark Brown",             "hex": "#3D2F24", "munsell": "" },
   { "name": "Dark Grey",                   "hex": "#555A60", "munsell": "" },
   { "name": "Very Dark Grey / Near Black", "hex": "#2B2D2F", "munsell": "" }
+,
 
+  // ── Soil Color Chart additions (authoritative aqp sRGB) ──
+  { "name": "Reddish Black", "hex": "#382D2B", "munsell": "10R 2/1" },
+  { "name": "Dusky Red", "hex": "#3F2A28", "munsell": "10R 2/2" },
+  { "name": "Dusky Red", "hex": "#462724", "munsell": "10R 2/3" },
+  { "name": "Dusky Red", "hex": "#4B2420", "munsell": "10R 2/4" },
+  { "name": "Dusky Red", "hex": "#551D19", "munsell": "10R 2/6" },
+  { "name": "Dusky Red", "hex": "#5F1211", "munsell": "10R 2/8" },
+  { "name": "Dark Reddish Gray", "hex": "#514441", "munsell": "10R 3/1" },
+  { "name": "Dusky Red", "hex": "#5A413D", "munsell": "10R 3/2" },
+  { "name": "Dusky Red", "hex": "#613E38", "munsell": "10R 3/3" },
+  { "name": "Dusky Red", "hex": "#673B33", "munsell": "10R 3/4" },
+  { "name": "Dark Red", "hex": "#733529", "munsell": "10R 3/6" },
+  { "name": "Dark Red", "hex": "#7D2C1D", "munsell": "10R 3/8" },
+  { "name": "Dark Reddish Gray", "hex": "#6A5E5B", "munsell": "10R 4/1" },
+  { "name": "Weak Red", "hex": "#735B55", "munsell": "10R 4/2" },
+  { "name": "Weak Red", "hex": "#7B5850", "munsell": "10R 4/3" },
+  { "name": "Weak Red", "hex": "#83554A", "munsell": "10R 4/4" },
+  { "name": "Red", "hex": "#8F4F3E", "munsell": "10R 4/6" },
+  { "name": "Red", "hex": "#9A4832", "munsell": "10R 4/8" },
+  { "name": "Reddish Gray", "hex": "#827876", "munsell": "10R 5/1" },
+  { "name": "Weak Red", "hex": "#8C7570", "munsell": "10R 5/2" },
+  { "name": "Red", "hex": "#957369", "munsell": "10R 5/3" },
+  { "name": "Red", "hex": "#9C7063", "munsell": "10R 5/4" },
+  { "name": "Red", "hex": "#AB6A56", "munsell": "10R 5/6" },
+  { "name": "Red", "hex": "#B86348", "munsell": "10R 5/8" },
+  { "name": "Pinkish Gray", "hex": "#9D9290", "munsell": "10R 6/1" },
+  { "name": "Pale Red", "hex": "#A79089", "munsell": "10R 6/2" },
+  { "name": "Light Red", "hex": "#B08D83", "munsell": "10R 6/3" },
+  { "name": "Light Red", "hex": "#B88A7C", "munsell": "10R 6/4" },
+  { "name": "Light Red", "hex": "#C68570", "munsell": "10R 6/6" },
+  { "name": "Light Red", "hex": "#D37F63", "munsell": "10R 6/8" },
+  { "name": "Pinkish White", "hex": "#B7ADAB", "munsell": "10R 7/1" },
+  { "name": "Pinkish Gray", "hex": "#C1AAA4", "munsell": "10R 7/2" },
+  { "name": "Pink", "hex": "#CAA89D", "munsell": "10R 7/3" },
+  { "name": "Pink", "hex": "#D2A597", "munsell": "10R 7/4" },
+  { "name": "Pink", "hex": "#E29F89", "munsell": "10R 7/6" },
+  { "name": "Pink", "hex": "#F1997B", "munsell": "10R 7/8" },
+  { "name": "Pinkish White", "hex": "#CDC9C8", "munsell": "10R 8/1" },
+  { "name": "Pinkish Gray", "hex": "#D9C6C0", "munsell": "10R 8/2" },
+  { "name": "Pink", "hex": "#E5C3B8", "munsell": "10R 8/3" },
+  { "name": "Pink", "hex": "#EFC0B0", "munsell": "10R 8/4" },
+  { "name": "Pink", "hex": "#FFBAA1", "munsell": "10R 8/6" },
+  { "name": "Pink", "hex": "#FFB392", "munsell": "10R 8/8" },
+  { "name": "Reddish Black", "hex": "#372D2A", "munsell": "2.5YR 2/1" },
+  { "name": "Dusky Red", "hex": "#3F2B26", "munsell": "2.5YR 2/2" },
+  { "name": "Dusky Red", "hex": "#452821", "munsell": "2.5YR 2/3" },
+  { "name": "Dusky Red", "hex": "#4A251C", "munsell": "2.5YR 2/4" },
+  { "name": "Dusky Red", "hex": "#531F11", "munsell": "2.5YR 2/6" },
+  { "name": "Dusky Red", "hex": "#5D1600", "munsell": "2.5YR 2/8" },
+  { "name": "Dark Reddish Gray", "hex": "#514440", "munsell": "2.5YR 3/1" },
+  { "name": "Dusky Red", "hex": "#59423A", "munsell": "2.5YR 3/2" },
+  { "name": "Dusky Red", "hex": "#603F34", "munsell": "2.5YR 3/3" },
+  { "name": "Dusky Red", "hex": "#663D2E", "munsell": "2.5YR 3/4" },
+  { "name": "Dark Red", "hex": "#79310E", "munsell": "2.5YR 3/8" },
+  { "name": "Dark Reddish Gray", "hex": "#6A5E59", "munsell": "2.5YR 4/1" },
+  { "name": "Weak Red", "hex": "#735B53", "munsell": "2.5YR 4/2" },
+  { "name": "Weak Red", "hex": "#7B594C", "munsell": "2.5YR 4/3" },
+  { "name": "Weak Red", "hex": "#815645", "munsell": "2.5YR 4/4" },
+  { "name": "Red", "hex": "#8C5137", "munsell": "2.5YR 4/6" },
+  { "name": "Red", "hex": "#964C26", "munsell": "2.5YR 4/8" },
+  { "name": "Reddish Gray", "hex": "#837873", "munsell": "2.5YR 5/1" },
+  { "name": "Weak Red", "hex": "#8C766D", "munsell": "2.5YR 5/2" },
+  { "name": "Red", "hex": "#947366", "munsell": "2.5YR 5/3" },
+  { "name": "Red", "hex": "#9B715E", "munsell": "2.5YR 5/4" },
+  { "name": "Red", "hex": "#A96B4F", "munsell": "2.5YR 5/6" },
+  { "name": "Red", "hex": "#B4663D", "munsell": "2.5YR 5/8" },
+  { "name": "Pinkish Gray", "hex": "#9E928D", "munsell": "2.5YR 6/1" },
+  { "name": "Pale Red", "hex": "#A79086", "munsell": "2.5YR 6/2" },
+  { "name": "Light Red", "hex": "#AF8E7F", "munsell": "2.5YR 6/3" },
+  { "name": "Light Red", "hex": "#B68B77", "munsell": "2.5YR 6/4" },
+  { "name": "Light Red", "hex": "#C58668", "munsell": "2.5YR 6/6" },
+  { "name": "Light Red", "hex": "#D18158", "munsell": "2.5YR 6/8" },
+  { "name": "Pinkish White", "hex": "#B8ADA9", "munsell": "2.5YR 7/1" },
+  { "name": "Pinkish Gray", "hex": "#C1ABA1", "munsell": "2.5YR 7/2" },
+  { "name": "Pink", "hex": "#CAA899", "munsell": "2.5YR 7/3" },
+  { "name": "Pink", "hex": "#D2A691", "munsell": "2.5YR 7/4" },
+  { "name": "Pink", "hex": "#E1A180", "munsell": "2.5YR 7/6" },
+  { "name": "Pink", "hex": "#EE9B70", "munsell": "2.5YR 7/8" },
+  { "name": "Pinkish White", "hex": "#CEC9C6", "munsell": "2.5YR 8/1" },
+  { "name": "Pinkish Gray", "hex": "#DAC6BD", "munsell": "2.5YR 8/2" },
+  { "name": "Pink", "hex": "#E5C3B3", "munsell": "2.5YR 8/3" },
+  { "name": "Pink", "hex": "#EEC0AA", "munsell": "2.5YR 8/4" },
+  { "name": "Pink", "hex": "#FEBB99", "munsell": "2.5YR 8/6" },
+  { "name": "Pink", "hex": "#FFB687", "munsell": "2.5YR 8/8" },
+  { "name": "Black", "hex": "#372E2A", "munsell": "5YR 2/1" },
+  { "name": "Dark Reddish Brown", "hex": "#3E2B24", "munsell": "5YR 2/2" },
+  { "name": "Dark Reddish Brown", "hex": "#43291D", "munsell": "5YR 2/3" },
+  { "name": "Dark Reddish Brown", "hex": "#482716", "munsell": "5YR 2/4" },
+  { "name": "Dark Reddish Brown", "hex": "#502203", "munsell": "5YR 2/6" },
+  { "name": "Dark Reddish Brown", "hex": "#581C00", "munsell": "5YR 2/8" },
+  { "name": "Dark Reddish Gray", "hex": "#51453F", "munsell": "5YR 3/1" },
+  { "name": "Dark Reddish Brown", "hex": "#584338", "munsell": "5YR 3/2" },
+  { "name": "Dark Reddish Brown", "hex": "#6C3A18", "munsell": "5YR 3/6" },
+  { "name": "Dark Reddish Brown", "hex": "#733600", "munsell": "5YR 3/8" },
+  { "name": "Dark Reddish Gray", "hex": "#695E58", "munsell": "5YR 4/1" },
+  { "name": "Reddish Brown", "hex": "#725C50", "munsell": "5YR 4/2" },
+  { "name": "Reddish Brown", "hex": "#795A48", "munsell": "5YR 4/3" },
+  { "name": "Yellowish Red", "hex": "#91501B", "munsell": "5YR 4/8" },
+  { "name": "Reddish Gray", "hex": "#837872", "munsell": "5YR 5/1" },
+  { "name": "Reddish Brown", "hex": "#8B766A", "munsell": "5YR 5/2" },
+  { "name": "Yellowish Red", "hex": "#937462", "munsell": "5YR 5/3" },
+  { "name": "Yellowish Red", "hex": "#A56E46", "munsell": "5YR 5/6" },
+  { "name": "Yellowish Red", "hex": "#AF6932", "munsell": "5YR 5/8" },
+  { "name": "Pinkish Gray", "hex": "#9E938B", "munsell": "5YR 6/1" },
+  { "name": "Light Reddish Brown", "hex": "#A69083", "munsell": "5YR 6/2" },
+  { "name": "Light Reddish Brown", "hex": "#AE8F7B", "munsell": "5YR 6/3" },
+  { "name": "Reddish Yellow", "hex": "#C1885F", "munsell": "5YR 6/6" },
+  { "name": "Reddish Yellow", "hex": "#CC844B", "munsell": "5YR 6/8" },
+  { "name": "Pinkish White", "hex": "#B8ADA6", "munsell": "5YR 7/1" },
+  { "name": "Pinkish Gray", "hex": "#C1AB9D", "munsell": "5YR 7/2" },
+  { "name": "Pink", "hex": "#C8A995", "munsell": "5YR 7/3" },
+  { "name": "Pink", "hex": "#D0A78B", "munsell": "5YR 7/4" },
+  { "name": "Reddish Yellow", "hex": "#DDA378", "munsell": "5YR 7/6" },
+  { "name": "Reddish Yellow", "hex": "#E99F65", "munsell": "5YR 7/8" },
+  { "name": "Pinkish White", "hex": "#D1C9C2", "munsell": "5YR 8/1" },
+  { "name": "Pinkish Gray", "hex": "#DBC6B8", "munsell": "5YR 8/2" },
+  { "name": "Pink", "hex": "#E4C4AE", "munsell": "5YR 8/3" },
+  { "name": "Pink", "hex": "#ECC2A4", "munsell": "5YR 8/4" },
+  { "name": "Reddish Yellow", "hex": "#FABE91", "munsell": "5YR 8/6" },
+  { "name": "Reddish Yellow", "hex": "#FFB97B", "munsell": "5YR 8/8" },
+  { "name": "Dark Brown", "hex": "#412B1A", "munsell": "7.5YR 2/3" },
+  { "name": "Dark Brown", "hex": "#452911", "munsell": "7.5YR 2/4" },
+  { "name": "Dark Brown", "hex": "#4C2600", "munsell": "7.5YR 2/6" },
+  { "name": "Dark Brown", "hex": "#522300", "munsell": "7.5YR 2/8" },
+  { "name": "Very Dark Gray", "hex": "#50453E", "munsell": "7.5YR 3/1" },
+  { "name": "Dark Brown", "hex": "#604026", "munsell": "7.5YR 3/4" },
+  { "name": "Dark Brown", "hex": "#683D11", "munsell": "7.5YR 3/6" },
+  { "name": "Dark Brown", "hex": "#6D3B00", "munsell": "7.5YR 3/8" },
+  { "name": "Dark Gray", "hex": "#695F57", "munsell": "7.5YR 4/1" },
+  { "name": "Brown", "hex": "#775B44", "munsell": "7.5YR 4/3" },
+  { "name": "Strong Brown", "hex": "#855628", "munsell": "7.5YR 4/6" },
+  { "name": "Strong Brown", "hex": "#8B530F", "munsell": "7.5YR 4/8" },
+  { "name": "Gray", "hex": "#827971", "munsell": "7.5YR 5/1" },
+  { "name": "Brown", "hex": "#8A7768", "munsell": "7.5YR 5/2" },
+  { "name": "Brown", "hex": "#91755E", "munsell": "7.5YR 5/3" },
+  { "name": "Strong Brown", "hex": "#AA6D27", "munsell": "7.5YR 5/8" },
+  { "name": "Gray", "hex": "#9D938A", "munsell": "7.5YR 6/1" },
+  { "name": "Pinkish Gray", "hex": "#A59181", "munsell": "7.5YR 6/2" },
+  { "name": "Light Brown", "hex": "#AC8F77", "munsell": "7.5YR 6/3" },
+  { "name": "Reddish Yellow", "hex": "#BD8A58", "munsell": "7.5YR 6/6" },
+  { "name": "Reddish Yellow", "hex": "#C78742", "munsell": "7.5YR 6/8" },
+  { "name": "Light Gray", "hex": "#B8AEA4", "munsell": "7.5YR 7/1" },
+  { "name": "Pinkish Gray", "hex": "#C0AC9B", "munsell": "7.5YR 7/2" },
+  { "name": "Pink", "hex": "#C7AA91", "munsell": "7.5YR 7/3" },
+  { "name": "Pink", "hex": "#CDA886", "munsell": "7.5YR 7/4" },
+  { "name": "Reddish Yellow", "hex": "#D9A571", "munsell": "7.5YR 7/6" },
+  { "name": "Reddish Yellow", "hex": "#E3A25B", "munsell": "7.5YR 7/8" },
+  { "name": "Light Gray", "hex": "#D2C9BF", "munsell": "7.5YR 8/1" },
+  { "name": "Pinkish Gray", "hex": "#DAC7B5", "munsell": "7.5YR 8/2" },
+  { "name": "Pink", "hex": "#E2C5AA", "munsell": "7.5YR 8/3" },
+  { "name": "Pink", "hex": "#E8C49F", "munsell": "7.5YR 8/4" },
+  { "name": "Reddish Yellow", "hex": "#F5C08A", "munsell": "7.5YR 8/6" },
+  { "name": "Reddish Yellow", "hex": "#FFBD72", "munsell": "7.5YR 8/8" },
+  { "name": "Very Dark Brown", "hex": "#3A2D20", "munsell": "10YR 2/2" },
+  { "name": "Very Dark Brown", "hex": "#3F2C17", "munsell": "10YR 2/3" },
+  { "name": "Very Dark Brown", "hex": "#422B0C", "munsell": "10YR 2/4" },
+  { "name": "Very Dark Brown", "hex": "#482800", "munsell": "10YR 2/6" },
+  { "name": "Very Dark Brown", "hex": "#4C2600", "munsell": "10YR 2/8" },
+  { "name": "Dark Yellowish Brown", "hex": "#58432C", "munsell": "10YR 3/3" },
+  { "name": "Dark Yellowish Brown", "hex": "#5C4222", "munsell": "10YR 3/4" },
+  { "name": "Dark Yellowish Brown", "hex": "#634008", "munsell": "10YR 3/6" },
+  { "name": "Dark Yellowish Brown", "hex": "#673E00", "munsell": "10YR 3/8" },
+  { "name": "Dark Yellowish Brown", "hex": "#745C41", "munsell": "10YR 4/3" },
+  { "name": "Dark Yellowish Brown", "hex": "#855700", "munsell": "10YR 4/8" },
+  { "name": "Gray", "hex": "#81796F", "munsell": "10YR 5/1" },
+  { "name": "Yellowish Brown", "hex": "#8E775A", "munsell": "10YR 5/3" },
+  { "name": "Yellowish Brown", "hex": "#A3711C", "munsell": "10YR 5/8" },
+  { "name": "Gray", "hex": "#9C9388", "munsell": "10YR 6/1" },
+  { "name": "Light Yellowish Brown", "hex": "#A99173", "munsell": "10YR 6/3" },
+  { "name": "Brownish Yellow", "hex": "#BF8B37", "munsell": "10YR 6/8" },
+  { "name": "Light Gray", "hex": "#BDAD97", "munsell": "10YR 7/2" },
+  { "name": "Yellow", "hex": "#D3A869", "munsell": "10YR 7/6" },
+  { "name": "Yellow", "hex": "#DBA651", "munsell": "10YR 7/8" },
+  { "name": "White", "hex": "#D8C8B1", "munsell": "10YR 8/2" },
+  { "name": "Very Pale Brown", "hex": "#DEC7A6", "munsell": "10YR 8/3" },
+  { "name": "Very Pale Brown", "hex": "#E4C69A", "munsell": "10YR 8/4" },
+  { "name": "Very Pale Brown", "hex": "#EFC382", "munsell": "10YR 8/6" },
+  { "name": "Very Pale Brown", "hex": "#F8C169", "munsell": "10YR 8/8" },
+  { "name": "Black", "hex": "#332F28", "munsell": "2.5Y 2/1" },
+  { "name": "Black", "hex": "#382E1F", "munsell": "2.5Y 2/2" },
+  { "name": "Black", "hex": "#3C2D15", "munsell": "2.5Y 2/3" },
+  { "name": "Black", "hex": "#3F2C07", "munsell": "2.5Y 2/4" },
+  { "name": "Black", "hex": "#442B00", "munsell": "2.5Y 2/6" },
+  { "name": "Black", "hex": "#482900", "munsell": "2.5Y 2/8" },
+  { "name": "Very Dark Grayish Brown", "hex": "#55452A", "munsell": "2.5Y 3/3" },
+  { "name": "Very Dark Grayish Brown", "hex": "#58441F", "munsell": "2.5Y 3/4" },
+  { "name": "Very Dark Grayish Brown", "hex": "#5D4301", "munsell": "2.5Y 3/6" },
+  { "name": "Very Dark Grayish Brown", "hex": "#614200", "munsell": "2.5Y 3/8" },
+  { "name": "Dark Gray", "hex": "#666054", "munsell": "2.5Y 4/1" },
+  { "name": "Dark Grayish Brown", "hex": "#6C5F4A", "munsell": "2.5Y 4/2" },
+  { "name": "Dark Grayish Brown", "hex": "#705E3E", "munsell": "2.5Y 4/3" },
+  { "name": "Dark Grayish Brown", "hex": "#745D33", "munsell": "2.5Y 4/4" },
+  { "name": "Dark Grayish Brown", "hex": "#795C1B", "munsell": "2.5Y 4/6" },
+  { "name": "Dark Grayish Brown", "hex": "#7E5B00", "munsell": "2.5Y 4/8" },
+  { "name": "Gray", "hex": "#807A6E", "munsell": "2.5Y 5/1" },
+  { "name": "Grayish Brown", "hex": "#867963", "munsell": "2.5Y 5/2" },
+  { "name": "Light Olive Brown", "hex": "#8A7858", "munsell": "2.5Y 5/3" },
+  { "name": "Light Olive Brown", "hex": "#967631", "munsell": "2.5Y 5/6" },
+  { "name": "Light Olive Brown", "hex": "#9B750F", "munsell": "2.5Y 5/8" },
+  { "name": "Gray", "hex": "#9A9487", "munsell": "2.5Y 6/1" },
+  { "name": "Light Brownish Gray", "hex": "#A0937C", "munsell": "2.5Y 6/2" },
+  { "name": "Light Yellowish Brown", "hex": "#A59370", "munsell": "2.5Y 6/3" },
+  { "name": "Yellow", "hex": "#B1904A", "munsell": "2.5Y 6/6" },
+  { "name": "Yellow", "hex": "#B78F2D", "munsell": "2.5Y 6/8" },
+  { "name": "Pale Yellow", "hex": "#C0AD89", "munsell": "2.5Y 7/3" },
+  { "name": "Pale Yellow", "hex": "#C5AD7D", "munsell": "2.5Y 7/4" },
+  { "name": "Pale Yellow", "hex": "#CDAB64", "munsell": "2.5Y 7/6" },
+  { "name": "Pale Yellow", "hex": "#D3AA49", "munsell": "2.5Y 7/8" },
+  { "name": "White", "hex": "#D0CABA", "munsell": "2.5Y 8/1" },
+  { "name": "White", "hex": "#D5C9AE", "munsell": "2.5Y 8/2" },
+  { "name": "Pale Yellow", "hex": "#DAC8A2", "munsell": "2.5Y 8/3" },
+  { "name": "Yellow", "hex": "#E8C67C", "munsell": "2.5Y 8/6" },
+  { "name": "Black", "hex": "#322F28", "munsell": "5Y 2/1" },
+  { "name": "Black", "hex": "#362F1E", "munsell": "5Y 2/2" },
+  { "name": "Black", "hex": "#392E13", "munsell": "5Y 2/3" },
+  { "name": "Black", "hex": "#3B2E04", "munsell": "5Y 2/4" },
+  { "name": "Black", "hex": "#3F2D00", "munsell": "5Y 2/6" },
+  { "name": "Very Dark Gray", "hex": "#4B473D", "munsell": "5Y 3/1" },
+  { "name": "Olive Gray", "hex": "#4E4733", "munsell": "5Y 3/2" },
+  { "name": "Olive Gray", "hex": "#514629", "munsell": "5Y 3/3" },
+  { "name": "Olive Gray", "hex": "#54461D", "munsell": "5Y 3/4" },
+  { "name": "Olive Gray", "hex": "#584500", "munsell": "5Y 3/6" },
+  { "name": "Olive Gray", "hex": "#5B4500", "munsell": "5Y 3/8" },
+  { "name": "Olive Gray", "hex": "#6C603D", "munsell": "5Y 4/3" },
+  { "name": "Olive Gray", "hex": "#6F5F31", "munsell": "5Y 4/4" },
+  { "name": "Olive Gray", "hex": "#735F15", "munsell": "5Y 4/6" },
+  { "name": "Olive Gray", "hex": "#775E00", "munsell": "5Y 4/8" },
+  { "name": "Gray", "hex": "#7E7A6E", "munsell": "5Y 5/1" },
+  { "name": "Olive", "hex": "#8F792C", "munsell": "5Y 5/6" },
+  { "name": "Olive", "hex": "#937802", "munsell": "5Y 5/8" },
+  { "name": "Olive Yellow", "hex": "#A39461", "munsell": "5Y 6/4" },
+  { "name": "Olive Yellow", "hex": "#AA9345", "munsell": "5Y 6/6" },
+  { "name": "Olive Yellow", "hex": "#AE9324", "munsell": "5Y 6/8" },
+  { "name": "Light Gray", "hex": "#B8AF94", "munsell": "5Y 7/2" },
+  { "name": "Pale Yellow", "hex": "#BBAF87", "munsell": "5Y 7/3" },
+  { "name": "Pale Yellow", "hex": "#BEAF7A", "munsell": "5Y 7/4" },
+  { "name": "Pale Yellow", "hex": "#C4AE5F", "munsell": "5Y 7/6" },
+  { "name": "Pale Yellow", "hex": "#C9AE42", "munsell": "5Y 7/8" },
+  { "name": "White", "hex": "#CFCAB9", "munsell": "5Y 8/1" },
+  { "name": "Pale Yellow", "hex": "#D2CAAC", "munsell": "5Y 8/2" },
+  { "name": "Pale Yellow", "hex": "#D6CAA0", "munsell": "5Y 8/3" },
+  { "name": "Pale Yellow", "hex": "#D9CA93", "munsell": "5Y 8/4" },
+  { "name": "Yellow", "hex": "#DFCA77", "munsell": "5Y 8/6" },
+  { "name": "Yellow", "hex": "#E4C95A", "munsell": "5Y 8/8" },
+  { "name": "Gray", "hex": "#7C7B6F", "munsell": "10Y 5/1" },
+  { "name": "Light Gray", "hex": "#969586", "munsell": "10Y 6/1" },
+  { "name": "Light Greenish Gray", "hex": "#939688", "munsell": "5GY 6/1" },
+  { "name": "Greenish Gray", "hex": "#757D74", "munsell": "10GY 5/1" },
+  { "name": "Light Greenish Gray", "hex": "#8D978D", "munsell": "10GY 6/1" },
+  { "name": "Greenish Gray", "hex": "#727D77", "munsell": "5G 5/1" },
+  { "name": "Light Greenish Gray", "hex": "#8B9890", "munsell": "5G 6/1" },
+  { "name": "Greenish Gray", "hex": "#717D79", "munsell": "10G 5/1" },
+  { "name": "Greenish Gray", "hex": "#707D7B", "munsell": "5BG 5/1" },
+  { "name": "Light Greenish Gray", "hex": "#8A9895", "munsell": "5BG 6/1" },
+  { "name": "Greenish Gray", "hex": "#6F7D7E", "munsell": "10BG 5/1" },
+  { "name": "Light Bluish Gray", "hex": "#8C9799", "munsell": "5B 6/1" },
+  { "name": "Black", "hex": "#3C3C3C", "munsell": "N 2.5/" },
+  { "name": "Gray", "hex": "#939393", "munsell": "N 6/" },
+  { "name": "Light Gray", "hex": "#ADADAD", "munsell": "N 7/" },
+  { "name": "White", "hex": "#C8C8C8", "munsell": "N 8/" }
 ],
      
     "soilMains": {
@@ -1814,6 +2136,131 @@ const TRANSITION_TYPES = {
 //  (lowercase code). English words go into the description; the KA5
 //  code is shown as a live preview.
 // ═══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  AUTHORITATIVE MUNSELL SOIL-COLOUR LOOKUP
+//  Source: aqp (USDA-NRCS) soil-chart sRGB conversions + ASTM
+//  neutral-value greys. Maps 'H V/C' -> official hex. Used by
+//  the colour dropdown sync and the legacy-core converter.
+// ════════════════════════════════════════════════════════════
+const MUNSELL_SOIL = {"10B 2.5/1":"#343C42","10B 2.5/2":"#2E3D48","10B 2.5/3":"#263E4E","10B 2.5/4":"#1A3E54","10B 2.5/5":"#053F5B","10B 2.5/6":"#004061","10B 2.5/7":"#004167","10B 2.5/8":"#00416E","10B 2/1":"#293036","10B 2/2":"#24313B","10B 2/3":"#1C3241","10B 2/4":"#0F3347","10B 2/5":"#00334D","10B 2/6":"#003454","10B 2/7":"#00355A","10B 2/8":"#003561","10B 3/1":"#3F484F","10B 3/2":"#394955","10B 3/3":"#314A5B","10B 3/4":"#264B62","10B 3/5":"#164C68","10B 3/6":"#004C6E","10B 3/7":"#004D75","10B 3/8":"#004E7B","10B 4/1":"#5A6266","10B 4/2":"#53636D","10B 4/3":"#4B6474","10B 4/4":"#42647A","10B 4/5":"#386580","10B 4/6":"#2A6687","10B 4/7":"#11678D","10B 4/8":"#006894","10B 5/1":"#747C80","10B 5/2":"#6D7D87","10B 5/3":"#667E8D","10B 5/4":"#5D7F94","10B 5/5":"#54809A","10B 5/6":"#4881A1","10B 5/7":"#3A82A7","10B 5/8":"#2483AE","10B 6/1":"#8E969A","10B 6/2":"#8897A0","10B 6/3":"#8098A6","10B 6/4":"#7899AD","10B 6/5":"#6E9AB4","10B 6/6":"#639BBB","10B 6/7":"#579CC2","10B 6/8":"#489DC9","10B 7/1":"#AAB0B3","10B 7/2":"#A3B1BA","10B 7/3":"#9AB3C1","10B 7/4":"#91B4C8","10B 7/5":"#88B5CE","10B 7/6":"#7EB6D5","10B 7/7":"#72B8DC","10B 7/8":"#64B9E4","10B 8.5/1":"#D4D9DA","10B 8.5/2":"#CBDAE2","10B 8.5/3":"#C1DCEA","10B 8.5/4":"#B6DEF2","10B 8.5/5":"#ABDFFA","10B 8.5/6":"#9EE1FF","10B 8.5/7":"#90E2FF","10B 8.5/8":"#7FE4FF","10B 8/1":"#C5CBCD","10B 8/2":"#BDCCD4","10B 8/3":"#B5CEDC","10B 8/4":"#ABCFE3","10B 8/5":"#A1D1EB","10B 8/6":"#95D2F2","10B 8/7":"#87D4FB","10B 8/8":"#76D5FF","10BG 2.5/1":"#333D3E","10BG 2.5/2":"#2A3F42","10BG 2.5/3":"#1D4045","10BG 2.5/4":"#034249","10BG 2.5/5":"#00434D","10BG 2.5/6":"#004550","10BG 2.5/7":"#004654","10BG 2.5/8":"#004758","10BG 2/1":"#293132","10BG 2/2":"#203336","10BG 2/3":"#133439","10BG 2/4":"#00363D","10BG 2/5":"#003741","10BG 2/6":"#003844","10BG 2/7":"#003948","10BG 2/8":"#003B4C","10BG 3/1":"#3E494A","10BG 3/2":"#344B4E","10BG 3/3":"#264D52","10BG 3/4":"#0D4F56","10BG 3/5":"#00505A","10BG 3/6":"#00525E","10BG 3/7":"#005361","10BG 3/8":"#005565","10BG 4/1":"#576363","10BG 4/2":"#4C6567","10BG 4/3":"#3F676B","10BG 4/4":"#2E696F","10BG 4/5":"#126B73","10BG 4/6":"#006C77","10BG 4/7":"#006E7B","10BG 4/8":"#00707F","10BG 5/1":"#6F7D7E","10BG 5/2":"#657F81","10BG 5/3":"#5A8185","10BG 5/4":"#4B8388","10BG 5/5":"#39858C","10BG 5/6":"#1B8790","10BG 5/7":"#008994","10BG 5/8":"#008B97","10BG 6/1":"#8A9797","10BG 6/2":"#7F9A9B","10BG 6/3":"#729C9F","10BG 6/4":"#649EA2","10BG 6/5":"#53A1A6","10BG 6/6":"#3DA3AA","10BG 6/7":"#18A4AD","10BG 6/8":"#00A6B0","10BG 7/1":"#A4B2B2","10BG 7/2":"#99B5B5","10BG 7/3":"#8CB7B9","10BG 7/4":"#7EB9BC","10BG 7/5":"#70BCBF","10BG 7/6":"#60BDC2","10BG 7/7":"#49C0C6","10BG 7/8":"#20C2CA","10BG 8.5/1":"#CCDBDA","10BG 8.5/2":"#C0DEDD","10BG 8.5/3":"#B2E1E1","10BG 8.5/4":"#A3E3E4","10BG 8.5/5":"#92E6E8","10BG 8.5/6":"#7FE9EB","10BG 8.5/7":"#69EBEE","10BG 8.5/8":"#4BEDF1","10BG 8/1":"#BFCDCC","10BG 8/2":"#B3D0D0","10BG 8/3":"#A6D2D3","10BG 8/4":"#97D5D6","10BG 8/5":"#88D7DA","10BG 8/6":"#76DADD","10BG 8/7":"#61DCE0","10BG 8/8":"#44DEE4","10G 2.5/1":"#363C3A","10G 2.5/2":"#2D3F3A","10G 2.5/3":"#224139","10G 2.5/4":"#134339","10G 2.5/5":"#004438","10G 2.5/6":"#004538","10G 2.5/7":"#004738","10G 2.5/8":"#004838","10G 2/1":"#2C312F","10G 2/2":"#23332E","10G 2/3":"#18352E","10G 2/4":"#07362E","10G 2/5":"#00382D","10G 2/6":"#00392D","10G 2/7":"#003A2D","10G 2/8":"#003B2D","10G 3/1":"#414946","10G 3/2":"#374B46","10G 3/3":"#2B4E45","10G 3/4":"#1B5044","10G 3/5":"#005144","10G 3/6":"#005343","10G 3/7":"#005443","10G 3/8":"#005643","10G 4/1":"#59635F","10G 4/2":"#4E655E","10G 4/3":"#42685D","10G 4/4":"#346A5C","10G 4/5":"#226C5C","10G 4/6":"#006E5B","10G 4/7":"#00705B","10G 4/8":"#00715A","10G 5/1":"#717D79","10G 5/2":"#678078","10G 5/3":"#5C8277","10G 5/4":"#4F8576","10G 5/5":"#428775","10G 5/6":"#2F8974","10G 5/7":"#068B73","10G 5/8":"#008D72","10G 6/1":"#8B9793","10G 6/2":"#809B91","10G 6/3":"#739D90","10G 6/4":"#66A08F","10G 6/5":"#59A28E","10G 6/6":"#4BA48D","10G 6/7":"#36A68C","10G 6/8":"#0FA88B","10G 7/1":"#A3B3AD","10G 7/2":"#99B6AB","10G 7/3":"#8EB8AA","10G 7/4":"#82BBA9","10G 7/5":"#76BDA7","10G 7/6":"#68BFA6","10G 7/7":"#57C1A5","10G 7/8":"#42C4A4","10G 8.5/1":"#CADCD5","10G 8.5/2":"#BFDFD3","10G 8.5/3":"#B3E2D1","10G 8.5/4":"#A7E5D0","10G 8.5/5":"#98E8CE","10G 8.5/6":"#89EACD","10G 8.5/7":"#78EDCB","10G 8.5/8":"#66EFCA","10G 8/1":"#BDCEC7","10G 8/2":"#B2D1C6","10G 8/3":"#A7D4C4","10G 8/4":"#9BD6C2","10G 8/5":"#8DD9C1","10G 8/6":"#7FDBC0","10G 8/7":"#6FDEBE","10G 8/8":"#5DE0BD","10GY 2.5/1":"#383C38","10GY 2.5/2":"#323E33","10GY 2.5/3":"#2C402E","10GY 2.5/4":"#264129","10GY 2.5/5":"#1F4324","10GY 2.5/6":"#17441E","10GY 2.5/7":"#0B4519","10GY 2.5/8":"#004612","10GY 2/1":"#2E302E","10GY 2/2":"#283229","10GY 2/3":"#213424","10GY 2/4":"#1A351F","10GY 2/5":"#12371A","10GY 2/6":"#053815","10GY 2/7":"#00390F","10GY 2/8":"#003A08","10GY 3/1":"#444844","10GY 3/2":"#3D4B3E","10GY 3/3":"#374D38","10GY 3/4":"#304E32","10GY 3/5":"#29502C","10GY 3/6":"#205126","10GY 3/7":"#13531F","10GY 3/8":"#005418","10GY 4/1":"#5C625B","10GY 4/2":"#556554","10GY 4/3":"#4F674E","10GY 4/4":"#486847","10GY 4/5":"#406A40","10GY 4/6":"#386C39","10GY 4/7":"#2E6E31","10GY 4/8":"#226F2A","10GY 5/1":"#757D74","10GY 5/2":"#6E7F6D","10GY 5/3":"#688167","10GY 5/4":"#628360","10GY 5/5":"#5B8559","10GY 5/6":"#548751","10GY 5/7":"#4C884A","10GY 5/8":"#428A42","10GY 6/1":"#8D978D","10GY 6/2":"#879A85","10GY 6/3":"#819C7E","10GY 6/4":"#7B9E77","10GY 6/5":"#74A070","10GY 6/6":"#6DA268","10GY 6/7":"#66A360","10GY 6/8":"#5DA558","10GY 7/1":"#A8B2A6","10GY 7/2":"#A1B59F","10GY 7/3":"#9BB797","10GY 7/4":"#95B98F","10GY 7/5":"#8FBB88","10GY 7/6":"#88BD81","10GY 7/7":"#81BF79","10GY 7/8":"#79C071","10GY 8.5/1":"#CEDCCC","10GY 8.5/2":"#C8DEC4","10GY 8.5/3":"#C2E0BC","10GY 8.5/4":"#BBE3B4","10GY 8.5/5":"#B4E5AB","10GY 8.5/6":"#ACE7A2","10GY 8.5/7":"#A6E99B","10GY 8.5/8":"#9FEB93","10GY 8/1":"#C1CEBF","10GY 8/2":"#BBD0B8","10GY 8/3":"#B5D2B0","10GY 8/4":"#AED4A8","10GY 8/5":"#A8D79F","10GY 8/6":"#A1D997","10GY 8/7":"#9ADA90","10GY 8/8":"#93DC89","10R 2.5/1":"#443836","10R 2.5/2":"#4C3632","10R 2.5/3":"#53332D","10R 2.5/4":"#593029","10R 2.5/5":"#5E2D25","10R 2.5/6":"#632920","10R 2.5/7":"#68251B","10R 2.5/8":"#6E1F16","10R 2/1":"#382D2B","10R 2/2":"#3F2A28","10R 2/3":"#462724","10R 2/4":"#4B2420","10R 2/5":"#50211D","10R 2/6":"#551D19","10R 2/7":"#5A1815","10R 2/8":"#5F1211","10R 3/1":"#514441","10R 3/2":"#5A413D","10R 3/3":"#613E38","10R 3/4":"#673B33","10R 3/5":"#6D382E","10R 3/6":"#733529","10R 3/7":"#783123","10R 3/8":"#7D2C1D","10R 4/1":"#6A5E5B","10R 4/2":"#735B55","10R 4/3":"#7B5850","10R 4/4":"#83554A","10R 4/5":"#895244","10R 4/6":"#8F4F3E","10R 4/7":"#954C38","10R 4/8":"#9A4832","10R 5/1":"#827876","10R 5/2":"#8C7570","10R 5/3":"#957369","10R 5/4":"#9C7063","10R 5/5":"#A46D5D","10R 5/6":"#AB6A56","10R 5/7":"#B1664F","10R 5/8":"#B86348","10R 6/1":"#9D9290","10R 6/2":"#A79089","10R 6/3":"#B08D83","10R 6/4":"#B88A7C","10R 6/5":"#BF8776","10R 6/6":"#C68570","10R 6/7":"#CC8269","10R 6/8":"#D37F63","10R 7/1":"#B7ADAB","10R 7/2":"#C1AAA4","10R 7/3":"#CAA89D","10R 7/4":"#D2A597","10R 7/5":"#DAA290","10R 7/6":"#E29F89","10R 7/7":"#EA9C82","10R 7/8":"#F1997B","10R 8.5/1":"#D9D7D7","10R 8.5/2":"#E7D4CE","10R 8.5/3":"#F3D0C5","10R 8.5/4":"#FECDBD","10R 8.5/5":"#FFCAB5","10R 8.5/6":"#FFC7AD","10R 8.5/7":"#FFC4A6","10R 8.5/8":"#FFC09E","10R 8/1":"#CDC9C8","10R 8/2":"#D9C6C0","10R 8/3":"#E5C3B8","10R 8/4":"#EFC0B0","10R 8/5":"#F7BDA9","10R 8/6":"#FFBAA1","10R 8/7":"#FFB69A","10R 8/8":"#FFB392","10Y 2.5/1":"#3C3C34","10Y 2.5/2":"#3D3C2A","10Y 2.5/3":"#3E3C20","10Y 2.5/4":"#3E3D14","10Y 2.5/5":"#403E00","10Y 2.5/6":"#403E00","10Y 2/1":"#30302B","10Y 2/2":"#313020","10Y 2/3":"#323115","10Y 2/4":"#333105","10Y 2/5":"#333100","10Y 2/6":"#343200","10Y 3/1":"#48483E","10Y 3/2":"#494834","10Y 3/3":"#4A4929","10Y 3/4":"#4B491D","10Y 3/5":"#4C490E","10Y 3/6":"#4C4A00","10Y 3/7":"#4C4A00","10Y 3/8":"#4D4A00","10Y 4/1":"#616156","10Y 4/2":"#63624A","10Y 4/3":"#64623D","10Y 4/4":"#656330","10Y 4/5":"#666323","10Y 4/6":"#666312","10Y 4/7":"#676300","10Y 4/8":"#676400","10Y 5/1":"#7C7B6F","10Y 5/2":"#7D7C62","10Y 5/3":"#7E7C56","10Y 5/4":"#7F7D48","10Y 5/5":"#807D3A","10Y 5/6":"#817E2B","10Y 5/7":"#827E18","10Y 5/8":"#827E00","10Y 6/1":"#969586","10Y 6/2":"#98967A","10Y 6/3":"#99976E","10Y 6/4":"#9A9761","10Y 6/5":"#9B9853","10Y 6/6":"#9C9844","10Y 6/7":"#9D9833","10Y 6/8":"#9D991F","10Y 7/1":"#B1B0A1","10Y 7/2":"#B2B193","10Y 7/3":"#B4B186","10Y 7/4":"#B5B279","10Y 7/5":"#B6B26C","10Y 7/6":"#B7B35E","10Y 7/7":"#B8B34F","10Y 7/8":"#B9B43E","10Y 8.5/1":"#DAD9C5","10Y 8.5/2":"#DBDAB8","10Y 8.5/3":"#DDDAAB","10Y 8.5/4":"#DEDB9D","10Y 8.5/5":"#DFDB8F","10Y 8.5/6":"#E0DC81","10Y 8.5/7":"#E1DC72","10Y 8.5/8":"#E2DD62","10Y 8/1":"#CCCBB8","10Y 8/2":"#CDCCAB","10Y 8/3":"#CFCC9F","10Y 8/4":"#D0CD91","10Y 8/5":"#D1CE84","10Y 8/6":"#D2CE75","10Y 8/7":"#D3CE67","10Y 8/8":"#D4CF57","10YR 2.5/1":"#413A33","10YR 2.5/2":"#46392B","10YR 2.5/3":"#4B3822","10YR 2.5/4":"#4E3619","10YR 2.5/5":"#53350A","10YR 2.5/6":"#563400","10YR 2.5/7":"#593300","10YR 2.5/8":"#5B3200","10YR 2/1":"#352E28","10YR 2/2":"#3A2D20","10YR 2/3":"#3F2C17","10YR 2/4":"#422B0C","10YR 2/5":"#462900","10YR 2/6":"#482800","10YR 2/7":"#4B2700","10YR 2/8":"#4C2600","10YR 3/1":"#4E463D","10YR 3/2":"#544535","10YR 3/3":"#58432C","10YR 3/4":"#5C4222","10YR 3/5":"#604117","10YR 3/6":"#634008","10YR 3/7":"#653F00","10YR 3/8":"#673E00","10YR 4/1":"#685F55","10YR 4/2":"#6E5E4B","10YR 4/3":"#745C41","10YR 4/4":"#795B36","10YR 4/5":"#7C5A2C","10YR 4/6":"#805921","10YR 4/7":"#825814","10YR 4/8":"#855700","10YR 5/1":"#81796F","10YR 5/2":"#887865","10YR 5/3":"#8E775A","10YR 5/4":"#93754F","10YR 5/5":"#987444","10YR 5/6":"#9C7337","10YR 5/7":"#A0722A","10YR 5/8":"#A3711C","10YR 6/1":"#9C9388","10YR 6/2":"#A3927E","10YR 6/3":"#A99173","10YR 6/4":"#AE9068","10YR 6/5":"#B38F5D","10YR 6/6":"#B88D51","10YR 6/7":"#BC8C44","10YR 6/8":"#BF8B37","10YR 7/1":"#B6AEA3","10YR 7/2":"#BDAD97","10YR 7/3":"#C4AC8C","10YR 7/4":"#C9AB81","10YR 7/5":"#CEA975","10YR 7/6":"#D3A869","10YR 7/7":"#D7A75D","10YR 7/8":"#DBA651","10YR 8.5/1":"#DFD7CA","10YR 8.5/2":"#E6D6BE","10YR 8.5/3":"#EDD5B2","10YR 8.5/4":"#F2D3A6","10YR 8.5/5":"#F8D29A","10YR 8.5/6":"#FDD18E","10YR 8.5/7":"#FFD081","10YR 8.5/8":"#FFCF74","10YR 8/1":"#D1C9BC","10YR 8/2":"#D8C8B1","10YR 8/3":"#DEC7A6","10YR 8/4":"#E4C69A","10YR 8/5":"#E9C48E","10YR 8/6":"#EFC382","10YR 8/7":"#F3C276","10YR 8/8":"#F8C169","2.5Y 2.5/1":"#403A33","2.5Y 2.5/2":"#443A2A","2.5Y 2.5/3":"#473920","2.5Y 2.5/4":"#4A3815","2.5Y 2.5/5":"#4F3803","2.5Y 2.5/6":"#523700","2.5Y 2.5/7":"#543600","2.5Y 2.5/8":"#563600","2.5Y 2/1":"#332F28","2.5Y 2/2":"#382E1F","2.5Y 2/3":"#3C2D15","2.5Y 2/4":"#3F2C07","2.5Y 2/5":"#422C00","2.5Y 2/6":"#442B00","2.5Y 2/7":"#462A00","2.5Y 2/8":"#482900","2.5Y 3/1":"#4C473D","2.5Y 3/2":"#514634","2.5Y 3/3":"#55452A","2.5Y 3/4":"#58441F","2.5Y 3/5":"#5B4313","2.5Y 3/6":"#5D4301","2.5Y 3/7":"#604200","2.5Y 3/8":"#614200","2.5Y 4/1":"#666054","2.5Y 4/2":"#6C5F4A","2.5Y 4/3":"#705E3E","2.5Y 4/4":"#745D33","2.5Y 4/5":"#775D27","2.5Y 4/6":"#795C1B","2.5Y 4/7":"#7C5B08","2.5Y 4/8":"#7E5B00","2.5Y 5/1":"#807A6E","2.5Y 5/2":"#867963","2.5Y 5/3":"#8A7858","2.5Y 5/4":"#8F774B","2.5Y 5/5":"#93773E","2.5Y 5/6":"#967631","2.5Y 5/7":"#997522","2.5Y 5/8":"#9B750F","2.5Y 6/1":"#9A9487","2.5Y 6/2":"#A0937C","2.5Y 6/3":"#A59370","2.5Y 6/4":"#A99264","2.5Y 6/5":"#AD9158","2.5Y 6/6":"#B1904A","2.5Y 6/7":"#B5903C","2.5Y 6/8":"#B78F2D","2.5Y 7/1":"#B4AFA1","2.5Y 7/2":"#BAAE95","2.5Y 7/3":"#C0AD89","2.5Y 7/4":"#C5AD7D","2.5Y 7/5":"#C9AC70","2.5Y 7/6":"#CDAB64","2.5Y 7/7":"#D0AA57","2.5Y 7/8":"#D3AA49","2.5Y 8.5/1":"#DED7C7","2.5Y 8.5/2":"#E3D7BB","2.5Y 8.5/3":"#E8D6AE","2.5Y 8.5/4":"#EDD6A2","2.5Y 8.5/5":"#F2D595","2.5Y 8.5/6":"#F6D488","2.5Y 8.5/7":"#FAD47A","2.5Y 8.5/8":"#FED36D","2.5Y 8/1":"#D0CABA","2.5Y 8/2":"#D5C9AE","2.5Y 8/3":"#DAC8A2","2.5Y 8/4":"#DFC896","2.5Y 8/5":"#E3C789","2.5Y 8/6":"#E8C67C","2.5Y 8/7":"#ECC66F","2.5Y 8/8":"#EFC562","2.5YR 2.5/1":"#443935","2.5YR 2.5/2":"#4B3630","2.5YR 2.5/3":"#51342A","2.5YR 2.5/4":"#573125","2.5YR 2.5/5":"#5C2E1F","2.5YR 2.5/6":"#612B18","2.5YR 2.5/7":"#66280F","2.5YR 2.5/8":"#6A2404","2.5YR 2/1":"#372D2A","2.5YR 2/2":"#3F2B26","2.5YR 2/3":"#452821","2.5YR 2/4":"#4A251C","2.5YR 2/5":"#4F2217","2.5YR 2/6":"#531F11","2.5YR 2/7":"#581B09","2.5YR 2/8":"#5D1600","2.5YR 3/1":"#514440","2.5YR 3/2":"#59423A","2.5YR 3/3":"#603F34","2.5YR 3/4":"#663D2E","2.5YR 3/5":"#6B3A27","2.5YR 3/6":"#703720","2.5YR 3/7":"#753418","2.5YR 3/8":"#79310E","2.5YR 4/1":"#6A5E59","2.5YR 4/2":"#735B53","2.5YR 4/3":"#7B594C","2.5YR 4/4":"#815645","2.5YR 4/5":"#87543E","2.5YR 4/6":"#8C5137","2.5YR 4/7":"#924E2F","2.5YR 4/8":"#964C26","2.5YR 5/1":"#837873","2.5YR 5/2":"#8C766D","2.5YR 5/3":"#947366","2.5YR 5/4":"#9B715E","2.5YR 5/5":"#A26E57","2.5YR 5/6":"#A96B4F","2.5YR 5/7":"#AF6946","2.5YR 5/8":"#B4663D","2.5YR 6/1":"#9E928D","2.5YR 6/2":"#A79086","2.5YR 6/3":"#AF8E7F","2.5YR 6/4":"#B68B77","2.5YR 6/5":"#BE8970","2.5YR 6/6":"#C58668","2.5YR 6/7":"#CB8360","2.5YR 6/8":"#D18158","2.5YR 7/1":"#B8ADA9","2.5YR 7/2":"#C1ABA1","2.5YR 7/3":"#CAA899","2.5YR 7/4":"#D2A691","2.5YR 7/5":"#DAA389","2.5YR 7/6":"#E1A180","2.5YR 7/7":"#E89E78","2.5YR 7/8":"#EE9B70","2.5YR 8.5/1":"#DBD7D4","2.5YR 8.5/2":"#E8D4CA","2.5YR 8.5/3":"#F4D1C0","2.5YR 8.5/4":"#FDCEB6","2.5YR 8.5/5":"#FFCBAD","2.5YR 8.5/6":"#FFC9A5","2.5YR 8.5/7":"#FFC69B","2.5YR 8.5/8":"#FFC392","2.5YR 8/1":"#CEC9C6","2.5YR 8/2":"#DAC6BD","2.5YR 8/3":"#E5C3B3","2.5YR 8/4":"#EEC0AA","2.5YR 8/5":"#F6BEA1","2.5YR 8/6":"#FEBB99","2.5YR 8/7":"#FFB890","2.5YR 8/8":"#FFB687","5B 2.5/1":"#333D3F","5B 2.5/2":"#2B3E45","5B 2.5/3":"#1F3F4A","5B 2.5/4":"#094150","5B 2.5/5":"#004255","5B 2.5/6":"#00435B","5B 2.5/7":"#004461","5B 2.5/8":"#004566","5B 2/1":"#283133","5B 2/2":"#203239","5B 2/3":"#15333E","5B 2/4":"#003443","5B 2/5":"#003648","5B 2/6":"#00374E","5B 2/7":"#003854","5B 2/8":"#00395A","5B 3/1":"#3E494C","5B 3/2":"#354B52","5B 3/3":"#284C58","5B 3/4":"#154D5E","5B 3/5":"#004F63","5B 3/6":"#005068","5B 3/7":"#00516E","5B 3/8":"#005274","5B 4/1":"#576265","5B 4/2":"#4E646B","5B 4/3":"#436670","5B 4/4":"#356776","5B 4/5":"#22687C","5B 4/6":"#006A81","5B 4/7":"#006B87","5B 4/8":"#006D8E","5B 5/1":"#727C7F","5B 5/2":"#687E84","5B 5/3":"#5E808A","5B 5/4":"#51828F","5B 5/5":"#428395","5B 5/6":"#2E859B","5B 5/7":"#0086A1","5B 5/8":"#0087A7","5B 6/1":"#8C9799","5B 6/2":"#82989E","5B 6/3":"#789AA3","5B 6/4":"#6C9CA9","5B 6/5":"#5D9EAF","5B 6/6":"#4BA0B5","5B 6/7":"#33A1BB","5B 6/8":"#00A3C1","5B 7/1":"#A7B1B3","5B 7/2":"#9DB3B9","5B 7/3":"#92B5BE","5B 7/4":"#85B7C4","5B 7/5":"#78B9C9","5B 7/6":"#68BBCF","5B 7/7":"#56BCD5","5B 7/8":"#3DBEDB","5B 8.5/1":"#D1D9DA","5B 8.5/2":"#C5DCE1","5B 8.5/3":"#B8DEE7","5B 8.5/4":"#AAE1EE","5B 8.5/5":"#9BE3F4","5B 8.5/6":"#8AE5FB","5B 8.5/7":"#76E7FF","5B 8.5/8":"#5DE9FF","5B 8/1":"#C3CCCD","5B 8/2":"#B8CED3","5B 8/3":"#ACD0D9","5B 8/4":"#9ED3DF","5B 8/5":"#90D5E5","5B 8/6":"#81D7EB","5B 8/7":"#6CD9F2","5B 8/8":"#51DBF9","5BG 2.5/1":"#353D3C","5BG 2.5/2":"#2B3F3E","5BG 2.5/3":"#1E4140","5BG 2.5/4":"#0A4241","5BG 2.5/5":"#004443","5BG 2.5/6":"#004544","5BG 2.5/7":"#004746","5BG 2.5/8":"#004848","5BG 2/1":"#2A3130","5BG 2/2":"#213332","5BG 2/3":"#143534","5BG 2/4":"#003636","5BG 2/5":"#003737","5BG 2/6":"#003939","5BG 2/7":"#003A3B","5BG 2/8":"#003C3D","5BG 3/1":"#404948","5BG 3/2":"#354B4A","5BG 3/3":"#274E4C","5BG 3/4":"#12504E","5BG 3/5":"#00514F","5BG 3/6":"#005351","5BG 3/7":"#005452","5BG 3/8":"#005654","5BG 4/1":"#576361","5BG 4/2":"#4C6563","5BG 4/3":"#3F6864","5BG 4/4":"#2F6A66","5BG 4/5":"#156C68","5BG 4/6":"#006E69","5BG 4/7":"#006F6B","5BG 4/8":"#00716D","5BG 5/1":"#707D7B","5BG 5/2":"#65807D","5BG 5/3":"#59827E","5BG 5/4":"#4B847F","5BG 5/5":"#3B8680","5BG 5/6":"#238882","5BG 5/7":"#008A83","5BG 5/8":"#008C85","5BG 6/1":"#8A9895","5BG 6/2":"#7E9A96","5BG 6/3":"#719D97","5BG 6/4":"#63A099","5BG 6/5":"#53A29A","5BG 6/6":"#40A49B","5BG 6/7":"#21A69C","5BG 6/8":"#00A89E","5BG 7/1":"#A3B3AF","5BG 7/2":"#97B5B0","5BG 7/3":"#8BB8B1","5BG 7/4":"#7EBAB2","5BG 7/5":"#71BDB3","5BG 7/6":"#62BFB4","5BG 7/7":"#4DC1B5","5BG 7/8":"#2CC3B6","5BG 8.5/1":"#CADCD7","5BG 8.5/2":"#BEDFD8","5BG 8.5/3":"#B1E2D8","5BG 8.5/4":"#A4E4D9","5BG 8.5/5":"#94E7DA","5BG 8.5/6":"#82EADB","5BG 8.5/7":"#6EECDC","5BG 8.5/8":"#55EFDD","5BG 8/1":"#BDCECA","5BG 8/2":"#B1D1CB","5BG 8/3":"#A5D3CB","5BG 8/4":"#98D6CC","5BG 8/5":"#8AD9CC","5BG 8/6":"#79DBCD","5BG 8/7":"#66DDCE","5BG 8/8":"#4DE0CF","5G 2.5/1":"#373C39","5G 2.5/2":"#2F3F37","5G 2.5/3":"#264135","5G 2.5/4":"#1B4232","5G 2.5/5":"#0C4430","5G 2.5/6":"#00452F","5G 2.5/7":"#00462D","5G 2.5/8":"#00472C","5G 2/1":"#2C302E","5G 2/2":"#25332C","5G 2/3":"#1C342A","5G 2/4":"#103628","5G 2/5":"#003826","5G 2/6":"#003924","5G 2/7":"#003A23","5G 2/8":"#003B22","5G 3/1":"#424945","5G 3/2":"#394B42","5G 3/3":"#2F4D40","5G 3/4":"#244F3D","5G 3/5":"#13513B","5G 3/6":"#005339","5G 3/7":"#005437","5G 3/8":"#005536","5G 4/1":"#5A635E","5G 4/2":"#50655A","5G 4/3":"#466857","5G 4/4":"#3B6A54","5G 4/5":"#2D6C52","5G 4/6":"#186E4F","5G 4/7":"#006F4D","5G 4/8":"#00714B","5G 5/1":"#727D77","5G 5/2":"#698074","5G 5/3":"#5F8270","5G 5/4":"#55846D","5G 5/5":"#49866B","5G 5/6":"#3B8868","5G 5/7":"#268A65","5G 5/8":"#008C63","5G 6/1":"#8B9890","5G 6/2":"#819B8D","5G 6/3":"#779D89","5G 6/4":"#6CA086","5G 6/5":"#61A283","5G 6/6":"#55A480","5G 6/7":"#46A67D","5G 6/8":"#33A87B","5G 7/1":"#A5B3AA","5G 7/2":"#9BB6A7","5G 7/3":"#91B8A3","5G 7/4":"#87BBA0","5G 7/5":"#7CBD9C","5G 7/6":"#71BF99","5G 7/7":"#64C197","5G 7/8":"#54C394","5G 8.5/1":"#CBDCD1","5G 8.5/2":"#C1DFCE","5G 8.5/3":"#B7E2CA","5G 8.5/4":"#ADE4C6","5G 8.5/5":"#A0E7C2","5G 8.5/6":"#92EABE","5G 8.5/7":"#84ECBA","5G 8.5/8":"#76EFB7","5G 8/1":"#BDCEC4","5G 8/2":"#B4D1C0","5G 8/3":"#ABD3BD","5G 8/4":"#A0D6B9","5G 8/5":"#94D9B5","5G 8/6":"#87DBB2","5G 8/7":"#7ADEAE","5G 8/8":"#6CE0AB","5GY 2.5/1":"#3A3C36","5GY 2.5/2":"#383D2E","5GY 2.5/3":"#363E26","5GY 2.5/4":"#343F1D","5GY 2.5/5":"#314012","5GY 2.5/6":"#2E4100","5GY 2.5/7":"#2B4300","5GY 2.5/8":"#274400","5GY 2/1":"#2F302C","5GY 2/2":"#2C3124","5GY 2/3":"#2A331C","5GY 2/4":"#273412","5GY 2/5":"#253505","5GY 2/6":"#213600","5GY 2/7":"#1E3700","5GY 2/8":"#1A3700","5GY 3/1":"#464841","5GY 3/2":"#434A38","5GY 3/3":"#414B2E","5GY 3/4":"#3F4C24","5GY 3/5":"#3D4D1A","5GY 3/6":"#3A4E0C","5GY 3/7":"#384F00","5GY 3/8":"#355000","5GY 4/1":"#5F6259","5GY 4/2":"#5D634E","5GY 4/3":"#5A6543","5GY 4/4":"#586638","5GY 4/5":"#56672D","5GY 4/6":"#546821","5GY 4/7":"#516910","5GY 4/8":"#4F6A00","5GY 5/1":"#797C71","5GY 5/2":"#767D66","5GY 5/3":"#757F5C","5GY 5/4":"#738051","5GY 5/5":"#708145","5GY 5/6":"#6E8238","5GY 5/7":"#6C832A","5GY 5/8":"#698418","5GY 6/1":"#939688","5GY 6/2":"#91987D","5GY 6/3":"#8F9973","5GY 6/4":"#8D9B68","5GY 6/5":"#8B9C5C","5GY 6/6":"#899D50","5GY 6/7":"#869E42","5GY 6/8":"#849F33","5GY 7/1":"#AEB1A1","5GY 7/2":"#ACB396","5GY 7/3":"#AAB48B","5GY 7/4":"#A8B57F","5GY 7/5":"#A6B774","5GY 7/6":"#A4B869","5GY 7/7":"#A2B95C","5GY 7/8":"#A0BA4E","5GY 8.5/1":"#D6DAC7","5GY 8.5/2":"#D5DBBB","5GY 8.5/3":"#D4DDAE","5GY 8.5/4":"#D2DEA2","5GY 8.5/5":"#D0E095","5GY 8.5/6":"#CEE188","5GY 8.5/7":"#CCE27C","5GY 8.5/8":"#CAE36E","5GY 8/1":"#C8CCBA","5GY 8/2":"#C7CDAE","5GY 8/3":"#C6CFA3","5GY 8/4":"#C4D097","5GY 8/5":"#C2D28B","5GY 8/6":"#C0D37E","5GY 8/7":"#BED472","5GY 8/8":"#BCD565","5PB 2.5/1":"#383B43","5PB 2.5/2":"#343B49","5PB 2.5/3":"#303B50","5PB 2.5/4":"#2B3B56","5PB 2.5/5":"#253B5D","5PB 2.5/6":"#1D3C63","5PB 2.5/7":"#113C6A","5PB 2.5/8":"#003C70","5PB 2/1":"#2C2F37","5PB 2/2":"#29303D","5PB 2/3":"#253043","5PB 2/4":"#203049","5PB 2/5":"#1A304F","5PB 2/6":"#103056","5PB 2/7":"#00305C","5PB 2/8":"#003063","5PB 3/1":"#434750","5PB 3/2":"#404756","5PB 3/3":"#3C485D","5PB 3/4":"#374864","5PB 3/5":"#31486B","5PB 3/6":"#2A4871","5PB 3/7":"#214877","5PB 3/8":"#15487D","5PB 4/1":"#5D6068","5PB 4/2":"#5A616F","5PB 4/3":"#566175","5PB 4/4":"#52617C","5PB 4/5":"#4D6182","5PB 4/6":"#476189","5PB 4/7":"#406290","5PB 4/8":"#376297","5PB 5/1":"#787A81","5PB 5/2":"#747B87","5PB 5/3":"#707B8E","5PB 5/4":"#6C7B95","5PB 5/5":"#677B9C","5PB 5/6":"#617CA3","5PB 5/7":"#5B7CAA","5PB 5/8":"#557CB1","5PB 6/1":"#92959A","5PB 6/2":"#8E95A1","5PB 6/3":"#8A95A7","5PB 6/4":"#8696AE","5PB 6/5":"#8196B6","5PB 6/6":"#7B96BE","5PB 6/7":"#7696C5","5PB 6/8":"#7097CC","5PB 7/1":"#ADAFB4","5PB 7/2":"#A9B0BB","5PB 7/3":"#A4B0C2","5PB 7/4":"#A0B0C9","5PB 7/5":"#9BB1D1","5PB 7/6":"#95B1D8","5PB 7/7":"#8FB1E0","5PB 7/8":"#89B2E8","5PB 8.5/1":"#D6D8DA","5PB 8.5/2":"#D1D8E2","5PB 8.5/3":"#CCD9EB","5PB 8.5/4":"#C7D9F4","5PB 8.5/5":"#C0DAFD","5PB 8.5/6":"#B9DAFF","5PB 8.5/7":"#B2DBFF","5PB 8.5/8":"#AADBFF","5PB 8/1":"#C8CACD","5PB 8/2":"#C3CBD5","5PB 8/3":"#BFCBDD","5PB 8/4":"#B9CBE5","5PB 8/5":"#B4CCEE","5PB 8/6":"#ADCCF6","5PB 8/7":"#A6CDFF","5PB 8/8":"#9ECDFF","5Y 2.5/1":"#3E3B33","5Y 2.5/2":"#423B29","5Y 2.5/3":"#443A1F","5Y 2.5/4":"#473A13","5Y 2.5/5":"#4A3A00","5Y 2.5/6":"#4C3900","5Y 2/1":"#322F28","5Y 2/2":"#362F1E","5Y 2/3":"#392E13","5Y 2/4":"#3B2E04","5Y 2/5":"#3D2E00","5Y 2/6":"#3F2D00","5Y 3/1":"#4B473D","5Y 3/2":"#4E4733","5Y 3/3":"#514629","5Y 3/4":"#54461D","5Y 3/5":"#564610","5Y 3/6":"#584500","5Y 3/7":"#5A4500","5Y 3/8":"#5B4500","5Y 4/1":"#646054","5Y 4/2":"#696049","5Y 4/3":"#6C603D","5Y 4/4":"#6F5F31","5Y 4/5":"#715F24","5Y 4/6":"#735F15","5Y 4/7":"#755E00","5Y 4/8":"#775E00","5Y 5/1":"#7E7A6E","5Y 5/2":"#827A62","5Y 5/3":"#867A56","5Y 5/4":"#897A49","5Y 5/5":"#8C793B","5Y 5/6":"#8F792C","5Y 5/7":"#91781B","5Y 5/8":"#937802","5Y 6/1":"#999586","5Y 6/2":"#9D957A","5Y 6/3":"#A0946E","5Y 6/4":"#A39461","5Y 6/5":"#A79454","5Y 6/6":"#AA9345","5Y 6/7":"#AC9336","5Y 6/8":"#AE9324","5Y 7/1":"#B4AFA0","5Y 7/2":"#B8AF94","5Y 7/3":"#BBAF87","5Y 7/4":"#BEAF7A","5Y 7/5":"#C1AF6C","5Y 7/6":"#C4AE5F","5Y 7/7":"#C7AE51","5Y 7/8":"#C9AE42","5Y 8.5/1":"#DDD8C6","5Y 8.5/2":"#E0D8B9","5Y 8.5/3":"#E3D8AC","5Y 8.5/4":"#E6D89E","5Y 8.5/5":"#EAD891","5Y 8.5/6":"#EDD883","5Y 8.5/7":"#F0D875","5Y 8.5/8":"#F2D766","5Y 8/1":"#CFCAB9","5Y 8/2":"#D2CAAC","5Y 8/3":"#D6CAA0","5Y 8/4":"#D9CA93","5Y 8/5":"#DCCA85","5Y 8/6":"#DFCA77","5Y 8/7":"#E2CA69","5Y 8/8":"#E4C95A","5YR 2.5/1":"#433934","5YR 2.5/2":"#4A372E","5YR 2.5/3":"#4F3527","5YR 2.5/4":"#543320","5YR 2.5/5":"#593118","5YR 2.5/6":"#5D2E0E","5YR 2.5/7":"#612C00","5YR 2.5/8":"#652A00","5YR 2/1":"#372E2A","5YR 2/2":"#3E2B24","5YR 2/3":"#43291D","5YR 2/4":"#482716","5YR 2/5":"#4C250E","5YR 2/6":"#502203","5YR 2/7":"#541F00","5YR 2/8":"#581C00","5YR 3/1":"#51453F","5YR 3/2":"#584338","5YR 3/3":"#5E4131","5YR 3/4":"#633F2A","5YR 3/5":"#683C22","5YR 3/6":"#6C3A18","5YR 3/7":"#70380D","5YR 3/8":"#733600","5YR 4/1":"#695E58","5YR 4/2":"#725C50","5YR 4/3":"#795A48","5YR 4/4":"#7F583F","5YR 4/5":"#845637","5YR 4/6":"#89542F","5YR 4/7":"#8D5226","5YR 4/8":"#91501B","5YR 5/1":"#837872","5YR 5/2":"#8B766A","5YR 5/3":"#937462","5YR 5/4":"#997259","5YR 5/5":"#A07050","5YR 5/6":"#A56E46","5YR 5/7":"#AB6B3C","5YR 5/8":"#AF6932","5YR 6/1":"#9E938B","5YR 6/2":"#A69083","5YR 6/3":"#AE8F7B","5YR 6/4":"#B48C72","5YR 6/5":"#BB8A69","5YR 6/6":"#C1885F","5YR 6/7":"#C78655","5YR 6/8":"#CC844B","5YR 7/1":"#B8ADA6","5YR 7/2":"#C1AB9D","5YR 7/3":"#C8A995","5YR 7/4":"#D0A78B","5YR 7/5":"#D7A582","5YR 7/6":"#DDA378","5YR 7/7":"#E3A16F","5YR 7/8":"#E99F65","5YR 8.5/1":"#DED7D1","5YR 8.5/2":"#E9D4C6","5YR 8.5/3":"#F2D2BB","5YR 8.5/4":"#FBD0B0","5YR 8.5/5":"#FFCDA6","5YR 8.5/6":"#FFCB9C","5YR 8.5/7":"#FFC992","5YR 8.5/8":"#FFC787","5YR 8/1":"#D1C9C2","5YR 8/2":"#DBC6B8","5YR 8/3":"#E4C4AE","5YR 8/4":"#ECC2A4","5YR 8/5":"#F3C09B","5YR 8/6":"#FABE91","5YR 8/7":"#FFBB86","5YR 8/8":"#FFB97B","7.5YR 2.5/1":"#433933","7.5YR 2.5/2":"#48382C","7.5YR 2.5/3":"#4D3625","7.5YR 2.5/4":"#51351C","7.5YR 2.5/5":"#553312","7.5YR 2.5/6":"#593204","7.5YR 2.5/7":"#5E3000","7.5YR 2.5/8":"#602F00","7.5YR 2/1":"#362E28","7.5YR 2/2":"#3C2C22","7.5YR 2/3":"#412B1A","7.5YR 2/4":"#452911","7.5YR 2/5":"#492705","7.5YR 2/6":"#4C2600","7.5YR 2/7":"#4F2400","7.5YR 2/8":"#522300","7.5YR 3/1":"#50453E","7.5YR 3/2":"#564436","7.5YR 3/3":"#5B422E","7.5YR 3/4":"#604026","7.5YR 3/5":"#643F1C","7.5YR 3/6":"#683D11","7.5YR 3/7":"#6B3C02","7.5YR 3/8":"#6D3B00","7.5YR 4/1":"#695F57","7.5YR 4/2":"#715D4E","7.5YR 4/3":"#775B44","7.5YR 4/4":"#7D593A","7.5YR 4/5":"#815831","7.5YR 4/6":"#855628","7.5YR 4/7":"#88551D","7.5YR 4/8":"#8B530F","7.5YR 5/1":"#827971","7.5YR 5/2":"#8A7768","7.5YR 5/3":"#91755E","7.5YR 5/4":"#977354","7.5YR 5/5":"#9D724A","7.5YR 5/6":"#A2703F","7.5YR 5/7":"#A66E34","7.5YR 5/8":"#AA6D27","7.5YR 6/1":"#9D938A","7.5YR 6/2":"#A59181","7.5YR 6/3":"#AC8F77","7.5YR 6/4":"#B28E6E","7.5YR 6/5":"#B88C63","7.5YR 6/6":"#BD8A58","7.5YR 6/7":"#C2894D","7.5YR 6/8":"#C78742","7.5YR 7/1":"#B8AEA4","7.5YR 7/2":"#C0AC9B","7.5YR 7/3":"#C7AA91","7.5YR 7/4":"#CDA886","7.5YR 7/5":"#D4A77C","7.5YR 7/6":"#D9A571","7.5YR 7/7":"#DEA466","7.5YR 7/8":"#E3A25B","7.5YR 8.5/1":"#DFD6CD","7.5YR 8.5/2":"#E8D5C2","7.5YR 8.5/3":"#F0D3B6","7.5YR 8.5/4":"#F7D1AB","7.5YR 8.5/5":"#FED0A0","7.5YR 8.5/6":"#FFCE95","7.5YR 8.5/7":"#FFCC89","7.5YR 8.5/8":"#FFCB7D","7.5YR 8/1":"#D2C9BF","7.5YR 8/2":"#DAC7B5","7.5YR 8/3":"#E2C5AA","7.5YR 8/4":"#E8C49F","7.5YR 8/5":"#EFC295","7.5YR 8/6":"#F5C08A","7.5YR 8/7":"#FBBE7E","7.5YR 8/8":"#FFBD72","N 2.5/":"#3C3C3C","N 2/":"#313131","N 3.5/":"#545454","N 3/":"#484848","N 4.5/":"#6D6D6D","N 4/":"#606060","N 5.5/":"#868686","N 5/":"#797979","N 6.5/":"#A0A0A0","N 6/":"#939393","N 7/":"#ADADAD","N 8/":"#C8C8C8"};
+
+// Resolve a Munsell notation (e.g. '10YR 4/3', 'N 5/') to the official
+// soil-chart hex, or '' if unknown. Tolerant of spacing/casing.
+function munsellToHex(mun){
+  if(!mun) return '';
+  let s=String(mun).trim().toUpperCase().replace(/\s+/g,' ');
+  if(MUNSELL_SOIL[s]) return MUNSELL_SOIL[s];
+  // normalise neutral 'N5/' or 'N 5' -> 'N 5/'
+  let nm=s.match(/^N\s*([0-9.]+)\/?$/); if(nm){const k='N '+nm[1]+'/'; if(MUNSELL_SOIL[k])return MUNSELL_SOIL[k];}
+  // tolerate missing space between hue and value e.g. '10YR4/3'
+  let m=s.match(/^([0-9.]*[A-Z]+)\s*([0-9.]+)\/([0-9.]+)$/);
+  if(m){const k=`${m[1]} ${m[2]}/${m[3]}`; if(MUNSELL_SOIL[k])return MUNSELL_SOIL[k];}
+  return '';
+}
+
+
+// ════════════════════════════════════════════════════════════
+//  LEGACY-CORE COLOUR CONVERTER
+//  Re-maps colours in an OLD exported core to the authoritative
+//  Munsell soil-chart hexes. Works on JSON (matches each layer's
+//  stored hex via the legacy bridge) and on TXT/CSV exports (uses
+//  the Munsell column directly). Downloads a corrected copy; the
+//  current in-app profile is never touched.
+// ════════════════════════════════════════════════════════════
+const LEGACY_HEX_MUNSELL = {"#211F1E":"N 2/","#231F20":"7.5YR 2/1","#24201B":"7.5YR 2/1","#2C2621":"10YR 2/1","#3B3022":"7.5YR 2/2","#433F3C":"N 2/","#48494B":"N 3/","#484A3F":"5GY 2/1","#4A4339":"10YR 3/2","#4B443B":"2.5Y 3/1","#4D3F33":"7.5YR 3/3","#4E4131":"7.5YR 3/2","#503932":"5YR 3/3","#59554C":"2.5Y 3/1","#59554F":"2.5Y 3/2","#5E5649":"10YR 3/1","#605D4E":"5Y 4/1","#616363":"N 4/","#645B50":"10YR 4/1","#662A22":"2.5YR 3/6","#675949":"7.5YR 4/2","#68583F":"10YR 4/6","#69563C":"10YR 4/4","#6E460B":"5YR 3/4","#6E7168":"5GY 4/1","#705C42":"7.5YR 4/4","#706C63":"10YR 4/1","#716E5B":"5Y 4/2","#736757":"10YR 4/2","#778385":"5B 5/2","#7A593E":"7.5YR 5/6","#7A8279":"5GY 5/1","#7E5241":"5YR 4/4","#828282":"N 5/","#857766":"7.5YR 5/4","#857F76":"10YR 5/2","#877353":"10YR 5/4","#8B8773":"5Y 5/2","#8B947F":"5GY 5/2","#8D7F57":"2.5Y 5/4","#8D8F79":"5Y 5/3","#8F8B66":"5Y 5/4","#958261":"10YR 5/6","#958A6C":"2.5Y 6/4","#99C1C2":"5BG 7/2","#A0887C":"5YR 5/4","#A15B35":"5YR 4/6","#A18D75":"7.5YR 6/4","#A6A89B":"5Y 6/1","#A79273":"10YR 6/4","#ABAC8D":"5Y 6/3","#AEAC93":"5Y 6/2","#AFA48E":"10YR 6/2","#BAA391":"5YR 6/4","#BCB6AD":"10YR 7/1","#BFC1B3":"5Y 7/1","#C1A365":"10YR 6/6","#C7C6BF":"2.5Y 7/1","#C9BDA5":"2.5Y 7/2","#CCBC9A":"10YR 7/3","#D3C79F":"10YR 7/4","#D6D1C9":"10YR 8/1","#F1E4B8":"2.5Y 8/4","#FCD683":"2.5Y 8/8"};
+
+// Closest authoritative soil hex by RGB distance — fallback when a
+// legacy hex isn't in the bridge and no notation is available.
+function nearestSoilHex(hex){
+  const h=String(hex||'').replace('#','');
+  if(h.length!==6) return '';
+  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  let best='',bd=1e9;
+  for(const k in MUNSELL_SOIL){
+    const v=MUNSELL_SOIL[k].replace('#','');
+    const dr=r-parseInt(v.slice(0,2),16),dg=g-parseInt(v.slice(2,4),16),db=b-parseInt(v.slice(4,6),16);
+    const d=dr*dr+dg*dg+db*db;
+    if(d<bd){bd=d;best=MUNSELL_SOIL[k];}
+  }
+  return best;
+}
+
+// Given an old layer hex, find its best authoritative replacement +
+// the Munsell notation used. Returns {hex, munsell, how}.
+function remapLegacyHex(oldHex){
+  const up=String(oldHex||'').toUpperCase();
+  if(LEGACY_HEX_MUNSELL[up]){
+    const mun=LEGACY_HEX_MUNSELL[up];
+    const hx=munsellToHex(mun);
+    if(hx) return {hex:hx, munsell:mun, how:'bridge'};
+  }
+  // already authoritative?
+  for(const k in MUNSELL_SOIL){ if(MUNSELL_SOIL[k].toUpperCase()===up) return {hex:MUNSELL_SOIL[k], munsell:k, how:'exact'}; }
+  const near=nearestSoilHex(oldHex);
+  return {hex:near||oldHex, munsell:'', how: near?'nearest':'unchanged'};
+}
+
+function convertLegacyColours(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let text=e.target.result, outText, changed=0, total=0, outName, mime;
+    const lower=(file.name||'').toLowerCase();
+    try{
+      if(lower.endsWith('.json')){
+        const prof=JSON.parse(text);
+        if(!prof||!Array.isArray(prof.layers)) throw 0;
+        prof.layers.forEach(l=>{
+          if(!l||!l.color) return;
+          total++;
+          // Prefer an explicit munsell field if the export had one.
+          let mun=(l.munsell||'').trim();
+          let res = mun ? {hex:munsellToHex(mun)||l.color, munsell:mun, how: munsellToHex(mun)?'field':'unchanged'}
+                        : remapLegacyHex(l.color);
+          if(res.hex && res.hex.toUpperCase()!==String(l.color).toUpperCase()){ l.color=res.hex; changed++; }
+          if(res.munsell) l.munsell=res.munsell;
+        });
+        outText=JSON.stringify(prof,null,2);
+        outName=(file.name.replace(/\.json$/i,''))+'-munsell-corrected.json';
+        mime='application/json';
+      } else {
+        // TSV/CSV: detect delimiter, find Color + Munsell columns.
+        const sep = text.indexOf('\t')!==-1 ? '\t' : (text.indexOf(';')!==-1 && text.indexOf(',')===-1 ? ';' : ',');
+        const lines=text.split(/\r?\n/);
+        // header may be preceded by comment lines (# ...). Find header row.
+        let hi=lines.findIndex(l=>/(^|[\t,;])Color([\t,;]|$)/i.test(l) && /Munsell/i.test(l));
+        if(hi===-1) throw 1;
+        const head=lines[hi].split(sep).map(s=>s.trim().replace(/^"|"$/g,''));
+        const ci=head.findIndex(h=>/^Color$/i.test(h));
+        const mi=head.findIndex(h=>/^Munsell$/i.test(h));
+        if(ci===-1) throw 1;
+        for(let i=hi+1;i<lines.length;i++){
+          if(!lines[i].trim()) continue;
+          const cells=lines[i].split(sep);
+          if(cells.length<=ci) continue;
+          total++;
+          let mun = (mi!==-1 && cells[mi]!=null) ? cells[mi].trim().replace(/^"|"$/g,'') : '';
+          let oldHex=(cells[ci]||'').trim().replace(/^"|"$/g,'');
+          let res = mun && mun!=='-' ? {hex:munsellToHex(mun)||oldHex} : remapLegacyHex(oldHex);
+          if(res.hex && res.hex.toUpperCase()!==oldHex.toUpperCase()){ cells[ci]=res.hex; changed++; }
+          lines[i]=cells.join(sep);
+        }
+        outText=lines.join('\n');
+        outName=(file.name.replace(/\.(txt|tsv|csv)$/i,''))+'-munsell-corrected'+(lower.match(/\.(txt|tsv|csv)$/i)||['.txt'])[0];
+        mime='text/plain';
+      }
+    }catch(err){
+      alert('Could not convert this file. Make sure it is a core exported by this tool (JSON, or TXT/CSV with Color & Munsell columns).');
+      event.target.value=''; return;
+    }
+    triggerDownload(new Blob([outText],{type:mime+';charset=utf-8'}), outName);
+    alert(`Colour conversion complete.\n\nLayers scanned: ${total}\nColours updated to soil-chart values: ${changed}\n\nA corrected copy has been downloaded:\n${outName}`);
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
 const PETRO_PRIMARY = [
     // code, English word, German
     { code: 'S',  en: 'sand',          de: 'Sand' },
@@ -1823,7 +2270,6 @@ const PETRO_PRIMARY = [
     { code: 'G',  en: 'gravel',        de: 'Kies' },
     { code: 'X',  en: 'stones',        de: 'Steine' },
     { code: 'H',  en: 'peat',          de: 'Torf' },
-    { code: 'Ha', en: 'amorphic peat', de: 'armorpher Torf'},
     { code: 'Mu', en: 'mud',           de: 'Mudde' },
     { code: 'Hn', en: 'fen peat',      de: 'Niedermoortorf' },
     { code: 'Hh', en: 'bog peat',      de: 'Hochmoortorf' },
@@ -1850,6 +2296,24 @@ const PETRO_SECONDARY = [
     { code: 'fe', en: 'ferruginous', de: 'eisenhaltig' },
     { code: 'o',  en: 'organic',     de: 'organisch' }
 ];
+// ── Genesis / depositional environment quick-entry ──────────────────
+// These describe the substrate ORIGIN (not a KA5 horizon). Selecting one
+// appends the English term to the description; the horizon classifier then
+// picks it up automatically and records it as a substrate note. The `kw`
+// is the exact phrase written to the description (kept simple + English so
+// the classifier's regexes match reliably). `de` is shown in the label.
+const GENESIS_OPTIONS = [
+    { kw: 'glaciofluvial',  label: 'Glaciofluvial — meltwater outwash', de: 'glazifluvial' },
+    { kw: 'glacial till',   label: 'Glacial — till / moraine',          de: 'glazial / Geschiebe' },
+    { kw: 'periglacial',    label: 'Periglacial — cryoturbation / solifluction', de: 'periglazial' },
+    { kw: 'fluvial',        label: 'Fluvial — river / floodplain',       de: 'fluvial / Aue' },
+    { kw: 'alluvial',       label: 'Alluvial — overbank fines',          de: 'alluvial / Auenlehm' },
+    { kw: 'lacustrine',     label: 'Lacustrine — lake / still water',    de: 'limnisch / See' },
+    { kw: 'marine tidal',   label: 'Marine — tidal / brackish',          de: 'marin / Watt' },
+    { kw: 'aeolian',        label: 'Aeolian — loess / dune sand',        de: 'äolisch / Löss' },
+    { kw: 'colluvial',      label: 'Colluvial — slope wash',             de: 'kolluvial / Hang' }
+];
+let lastGenesisPhrase = '';   // remember exactly what we appended (Add panel)
 // Working selection for the current (not yet added) layer
 let petroState = { primary: null, secondaries: [] };
 // Working selection for the gradational base soil (Add panel + Edit modal).
@@ -1867,20 +2331,74 @@ let editGradeState = { secondaries: [] };
 //  Repopulating preserves the current selection if it still exists in the
 //  filtered list; otherwise it falls back to the first available option.
 // ═══════════════════════════════════════════════════════════════
+// Official Munsell soil-chart hue-page order (not alphabetical — alphabetical
+// would scatter 10R / 10YR / 10Y). Used to sort/group the colour dropdown.
+const MUNSELL_HUE_ORDER = ['10R','2.5YR','5YR','7.5YR','10YR','2.5Y','5Y',
+    '10Y','5GY','10GY','5G','10G','5BG','10BG','5B','10B','5PB','N'];
+
+// Parse "10YR 4/3" or "N 5/" → { hue, value, chroma }. Returns null if unparseable.
+function parseMunsellNotation(mun) {
+    if (!mun) return null;
+    const s = String(mun).trim().toUpperCase().replace(/\s+/g, ' ');
+    const nm = s.match(/^N\s*([0-9.]+)\/?$/);
+    if (nm) return { hue: 'N', value: parseFloat(nm[1]), chroma: 0 };
+    const m = s.match(/^([0-9.]*[A-Z]+)\s+([0-9.]+)\/([0-9.]+)$/);
+    if (!m) return null;
+    return { hue: m[1], value: parseFloat(m[2]), chroma: parseFloat(m[3]) };
+}
+
 function populateColorSelect(sel, useMunsell) {
     if (!sel) return;
     const prev = sel.value;
     const list = SOIL_DATA.colors.filter(c =>
         useMunsell ? !!(c.munsell && c.munsell.trim()) : !(c.munsell && c.munsell.trim()));
     sel.innerHTML = '';
-    list.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.hex;
-        opt.text  = c.munsell ? `${c.name} – ${c.munsell}` : c.name;
-        opt.style.backgroundColor = c.hex;
-        opt.style.color = isDark(c.hex) ? 'white' : 'black';
-        sel.appendChild(opt);
-    });
+
+    if (useMunsell) {
+        // Group by hue page, sorted in official soil-chart order, then by
+        // value then chroma within each page. Options show ONLY the code.
+        // De-duplicate identical notations (a few legacy entries shared a code).
+        const seen = new Set();
+        const groups = {};
+        list.forEach(c => {
+            const key = (c.munsell || '').trim().toUpperCase();
+            if (seen.has(key)) return;
+            seen.add(key);
+            const p = parseMunsellNotation(c.munsell);
+            const hue = p ? p.hue : '?';
+            (groups[hue] = groups[hue] || []).push({ c, p });
+        });
+        const huesPresent = Object.keys(groups).sort((a, b) => {
+            const ia = MUNSELL_HUE_ORDER.indexOf(a), ib = MUNSELL_HUE_ORDER.indexOf(b);
+            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        });
+        huesPresent.forEach(hue => {
+            const og = document.createElement('optgroup');
+            og.label = hue === 'N' ? 'N (neutral)' : hue;
+            groups[hue]
+                .sort((x, y) => (x.p?.value - y.p?.value) || (x.p?.chroma - y.p?.chroma))
+                .forEach(({ c }) => {
+                    const opt = document.createElement('option');
+                    opt.value = c.hex;
+                    opt.text  = c.munsell;                 // code only
+                    opt.title = c.name || '';              // descriptive name on hover
+                    opt.style.backgroundColor = c.hex;
+                    opt.style.color = isDark(c.hex) ? 'white' : 'black';
+                    og.appendChild(opt);
+                });
+            sel.appendChild(og);
+        });
+    } else {
+        // Custom colours without a Munsell notation: keep the descriptive name.
+        list.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.hex;
+            opt.text  = c.name;
+            opt.style.backgroundColor = c.hex;
+            opt.style.color = isDark(c.hex) ? 'white' : 'black';
+            sel.appendChild(opt);
+        });
+    }
     // keep the old selection if it survives the filter
     if (prev && list.some(c => c.hex === prev)) sel.value = prev;
 }
@@ -1922,6 +2440,38 @@ window.onload = function() {
         opt.value = p.code;
         opt.text  = `${p.en} – ${p.code}`;
         pSec.appendChild(opt);
+    });
+
+    // Populate genesis (substrate origin) dropdown
+    const gGen = document.getElementById('genesisSelect');
+    if (gGen) GENESIS_OPTIONS.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.kw;
+        opt.text  = g.label;
+        gGen.appendChild(opt);
+    });
+
+    // Populate edit-modal petrography + genesis dropdowns (mirror the Add panel)
+    const ePrim = document.getElementById('editPetroPrimary');
+    if (ePrim) PETRO_PRIMARY.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.code;
+        opt.text  = `${capitalize(p.en)} – ${p.code}`;
+        ePrim.appendChild(opt);
+    });
+    const eSec = document.getElementById('editPetroSecondary');
+    if (eSec) PETRO_SECONDARY.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.code;
+        opt.text  = `${p.en} – ${p.code}`;
+        eSec.appendChild(opt);
+    });
+    const eGen = document.getElementById('editGenesisSelect');
+    if (eGen) GENESIS_OPTIONS.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.kw;
+        opt.text  = g.label;
+        eGen.appendChild(opt);
     });
 
     // Populate the gradational "soil at base" dropdowns (Add + Edit)
@@ -2321,6 +2871,235 @@ function classifyGradeCodes(phrase) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SOIL-HORIZON CLASSIFIER  (KA5, rule-based suggestion engine)
+//  ----------------------------------------------------------------
+//  This is a SUGGESTION engine, not an oracle. It infers the most
+//  likely KA5 master/sub horizon from the data we actually have:
+//    • depth / position in the profile
+//    • Munsell value & chroma (+ hue) parsed from the colour
+//    • the KA5 petrographic main code (translateSoil)
+//    • finds / observations (humic, roots, iron oxide, …)
+//    • free-text keywords (calcareous, mottled, gley, fill, …)
+//  Things that genuinely need field/lab evidence (Bt clay illuviation,
+//  Bs/Bh spodic, calcic Cc) are NOT invented — when the signal is weak
+//  we still give a best guess but mark it LOW confidence so you know to
+//  check it. Every result is written to an EDITABLE column.
+//
+//  Returns { code, conf, why } where conf ∈ {'high','med','low'}.
+// ═══════════════════════════════════════════════════════════════
+
+// Parse a Munsell string "10YR 3/2" → { hue:'10YR', value:3, chroma:2 }.
+// Returns null when colour has no usable Munsell notation.
+function parseMunsell(munsell) {
+    if (!munsell) return null;
+    const m = String(munsell).trim().match(/^\s*([0-9.]*\s*[A-Z]+)\s+([0-9.]+)\s*\/\s*([0-9.]+)/i);
+    if (!m) return null;
+    return { hue: m[1].replace(/\s+/g, '').toUpperCase(), value: parseFloat(m[2]), chroma: parseFloat(m[3]) };
+}
+
+// Main KA5 soil code letter for a layer (S, U, T, L, G, H, …) without
+// the parenthetical modifiers. Reuses the existing translateSoil engine.
+function horizonMainCode(layer) {
+    const official = (layer.officialDesc || translateSoil(layer.originalDesc || '') || '').trim();
+    const m = official.match(/^([A-Za-zÄÖÜäöü]+)/);
+    return m ? m[1] : '';
+}
+
+function classifyHorizon(layer, idx, allLayers) {
+    // Non-normal layer types map directly.
+    if (layer.layerType === 'missing')       return { code: '',    conf: 'high', why: 'sediment gap' };
+    if (layer.layerType === 'anthropogenic') return { code: 'yC',  conf: 'med',  why: 'anthropogenic fill (y = anthropogenic substrate)' };
+
+    const desc   = ((layer.originalDesc || '') + ' ' +
+                    (typeof translateGermanToEnglish === 'function' ? translateGermanToEnglish(layer.originalDesc || '') : '')).toLowerCase();
+    const finds  = (typeof summarizeFinds === 'function') ? summarizeFinds(layer) : {};
+    const mun    = parseMunsell(getMunsell ? getMunsell(layer.color) : '');
+    const main   = horizonMainCode(layer);
+    const top    = layer.depthFrom;
+    const isSurface = idx === 0 || top < 0.05;
+
+    // ── Observation signals (from finds panel + free-text) ─────────────
+    // Quantity: summarizeFinds gives 'abundant' | 'rare' | 'present'.
+    const qty       = finds.qtyLabel || 'present';
+    const lotsOf    = qty === 'abundant' || /\b(abundant|many|rich|massive|reichlich|viele|stark)\b/.test(desc);
+    const traceOnly = qty === 'rare'     || /\b(trace|few|faint|sparse|vereinzelt|wenig|schwach)\b/.test(desc);
+
+    const obsRoots   = finds.roots    || /\broot|wurzel|durchwurzel|rooting/.test(desc);
+    const obsShell   = finds.shell    || /shell|mollusc|gastropod|bivalve|muschel|schnecke/.test(desc);
+    const obsIronOx  = finds.ironoxide|| /iron.?oxid|eisenoxid|rost|ferrous|ferric|limonit|ocher|ochre/.test(desc);
+
+    // Explicit buried / fossil-soil wording. A buried A horizon (fAh, "f" =
+    // fossil/begraben) is a real, observable marker of a former land surface
+    // sealed by younger cover sediment — often the Holocene-over-Pleistocene
+    // boundary. We treat the EXPLICIT keyword as strong evidence; we can also
+    // INFER it structurally below (A-horizon signature that sits buried under
+    // mineral cover).
+    const kwBuried   = /buried|fossil|relict|paleosol|palaeosol|begraben|fossil(?:er|e|es)?\s*boden|reliktboden|pal(?:ä|ae)oboden|fah\b|2ah\b/.test(desc);
+
+    // Depositional environment / substrate genesis (KA5 has no single horizon
+    // symbol for these — they describe substrate ORIGIN, so we use them to bias
+    // the pedogenic call and record the genesis in the explanation, rather than
+    // inventing a horizon symbol that would need lab/field confirmation).
+    // Order matters: test the more specific compound terms (glaciofluvial,
+    // periglacial) before the generic ones (glacial, fluvial) they contain.
+    const envGlacioFlu = /glacio.?fluvial|fluvio.?glacial|glazifluvi|glaziofluvi|schmelzwasser|outwash|sander\b|sandur/.test(desc);
+    const envPeriglac  = /periglacial|periglazial|cryoturb|kryoturb|solifluct|solifluktion|gelifluct|frost.?wedge|eiskeil|tundra/.test(desc);
+    const envGlacial   = /\bglacial\b|glazial|\btill\b|geschiebe|moraine|moräne|grundmoräne|diamict|boulder.?clay|lodgement/.test(desc);
+    const envColluvial = /colluvi|kolluvi|slope.?wash|hangschutt|hillwash|hangsediment|abluvi/.test(desc);
+    const envMarine    = /marine|brackish|tidal|intertidal|salt.?marsh|watt|ästuar|estuar|lagoon|brack|gezeiten|meeresabl/.test(desc);
+    const envLacust    = /lacustrine|limnic|lake\b|see\b|seeabl|stillwater|pond|teich/.test(desc);
+    const envFluvial   = /fluvial|alluvial|floodplain|overbank|auenlehm|auensediment|fluss|aue\b|alluvi/.test(desc);
+    const envAeolian   = /aeolian|eolian|loess|löss|loss\b|dune|düne|flugsand|windabl/.test(desc);
+    const envGenesis = envGlacioFlu ? 'glaciofluvial (meltwater outwash)'
+                     : envPeriglac  ? 'periglacial'
+                     : envGlacial   ? 'glacial (till / moraine)'
+                     : envColluvial ? 'colluvial (slope)'
+                     : envMarine    ? 'marine/tidal'
+                     : envLacust    ? 'lacustrine'
+                     : envFluvial   ? 'fluvial/alluvial'
+                     : envAeolian   ? 'aeolian' : null;
+    // Genesis families that imply a Pleistocene (cold-stage) substrate. Used
+    // only to enrich the buried-soil note, never as a standalone age label.
+    const envPleistoceneHint = envGlacioFlu || envPeriglac || envGlacial;
+
+    // Keyword signals from the free text.
+    const kwPeat      = /\bpeat\b|\btorf\b|\bmoor\b/.test(desc);
+    const kwHumus     = /humic|humos|humus|organic matter|organische/.test(desc) || finds.humic;
+    const kwPlough    = /plough|plow|tilled|ackerkrume|pflug|arable/.test(desc);
+    const kwMottled   = /mottl|gefleckt|marmor|redoximorph|rost/.test(desc) || obsIronOx;
+    const kwGleyRed   = /reduc|gley|grau|grey|gray|bläulich|blue.?grey|reduktion/.test(desc);
+    const kwCalc      = /calcar|carbonate|kalk|lime\b|kalkhaltig/.test(desc) || (obsShell && lotsOf);
+    const kwWeather   = /weather|verwitter|browning|verbraun|oxidation|brown/.test(desc);
+    const kwFill      = /fill|rubble|bauschutt|aufschüttung|debris|made ground/.test(desc);
+    const kwGravelLag = main === 'G' || /gravel|kies|geröll/.test(desc);
+
+    // Colour-derived signals (only when Munsell present).
+    const lowValue  = mun ? mun.value  <= 3.5 : false;   // dark → organic enrichment
+    const lowChroma = mun ? mun.chroma <= 2   : false;   // grey → reduction (gley Gr)
+    const highChroma= mun ? mun.chroma >= 4   : false;   // strong colour → oxidation / weathering
+    const redHue    = mun ? /(YR|R)$/.test(mun.hue) && !/Y$/.test(mun.hue.replace(/YR/,'')) : false;
+
+    // Helper: append substrate genesis to an explanation string.
+    const withGenesis = (why) => envGenesis ? `${why}; substrate appears ${envGenesis}` : why;
+
+    // ── Decision cascade (top of profile downward) ──────────────────
+    // 1. Organic surface layers
+    if (kwPeat)                 return { code: 'H',  conf: 'high', why: withGenesis('peat / organic (H)') };
+    if (isSurface && kwPlough)  return { code: 'Ap', conf: 'high', why: 'ploughed topsoil (Ap)' };
+    if (isSurface && (kwHumus || lowValue || obsRoots)) {
+        // Roots + dark value + organic text reinforce each other.
+        const signals = [lowValue && 'dark value', kwHumus && 'organic', obsRoots && 'rooting'].filter(Boolean);
+        const conf = (signals.length >= 2) ? 'high' : (lowValue || kwHumus) ? 'med' : 'low';
+        return { code: 'Ah', conf, why: 'humic / rooted topsoil (Ah) — ' + signals.join(' + ') };
+    }
+    if (kwHumus && top < 0.4)   return { code: 'Ah', conf: 'med',  why: 'humic, near surface (Ah)' };
+    // Rooting zone below a topsoil but with no other A signal → still A-like.
+    if (obsRoots && lotsOf && top < 0.5)
+                                return { code: 'Ah', conf: 'low',  why: 'abundant roots near surface → rooting zone (Ah?)' };
+
+    // 1b. Buried / fossil soil (fAh) — a former topsoil sealed by younger
+    //     cover sediment. KA5 marks it with the "f" (fossil) prefix. This is
+    //     a genuine boundary marker (commonly Holocene cover over a
+    //     Pleistocene surface), so we surface that implication in the note —
+    //     but only as context, never as a hard age label.
+    //     Trigger when EITHER the description says so, OR a buried A-horizon
+    //     signature is detected: dark/humic material below the surface with a
+    //     non-organic mineral layer directly above it (the cover).
+    const aSignature = lowValue || kwHumus;          // looks like an A horizon
+    const prev       = (idx > 0) ? allLayers[idx-1] : null;
+    const prevDesc   = prev ? ((prev.originalDesc||'') + ' ' +
+                        (typeof translateGermanToEnglish === 'function' ? translateGermanToEnglish(prev.originalDesc||'') : '')).toLowerCase() : '';
+    const prevIsMineralCover = prev && !/\bpeat\b|\btorf\b|humic|humos|humus|organic|organische/.test(prevDesc);
+    const structurallyBuried = !isSurface && aSignature && prevIsMineralCover && top >= 0.15;
+
+    if (kwBuried || structurallyBuried) {
+        const conf = kwBuried ? 'high' : (lowValue && kwHumus) ? 'med' : 'low';
+        const basis = kwBuried
+            ? 'described as buried / fossil soil'
+            : 'dark, humic A-horizon signature sealed beneath mineral cover';
+        // If the buried layer's own substrate is glacial-family, the boundary
+        // implication is stronger and more specific.
+        const ageNote = envPleistoceneHint
+            ? `substrate reads ${envGenesis} → likely a Pleistocene surface beneath Holocene cover`
+            : `often a Holocene-cover-over-Pleistocene boundary`;
+        return { code: 'fAh', conf,
+                 why: `buried / fossil topsoil (fAh) — ${basis}. Marks a former land surface; ` +
+                      `${ageNote} (verify with dating/stratigraphy).` };
+    }
+
+    // 2. Redoximorphic / gley (colour-driven, KA5: Go oxidised, Gr reduced).
+    //    Marine/tidal and lacustrine substrates are typically waterlogged, so
+    //    their presence raises confidence in a gley reading.
+    const wetEnv = envMarine || envLacust;
+    if (lowChroma && (kwGleyRed || mun)) {
+        const conf = kwGleyRed ? 'high' : wetEnv ? 'med' : 'med';
+        return { code: 'Gr', conf, why: withGenesis('low chroma → permanent reduction (Gr)') };
+    }
+    if (kwMottled && (kwGleyRed || wetEnv)) {
+        // Abundant iron oxide in a fluctuating zone is a textbook Go.
+        const conf = (lotsOf || kwGleyRed) ? 'high' : 'med';
+        return { code: 'Go', conf, why: withGenesis('mottling + reduction/wet env → fluctuating GW (Go)') };
+    }
+    if (kwMottled) {
+        const conf = lotsOf ? 'med' : traceOnly ? 'low' : 'med';
+        return { code: 'Go', conf, why: withGenesis(`${lotsOf?'abundant ':''}iron oxide / mottling → oxidation zone (Go)`) };
+    }
+
+    // 3. Stagnic (perched water) — heuristic from explicit keywords only
+    if (/stagn|pseudogley|staunäss|stauwasser|sw\b|sd\b/.test(desc))
+                                           return { code: 'Sw', conf: 'low',  why: 'stagnic keyword (Sw — verify Sw/Sd)' };
+
+    // 4. Weathering / cambic B horizon (browning, strong chroma, mid-profile)
+    if (!isSurface && (kwWeather || (highChroma && redHue)) && top < 1.2)
+                                           return { code: 'Bv', conf: kwWeather ? 'med' : 'low',
+                                                    why: withGenesis('weathered / browned subsoil (Bv — no clay-illuviation test)') };
+
+    // 5. Parent material at depth
+    if (kwCalc)                            return { code: 'Cc', conf: obsShell && lotsOf ? 'med' : 'med',
+                                                    why: withGenesis('calcareous parent material (Cc)' + (obsShell ? ' — shell carbonate' : '')) };
+    if (idx === allLayers.length - 1 || top >= 1.0)
+                                           return { code: 'Cv', conf: 'med',  why: withGenesis('deep / basal → parent material (Cv)') };
+
+    // 6. Fallback — unaltered substrate, low confidence
+    return { code: 'C', conf: 'low', why: withGenesis('no strong pedogenic signal → substrate (C). Please verify.') };
+}
+
+// Run the classifier across every layer, writing editable fields.
+// Only fills layers whose horizon is empty OR was previously auto-filled
+// (so we never clobber a value you typed by hand).
+function generateHorizons() {
+    if (!layers.length) { alert('Add at least one layer first.'); return; }
+    let filled = 0, kept = 0;
+    layers.forEach((l, i) => {
+        if (l.horizon && l.horizonAuto === false) { kept++; return; }  // user-edited → keep
+        const r = classifyHorizon(l, i, layers);
+        l.horizon     = r.code;
+        l.horizonConf = r.conf;
+        l.horizonWhy  = r.why;
+        l.horizonAuto = true;
+        filled++;
+    });
+    updateTable();
+    if (typeof drawGraph === 'function') drawGraph();
+    const msg = `Generated ${filled} horizon suggestion${filled!==1?'s':''}` +
+                (kept ? ` · kept ${kept} manual entr${kept!==1?'ies':'y'}` : '') +
+                `.\n\nReview the “Horizon (KA5)” column — low-confidence guesses are marked ◓ / ○.`;
+    // non-blocking toast-ish feedback
+    try { console.log(msg); } catch(e){}
+    alert(msg);
+}
+
+// Inline edit handler for the horizon cell (keeps the value, marks it manual).
+function onHorizonEdit(idx, value) {
+    if (!layers[idx]) return;
+    const v = (value || '').trim();
+    layers[idx].horizon     = v;
+    layers[idx].horizonAuto = false;          // mark as user-confirmed
+    layers[idx].horizonConf = v ? 'high' : '';
+    if (typeof drawGraph === 'function') drawGraph();
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  ADD LAYER
 // ═══════════════════════════════════════════════════════════════
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
@@ -2511,6 +3290,121 @@ function onPetroSecondary() {
     sel.value = '';   // reset so the same one can be re-picked / next added
 }
 
+// Genesis (substrate origin): appends a short, classifier-readable phrase to
+// the END of the description, tagged so it's visually distinct and can be
+// swapped without disturbing the petrography prefix, the user's free text, or
+// the gradational " → base" suffix. Selecting "— add genesis —" (empty) clears.
+const GENESIS_TAG = ' · genesis: ';
+function onGenesis() {
+    const sel = document.getElementById('genesisSelect');
+    const kw  = sel.value;   // '' to clear, else the keyword phrase
+    const ta  = document.getElementById('soilDesc');
+    if (!ta) return;
+    let text = ta.value;
+
+    // Strip a previously-applied genesis tag (and its value) if present.
+    if (lastGenesisPhrase) {
+        const re = new RegExp(GENESIS_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                              lastGenesisPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$');
+        text = text.replace(re, '');
+    }
+    text = text.replace(/\s+$/, '');
+
+    if (kw) ta.value = text + GENESIS_TAG + kw;
+    else    ta.value = text;
+    lastGenesisPhrase = kw || '';
+    // keep the dropdown showing the current selection (don't reset to blank),
+    // so the user can see what's active and switch/clear it.
+}
+
+// ── Edit-modal petrography quick-entry (writes to #editSoilDesc) ────────
+// Parallel state to the Add panel's petroState, so editing one doesn't
+// disturb the other. Mirrors applyPetroToDescription / onPetroPrimary etc.
+let editPetroState   = { primary: null, secondaries: [] };
+let lastEditPetroPhrase = '';
+
+function applyEditPetroToDescription() {
+    const ta = document.getElementById('editSoilDesc');
+    if (!ta) return;
+    const secWords = editPetroState.secondaries.map(c => petroLookupSecondary(c)?.en).filter(Boolean);
+    const primWord = editPetroState.primary ? petroLookupPrimary(editPetroState.primary)?.en : null;
+    const phrase   = [...secWords, ...(primWord ? [primWord] : [])].join(' ');
+
+    let text = ta.value;
+    if (lastEditPetroPhrase) {
+        if (text.startsWith(lastEditPetroPhrase + PETRO_SEP)) text = text.slice((lastEditPetroPhrase + PETRO_SEP).length);
+        else if (text.startsWith(lastEditPetroPhrase))        text = text.slice(lastEditPetroPhrase.length);
+    }
+    text = text.replace(/^[\s,;]+/, '');
+    ta.value = phrase ? (text ? `${phrase}${PETRO_SEP}${text}` : phrase) : text;
+    lastEditPetroPhrase = phrase;
+
+    const prim = editPetroState.primary || '';
+    const secs = editPetroState.secondaries.join('');
+    const codeEl = document.getElementById('editPetroCode');
+    if (codeEl) codeEl.textContent = (prim + secs) || '—';
+}
+
+function onEditPetroPrimary() {
+    editPetroState.primary = document.getElementById('editPetroPrimary').value || null;
+    applyEditPetroToDescription();
+}
+function onEditPetroSecondary() {
+    const sel = document.getElementById('editPetroSecondary');
+    const code = sel.value;
+    if (code && !editPetroState.secondaries.includes(code)) {
+        editPetroState.secondaries.push(code);
+        applyEditPetroToDescription();
+    }
+    sel.value = '';
+}
+function refreshEditPetroCode() {
+    const ta = document.getElementById('editSoilDesc');
+    const codeEl = document.getElementById('editPetroCode');
+    const txt = (ta?.value || '').trim();
+    if (!txt) { if (codeEl) codeEl.textContent = '—'; return; }
+    const compact = translateSoil(txt).replace(/[()\s,]/g, '');
+    if (codeEl) codeEl.textContent = compact || '—';
+}
+
+let lastEditGenesisPhrase = '';
+function onEditGenesis() {
+    const sel = document.getElementById('editGenesisSelect');
+    const kw  = sel.value;
+    const ta  = document.getElementById('editSoilDesc');
+    if (!ta) return;
+    let text = ta.value;
+    if (lastEditGenesisPhrase) {
+        const re = new RegExp(GENESIS_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                              lastEditGenesisPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$');
+        text = text.replace(re, '');
+    }
+    text = text.replace(/\s+$/, '');
+    ta.value = kw ? text + GENESIS_TAG + kw : text;
+    lastEditGenesisPhrase = kw || '';
+}
+
+// Regenerate the horizon suggestion for just the layer being edited, using
+// the CURRENT (possibly unsaved) field values so the user sees the effect of
+// their edits before saving.
+function regenEditHorizon() {
+    const idx = parseInt(document.getElementById('editIndex').value, 10);
+    if (isNaN(idx) || !layers[idx]) return;
+    const hex  = document.getElementById('editSoilColor').value;
+    const desc = document.getElementById('editSoilDesc').value.trim();
+    const ltype= document.querySelector('input[name="editLayerType"]:checked')?.value || 'normal';
+    // Build a temporary layer reflecting the unsaved edits.
+    const tmp = { ...layers[idx], color: hex, originalDesc: desc,
+                  officialDesc: translateSoil(desc), layerType: ltype };
+    const probe = layers.map((l, i) => i === idx ? tmp : l);
+    const r = classifyHorizon(tmp, idx, probe);
+    document.getElementById('editHorizon').value = r.code;
+    const why = document.getElementById('editHorizonWhy');
+    if (why) why.textContent = r.why ? `(${r.conf}) ${r.why}` : '';
+    // mark intent: a freshly regenerated value is an auto suggestion
+    document.getElementById('editHorizon').dataset.auto = '1';
+}
+
 // Clear petrography state (called after a layer is added)
 function resetPetro() {
     petroState = { primary: null, secondaries: [] };
@@ -2521,6 +3415,9 @@ function resetPetro() {
     if (ps) ps.value = '';
     const code = document.getElementById('petroCode');
     if (code) code.textContent = '—';
+    const gen = document.getElementById('genesisSelect');
+    if (gen) gen.value = '';
+    lastGenesisPhrase = '';
     // reset gradational-shift control
     const gt = document.getElementById('gradeToggle');
     const gd = document.getElementById('gradeDetail');
@@ -2953,14 +3850,14 @@ function updateTable() {
         const shellQtyLabel = shellMany ? 'abundant' : shellFew ? 'rare' : 'present';
         const intactBadge = hasIntact ? '<span class="intact-badge">★ intact</span>' : '';
 
-        const shellTag    = hasShell    ? `<div class="shell-tag"> shells — ${shellQtyLabel}${intactBadge}</div>` : '';
-        const charcoalTag = hasCharcoal ? `<div class="find-tag find-tag-charcoal"> charcoal — ${shellQtyLabel}</div>` : '';
-        const woodTag     = hasWood     ? `<div class="find-tag find-tag-wood"> wood / plant${intactBadge}</div>` : '';
-        const ceramicsTag = hasCeramics ? `<div class="find-tag find-tag-ceramics"> ceramics${intactBadge}</div>` : '';
-        const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic"> humic</div>` : '';
-        const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots"> roots</div>` : '';
-        const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones"> stones${intactBadge}</div>` : '';
-        const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide"> iron oxide — ${shellQtyLabel}</div>` : '';
+        const shellTag    = hasShell    ? `<div class="shell-tag">🐚 shells — ${shellQtyLabel}${intactBadge}</div>` : '';
+        const charcoalTag = hasCharcoal ? `<div class="find-tag find-tag-charcoal">🔥 charcoal — ${shellQtyLabel}</div>` : '';
+        const woodTag     = hasWood     ? `<div class="find-tag find-tag-wood">🪵 wood / plant${intactBadge}</div>` : '';
+        const ceramicsTag = hasCeramics ? `<div class="find-tag find-tag-ceramics">🏺 ceramics${intactBadge}</div>` : '';
+        const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic">🌿 humic</div>` : '';
+        const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots">🌱 roots</div>` : '';
+        const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones">🪨 stones${intactBadge}</div>` : '';
+        const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide">🟠 iron oxide — ${shellQtyLabel}</div>` : '';
         const allFindTags = shellTag + charcoalTag + woodTag + ceramicsTag + humicTag + rootsTag + stonesTag + ironoxideTag;
 
         const elevCell = z !== null
@@ -2976,6 +3873,13 @@ function updateTable() {
             ${z !== null ? `<td class="elev-col">${depthToElev(l.depthFrom)} – ${depthToElev(l.depthTo)} m</td>` : ''}
             <td style="background:${l.color};color:${isDark(l.color)?'white':'black'};text-align:center;font-family:monospace;font-size:.7rem;line-height:1.4;">${l.color}<br><span style="font-size:.65rem;opacity:.85;">${getMunsell(l.color)}</span></td>
             <td><strong>${escXml(l.officialDesc)}</strong></td>
+            <td style="text-align:center;white-space:nowrap;" title="${escXml(l.horizonWhy || 'Press “Generate soil horizons” to suggest')}">
+                <input type="text" value="${escXml(l.horizon || '')}"
+                       onchange="onHorizonEdit(${idx}, this.value)"
+                       placeholder="—"
+                       style="width:62px;text-align:center;font-family:monospace;font-weight:bold;padding:6px 4px;${l.horizonAuto === false && l.horizon ? 'border-color:var(--ga-accent);' : ''}">
+                ${l.horizon ? `<span style="font-size:.75rem;margin-left:3px;${l.horizonConf==='high'?'color:var(--ga-green);':l.horizonConf==='med'?'color:var(--ga-amber);':'color:var(--ga-faint);'}" title="${l.horizonAuto===false?'manually confirmed':(l.horizonConf||'')+' confidence'}">${l.horizonAuto===false?'✓':(l.horizonConf==='high'?'●':l.horizonConf==='med'?'◓':'○')}</span>` : ''}
+            </td>
             <td>${escXml(l.originalDesc)}${langBadge}${badge}${allFindTags}${markHtml}${compHtml}</td>
             <td><button class="btn-edit" data-index="${idx}" title="Edit" onclick="openEditModal(${idx})">✎</button></td>
             <td><button class="btn-delete" data-index="${idx}" title="Delete">✖</button></td>`;
@@ -3034,10 +3938,9 @@ const SOIL_WIDTH_FRAC = {
     'G':  0.92,   // gravel (unspecified)
     'Fk': 0.86,   // fine gravel
     'Mk': 0.94,   // medium gravel
-    'Gk': 0.00,   // coarse gravel
+    'Gk': 1.00,   // coarse gravel
     // stones → widest
-    'X':  1.00,    // stones
-    '': 0.00
+    'X':  1.00    // stones
 };
 
 // Resolve a layer's main soil code, preferring the classifier result.
@@ -4611,18 +5514,72 @@ function exportPDF() {
     }
 
     // ── Desktop: open a minimal HTML page that auto-triggers print ──
+    //    The profile is cut into 1 m segments so each metre of core sits
+    //    neatly on its own page. We render the full SVG once per page inside
+    //    a fixed-height window and shift it vertically so the correct metre
+    //    is shown; the inline depth axis, finds and description columns move
+    //    with it and stay aligned.
+    const SEG_M     = 1;                 // segment height in metres
+    const SEG_PX    = SEG_M * SCALE;     // segment core height in px
+    const nSegments = Math.ceil(totalDepth / SEG_M);
+
+    const pageW = W;
+    const pageH = SEG_PX + PAD_TOP + PAD_BOTTOM;
+    const ttl   = profileTitle() || 'Core log';
+
+    const pages = [];
+    for (let i = 0; i < nSegments; i++) {
+        const fromM = i * SEG_M;
+        const toM   = Math.min((i + 1) * SEG_M, totalDepth);
+        // Shift the full SVG up so depth `fromM` lands at the top of the
+        // segment window. The SVG places depth `fromM` at fromM*SCALE+PAD_TOP;
+        // the .seg-shift wrapper already pulls the SVG up by PAD_TOP (to hide
+        // its built-in title band), so here we only subtract the metre offset.
+        const shift = -(fromM * SCALE);
+        pages.push(`
+  <div class="seg-page">
+    <div class="seg-head">${escXml(ttl)} &nbsp;·&nbsp; ${fromM.toFixed(2)}\u2013${toM.toFixed(2)} m &nbsp;·&nbsp; segment ${i+1}/${nSegments}</div>
+    <div class="seg-window">
+      <div class="seg-shift" style="top:${-PAD_TOP + shift}px;">
+        ${svg}
+      </div>
+    </div>
+  </div>`);
+    }
+
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Core Log Export</title>
 <style>
-  @page { margin:0; size:${W}px ${H}px; }
-  body  { margin:0; padding:0; background:white; }
-  svg   { display:block; width:${W}px; height:${H}px; }
-  @media print {
-    html,body { width:${W}px; height:${H}px; }
+  @page { margin:0; size:${pageW}px ${pageH}px; }
+  html,body { margin:0; padding:0; background:white; }
+  .seg-page {
+    position:relative;
+    width:${pageW}px; height:${pageH}px;
+    overflow:hidden;
+    page-break-after:always;
+    break-after:page;
   }
+  .seg-page:last-child { page-break-after:auto; break-after:auto; }
+  .seg-head {
+    height:${PAD_TOP}px; box-sizing:border-box;
+    display:flex; align-items:flex-end; gap:8px;
+    padding:0 0 8px 8px;
+    font-family:'Courier New',monospace; font-size:12px; font-weight:bold;
+    color:#2d3748;
+    border-bottom:1px solid #cbd5e1;
+  }
+  .seg-window {
+    position:relative;
+    width:${pageW}px; height:${SEG_PX + PAD_BOTTOM}px;
+    overflow:hidden;
+  }
+  /* .seg-shift pulls the SVG up by PAD_TOP (to hide its built-in title band)
+     plus the per-segment metre offset, set inline via the top style. */
+  .seg-shift { position:absolute; left:0; }
+  .seg-shift svg { display:block; width:${W}px; height:${H}px; }
 </style>
 </head><body>
-${svg}
+${pages.join('\n')}
 <script>
   window.addEventListener('load', () => {
     setTimeout(() => window.print(), 400);
@@ -4762,6 +5719,10 @@ function sanitizeProfile(profile) {
             layerType,
             gradeTo,
             gradeSecondaries,
+            horizon:      (typeof l.horizon === 'string') ? l.horizon : '',
+            horizonConf:  (typeof l.horizonConf === 'string') ? l.horizonConf : '',
+            horizonWhy:   (typeof l.horizonWhy === 'string') ? l.horizonWhy : '',
+            horizonAuto:  (typeof l.horizonAuto === 'boolean') ? l.horizonAuto : (l.horizon ? false : true),
             addedAt:      (typeof l.addedAt === 'string') ? l.addedAt : new Date().toISOString()
         });
     });
@@ -4906,6 +5867,7 @@ function importTSV(event) {
             const iColor = col('Color');
             const iDesc  = col('Description');
             const iClass = col('Class');
+            const iHz    = col('Horizon');
             const iMk    = col('Markers');
             const iCp    = col('Compaction');
             const iTr    = col('Transition');
@@ -5056,6 +6018,15 @@ function importTSV(event) {
                 }
                 // ────────────────────────────────────────────────────────────
 
+                // ── Horizon column (KA5) — strip any "(med)/(low)" conf tag ──
+                let hz = (iHz !== -1 ? (c[iHz] || '').trim() : '');
+                let hzConf = 'high', hzAuto = false;
+                if (hz === '-' || hz === '') { hz = ''; hzConf = ''; hzAuto = true; }
+                else {
+                    const cm = hz.match(/^(.*?)\s*\((high|med|low)\)\s*$/i);
+                    if (cm) { hz = cm[1].trim(); hzConf = cm[2].toLowerCase(); hzAuto = true; }
+                }
+
                 newLayers.push({
                     id, depthFrom, depthTo, color, lang,
                     officialDesc,
@@ -5064,6 +6035,10 @@ function importTSV(event) {
                     layerType,
                     gradeTo,
                     gradeSecondaries,
+                    horizon: hz,
+                    horizonConf: hzConf,
+                    horizonWhy: '',
+                    horizonAuto: hzAuto,
                     addedAt: new Date().toISOString()
                 });
             }
@@ -5225,7 +6200,7 @@ function buildTSV(ts) {
     const z  = getSurfaceElev();
     let tsv  = 'ID\tLayer#\tExported At\tFrom (m)\tTo (m)' +
                (z !== null ? '\tFrom (m a.s.l.)\tTo (m a.s.l.)' : '') +
-               '\tColor\tMunsell\tClass\tDescription\tMarkers\tCompaction\tTransition\n';
+               '\tColor\tMunsell\tClass\tHorizon\tDescription\tMarkers\tCompaction\tTransition\n';
     layers.forEach((l, i) => {
         // Markers encode: label[findType](from-to)  OR  label[findType](depth)
         // findType is optional and only present for structured finds.
@@ -5242,7 +6217,8 @@ function buildTSV(ts) {
                               .join('; ') || '-';
         const elevFrom = z !== null ? `\t${(z-l.depthFrom).toFixed(2)}\t${(z-l.depthTo).toFixed(2)}` : '';
         const munsell  = getMunsell(l.color);
-        tsv += `${l.id}\t${i+1}\t${ts}\t${l.depthFrom.toFixed(2)}\t${l.depthTo.toFixed(2)}${elevFrom}\t${l.color}\t${munsell}\t${l.officialDesc}\t${l.originalDesc}\t${mk}\t${cp}\t${tr}\n`;
+        const hz       = (l.horizon || '-') + (l.horizon && l.horizonAuto !== false && l.horizonConf && l.horizonConf !== 'high' ? `(${l.horizonConf})` : '');
+        tsv += `${l.id}\t${i+1}\t${ts}\t${l.depthFrom.toFixed(2)}\t${l.depthTo.toFixed(2)}${elevFrom}\t${l.color}\t${munsell}\t${l.officialDesc}\t${hz}\t${l.originalDesc}\t${mk}\t${cp}\t${tr}\n`;
     });
     return tsv;
 }
@@ -5326,6 +6302,28 @@ function openEditModal(idx) {
     editGradeState = { secondaries: Array.isArray(l.gradeSecondaries) ? [...l.gradeSecondaries] : [] };
     lastEditGradePhrase = hasGrade ? buildGradePhrase(l.gradeTo || '', editGradeState.secondaries) : '';
 
+    // Reset petrography/genesis quick-entry state for the modal. The
+    // description already holds whatever was saved, so we don't re-inject —
+    // we just clear the dropdowns and the "last applied" trackers so the
+    // user's next selection strips/appends cleanly.
+    editPetroState = { primary: null, secondaries: [] };
+    lastEditPetroPhrase   = '';
+    lastEditGenesisPhrase = '';
+    const epp = document.getElementById('editPetroPrimary');
+    const eps = document.getElementById('editPetroSecondary');
+    const egs = document.getElementById('editGenesisSelect');
+    if (epp) epp.value = '';
+    if (eps) eps.value = '';
+    if (egs) egs.value = '';
+    // Show the current KA5 code derived from the saved description.
+    refreshEditPetroCode();
+
+    // Seed the horizon field + reasoning.
+    const eh  = document.getElementById('editHorizon');
+    const ehw = document.getElementById('editHorizonWhy');
+    if (eh)  { eh.value = l.horizon || ''; eh.dataset.auto = (l.horizonAuto === false) ? '0' : '1'; }
+    if (ehw) ehw.textContent = l.horizonWhy ? `(${l.horizonConf || '?'}) ${l.horizonWhy}` : '';
+
     document.getElementById('editModal').classList.add('open');
 }
 
@@ -5352,6 +6350,15 @@ function saveEditLayer() {
     const gradeSecondaries = gradeOn ? [...editGradeState.secondaries] : [];
 
     const lang = detectLanguage(desc);
+
+    // Horizon: read the edited field. dataset.auto='0' means the user typed or
+    // changed it → store as a manually-confirmed value; '1' means it's still an
+    // auto suggestion (seeded or freshly regenerated).
+    const ehEl    = document.getElementById('editHorizon');
+    const hzVal   = (ehEl?.value || '').trim();
+    const hzManual= ehEl?.dataset.auto === '0';
+    const prev    = layers[idx] || {};
+
     layers[idx] = {
         ...layers[idx],
         id, depthFrom: from, depthTo: to, color: hex, lang,
@@ -5359,7 +6366,11 @@ function saveEditLayer() {
         originalDesc: desc,
         layerType: ltype,
         gradeTo,
-        gradeSecondaries
+        gradeSecondaries,
+        horizon:     hzVal,
+        horizonAuto: hzVal ? (hzManual ? false : (prev.horizonAuto !== false)) : true,
+        horizonConf: hzVal ? (hzManual ? 'high' : (prev.horizonConf || 'med')) : '',
+        horizonWhy:  hzManual ? '' : (prev.horizonWhy || '')
     };
 
     document.getElementById('editModal').classList.remove('open');
