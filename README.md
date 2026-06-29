@@ -50,6 +50,9 @@ DOI: <https://doi.org/10.5281/zenodo.20607276>
 - Live **canvas-rendered stratigraphic column** that updates as layers are added
 - Soil colours rendered at scale; grain-size textures, markers, and compaction zones overlaid as annotations
 - Pinch-zoom and pan on mobile; exportable as image or vector
+- **Depth-adaptive scaling**: the vertical scale automatically adjusts to the total core length, so long cores (e.g. 10–20 m and deeper) render at a usable on-screen size with a readable depth axis instead of overflowing the drawing area. The profile box resizes to fit the core, and exports keep the same proportions shown on screen
+- **Scale controls** above the profile box — independent **Width (X)**, **Height (Y)**, and **Font** sliders redraw the profile geometry (staying crisp at any size and carrying through to the exported image/vector), with the current multiplier (`1.0×`) shown next to each and a **Reset scale** button
+- On-screen **zoom** (− / 100 % / + and Reset, plus pinch and Ctrl/⌘ + scroll) magnifies the rendered profile for inspection without altering the export
 
 ---
 
@@ -65,7 +68,7 @@ DOI: <https://doi.org/10.5281/zenodo.20607276>
 | **GeODin / SEP-3 (CSV)** | CSV in SEP-3 field naming convention for import into **GeODin-Shuttle** |
 | **JPG / PNG**            | Raster image of the stratigraphic profile                               |
 | **SVG**                  | Vector export of the profile                                            |
-| **PDF**                  | Vector PDF (desktop); falls back to SVG share sheet on iOS              |
+| **PDF**                  | Vector PDF (desktop); paginated by depth for long cores; falls back to SVG share sheet on iOS |
 
 JSON is the lossless format and round-trips every field, including gradational shifts and finds. The TXT/CSV import reconstructs gradational shifts from the description and re-reads finds with their type and depth range, so an exported log re-imports faithfully.
 
