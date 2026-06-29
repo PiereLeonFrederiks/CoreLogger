@@ -6,7 +6,7 @@ To the application: <https://piereleonfrederiks.github.io/CoreLogger/>
 
 ⚠ Early Access — This project is under active development. Features, exports, and data formats may change between versions. If you use this tool, I'd love to hear what works, what doesn't, and what's missing.
 
-DOI: <https://doi.org/10.5281/zenodo.21023026>
+DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21023026.svg)](https://doi.org/10.5281/zenodo.21023026)
 
 ---
 
