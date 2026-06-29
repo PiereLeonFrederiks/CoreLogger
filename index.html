@@ -258,7 +258,8 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 .shell-tag     { display:block; font-size:.68rem; color:#d4a017; margin-top:3px; font-weight:600; font-family:var(--ga-mono); letter-spacing:.04em; }
 .find-tag      { display:block; font-size:.68rem; margin-top:3px; font-weight:600; font-family:var(--ga-mono); letter-spacing:.04em; }
 .find-tag-charcoal  { color:#555; }
-.find-tag-wood      { color:#6b4226; }
+.find-tag-plant     { color:#5b7233; }
+.find-tag-anthroorg { color:#8a5a2b; }
 .find-tag-ceramics  { color:#a0522d; }
 .find-tag-humic     { color:#4a7c3f; }
 .find-tag-roots     { color:#3a6b2f; }
@@ -411,7 +412,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 /* Per-tab accent colours */
 .finds-btn-shell     { background: #b08000; }
 .finds-btn-charcoal  { background: #2d2d2d; }
-.finds-btn-wood      { background: #6b4226; }
+.finds-btn-plant     { background: #5b7233; }
 .finds-btn-ceramics  { background: #a0522d; }
 .finds-btn-humic     { background: #4a7c3f; }
 .finds-btn-roots     { background: #3a6b2f; }
@@ -444,8 +445,8 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
     will-change:transform;
 }
 .zoom-controls {
-    display:flex; align-items:center; gap:8px; margin-top:8px;
-    justify-content:flex-end;
+    display:flex; align-items:center; gap:8px; margin-top:8px; margin-bottom:10px;
+    justify-content:flex-start;
 }
 .zoom-btn {
     width:36px; height:36px; padding:0; line-height:1;
@@ -463,6 +464,37 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
     font-size:12px; color:var(--ga-subdued); -webkit-user-select:none; user-select:none;
 }
 .scroll-hint { font-size:.65rem; color:var(--ga-faint); text-align:right; margin-top:6px; letter-spacing:.05em; font-family:var(--ga-mono); }
+
+/* ── Profile scaling panel (X / Y / Font sliders) ── */
+.scale-controls {
+    display:flex; align-items:center; flex-wrap:wrap; gap:18px;
+    margin-top:12px; padding:12px 16px;
+    background:var(--ga-void); border:1px solid var(--ga-border); border-radius:8px;
+}
+.scale-ctrl { display:flex; align-items:center; gap:9px; }
+.scale-ctrl > label {
+    font-family:var(--ga-mono); font-size:.66rem; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--ga-subdued);
+    white-space:nowrap;
+}
+.scale-ctrl input[type="range"] {
+    width:120px; accent-color:var(--ga-accent); cursor:pointer; touch-action:manipulation;
+}
+.scale-val {
+    min-width:42px; text-align:left; font-family:var(--ga-mono);
+    font-size:.72rem; font-weight:600; color:var(--ga-accent);
+    -webkit-user-select:none; user-select:none;
+}
+.scale-reset-btn {
+    margin-left:auto; padding:6px 12px;
+    background:var(--ga-stratum); border:1px solid var(--ga-border); color:var(--ga-ink);
+    font-family:var(--ga-mono); font-size:.66rem; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+    border-radius:6px; transition:border-color .15s,background .15s; touch-action:manipulation;
+}
+.scale-reset-btn:hover  { border-color:var(--ga-accent); }
+.scale-reset-btn:active { background:var(--ga-void); }
+
 #coreCanvas { display:block; flex-shrink:0; image-rendering:-webkit-optimize-contrast; image-rendering:crisp-edges; }
 
 /* ── Export actions ── */
@@ -580,6 +612,12 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
     #coreCanvas { width:auto !important; height:auto !important; }
     .zoom-controls { justify-content:center; }
     .zoom-btn { width:44px; height:44px; font-size:20px; }  /* larger touch targets */
+
+    /* Scaling panel: stack each slider on its own row, full-width sliders */
+    .scale-controls { gap:10px; padding:12px; }
+    .scale-ctrl { width:100%; justify-content:flex-start; }
+    .scale-ctrl input[type="range"] { flex:1; width:auto; margin:0 0 0 10px; }
+    .scale-reset-btn { margin-left:0; width:100%; padding:11px; }
 
     /* Export buttons */
     .export-actions    { flex-direction:column; gap:8px; }
@@ -738,12 +776,12 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
     <!-- Tab bar -->
     <div class="finds-tab-bar" id="findsTabBar">
         <button class="finds-tab active" data-tab="marker"     onclick="switchFindsTab('marker')"> Marker</button>
-        <button class="finds-tab"        data-tab="shells"     onclick="switchFindsTab('shells')"> Shells</button>
-        <button class="finds-tab"        data-tab="charcoal"   onclick="switchFindsTab('charcoal')"> Charcoal</button>
-        <button class="finds-tab"        data-tab="wood"       onclick="switchFindsTab('wood')"> Wood</button>
-        <button class="finds-tab"        data-tab="ceramics"   onclick="switchFindsTab('ceramics')"> Ceramics</button>
+        <button class="finds-tab"        data-tab="plant"      onclick="switchFindsTab('plant')"> Plant / Organic</button>
         <button class="finds-tab"        data-tab="humic"      onclick="switchFindsTab('humic')"> Humic</button>
         <button class="finds-tab"        data-tab="roots"      onclick="switchFindsTab('roots')"> Roots</button>
+        <button class="finds-tab"        data-tab="charcoal"   onclick="switchFindsTab('charcoal')"> Charcoal</button>
+        <button class="finds-tab"        data-tab="shells"     onclick="switchFindsTab('shells')"> Shells</button>
+        <button class="finds-tab"        data-tab="ceramics"   onclick="switchFindsTab('ceramics')"> Ceramics</button>
         <button class="finds-tab"        data-tab="stones"     onclick="switchFindsTab('stones')"> Stones</button>
         <button class="finds-tab"        data-tab="ironoxide"  onclick="switchFindsTab('ironoxide')"> Iron oxide</button>
         <button class="finds-tab"        data-tab="compaction" onclick="switchFindsTab('compaction')"> Compaction</button>
@@ -771,10 +809,25 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Shell type</label>
                 <select id="shellType">
                     <option value="shells">Shells — general / Schalen</option>
-                    <option value="mussel shells">Mussel shells / Muschelschalen</option>
-                    <option value="oyster shells">Oyster shells / Austernschalen</option>
-                    <option value="gastropod shells">Gastropod shells / Schnecken</option>
-                    <option value="mollusc shells">Mollusc shells / Mollusken</option>
+                    <optgroup label="Bivalves">
+                        <option value="mussel shells">Mussel shells / Muschelschalen</option>
+                        <option value="cockle shells">Cockle (Cerastoderma) / Herzmuschel</option>
+                        <option value="oyster shells">Oyster shells / Austernschalen</option>
+                        <option value="clam shells">Clam / Klaffmuschel (Mya)</option>
+                        <option value="scrobicularia">Scrobicularia / Pfeffermuschel</option>
+                    </optgroup>
+                    <optgroup label="Gastropods">
+                        <option value="gastropod shells">Gastropods — general / Schnecken</option>
+                        <option value="hydrobia shells">Hydrobia / Wattschnecke</option>
+                        <option value="periwinkle shells">Periwinkle (Littorina) / Strandschnecke</option>
+                        <option value="land snail shells">Land snails / Landschnecken</option>
+                    </optgroup>
+                    <optgroup label="Other / mixed">
+                        <option value="mollusc shells">Mollusc shells — indet. / Mollusken</option>
+                        <option value="shell hash">Shell hash / Schillbruch</option>
+                        <option value="shell debris">Shell debris / Schalengrus</option>
+                        <option value="foraminifera">Foraminifera / Foraminiferen</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -782,7 +835,9 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="shellQty">
                     <option value="">— not specified —</option>
                     <option value="few">Few / vereinzelt</option>
+                    <option value="common">Common / häufig</option>
                     <option value="abundant">Abundant / zahlreich</option>
+                    <option value="shell bed">Shell bed / Schillbank</option>
                 </select>
             </div>
             <div>
@@ -790,8 +845,10 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="shellCondition">
                     <option value="">— not specified —</option>
                     <option value="intact">★ Intact / intakt</option>
+                    <option value="articulated">★ Articulated (in situ) / doppelklappig</option>
                     <option value="fragmented">Fragmented / fragmentiert</option>
                     <option value="worn">Worn / abgerollt</option>
+                    <option value="dissolved">Leached / angelöst</option>
                 </select>
             </div>
         </div>
@@ -814,9 +871,19 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Form</label>
                 <select id="charcoalForm">
                     <option value="charcoal">Charcoal — general / Holzkohle</option>
-                    <option value="charcoal fragments">Fragments / Holzkohlesplitter</option>
-                    <option value="charcoal lens">Lens / Holzkohlelinse</option>
-                    <option value="charcoal layer">Layer / Holzkohlelage</option>
+                    <optgroup label="By form">
+                        <option value="charcoal flecks">Flecks / Holzkohleflitter</option>
+                        <option value="charcoal fragments">Fragments / Holzkohlesplitter</option>
+                        <option value="charcoal lens">Lens / Holzkohlelinse</option>
+                        <option value="charcoal layer">Layer / Holzkohlelage</option>
+                        <option value="charcoal-rich band">Charcoal-rich band / holzkohlereiches Band</option>
+                    </optgroup>
+                    <optgroup label="Related burnt material">
+                        <option value="burnt wood">Burnt wood / verkohltes Holz</option>
+                        <option value="ash">Ash / Asche</option>
+                        <option value="burnt organic">Burnt organic matter / verbrannte Organik</option>
+                        <option value="soot">Soot staining / Rußschlieren</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -824,6 +891,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="charcoalQty">
                     <option value="">— not specified —</option>
                     <option value="few">Few / vereinzelt</option>
+                    <option value="common">Common / häufig</option>
                     <option value="abundant">Abundant / zahlreich</option>
                 </select>
             </div>
@@ -832,7 +900,9 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="charcoalCondition">
                     <option value="">— not specified —</option>
                     <option value="intact">★ Intact piece / intakt</option>
+                    <option value="identifiable">★ Identifiable taxon / bestimmbar</option>
                     <option value="fragmented">Fragmented / fragmentiert</option>
+                    <option value="dispersed">Dispersed / verteilt</option>
                 </select>
             </div>
         </div>
@@ -847,47 +917,78 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
         </div>
     </div>
 
-    <!-- ── TAB: Wood ── -->
-    <div class="finds-pane" id="tab-wood">
-        <p class="section-hint">Record wood or plant macrofossil remains — including waterlogged or preserved material.</p>
+    <!-- ── TAB: Plant / Organic remains ── -->
+    <div class="finds-pane" id="tab-plant">
+        <p class="section-hint">Record plant macrofossils and organic remains — wood, reed, leaves, seeds, moss, peat fragments — as well as anthropogenic organics such as dung, manure and cesspit fills. Use the <em>Roots</em> tab for in-situ rooting / bioturbation.</p>
         <div class="input-grid3" style="margin-bottom:10px;">
             <div>
                 <label class="field-label">Type</label>
-                <select id="woodForm">
-                    <option value="wood">Wood — general / Holz</option>
-                    <option value="wood fragment">Fragment / Holzfragment</option>
-                    <option value="twig">Twig / Zweig</option>
-                    <option value="bark">Bark / Rinde</option>
-                    <option value="seed">Seed / Samen</option>
-                    <option value="plant remains">Plant remains / Pflanzenreste</option>
+                <select id="plantForm">
+                    <optgroup label="Wood">
+                        <option value="wood">Wood — general / Holz</option>
+                        <option value="wood fragment">Wood fragment / Holzfragment</option>
+                        <option value="twig">Twig / Zweig</option>
+                        <option value="branch">Branch / Ast</option>
+                        <option value="bark">Bark / Rinde</option>
+                        <option value="root wood">Root wood / Wurzelholz</option>
+                    </optgroup>
+                    <optgroup label="Herbaceous / wetland">
+                        <option value="reed remains">Reed remains / Schilfreste</option>
+                        <option value="sedge remains">Sedge remains / Seggenreste</option>
+                        <option value="grass remains">Grass remains / Grasreste</option>
+                        <option value="rootlets / stems">Rootlets &amp; stems / Halme</option>
+                    </optgroup>
+                    <optgroup label="Leaves / fruits / seeds">
+                        <option value="leaves">Leaves / Blätter</option>
+                        <option value="needles">Conifer needles / Nadeln</option>
+                        <option value="seeds">Seeds / Samen</option>
+                        <option value="fruits / nuts">Fruits &amp; nuts / Früchte</option>
+                    </optgroup>
+                    <optgroup label="Bryophytes / amorphous">
+                        <option value="moss remains">Moss remains / Moosreste</option>
+                        <option value="peat fragments">Peat fragments / Torfbröckchen</option>
+                        <option value="detritus">Plant detritus / Pflanzendetritus</option>
+                        <option value="plant remains">Plant remains — indet. / Pflanzenreste</option>
+                    </optgroup>
+                    <optgroup label="Anthropogenic organic">
+                        <option value="dung">Dung / Dung</option>
+                        <option value="manure layer">Manure layer / Mistschicht</option>
+                        <option value="stable deposit">Stable deposit / Stallmist</option>
+                        <option value="cesspit fill">Cesspit / latrine fill / Kloakenfüllung</option>
+                        <option value="midden / refuse">Midden &amp; refuse / Abfallschicht</option>
+                        <option value="compost">Compost / Kompost</option>
+                        <option value="anthropogenic organic">Anthropogenic organic — indet. / anthropogen organisch</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
                 <label class="field-label">Quantity</label>
-                <select id="woodQty">
+                <select id="plantQty">
                     <option value="">— not specified —</option>
                     <option value="few">Few / vereinzelt</option>
+                    <option value="common">Common / häufig</option>
                     <option value="abundant">Abundant / zahlreich</option>
                 </select>
             </div>
             <div>
                 <label class="field-label">Preservation</label>
-                <select id="woodCondition">
+                <select id="plantCondition">
                     <option value="">— not specified —</option>
-                    <option value="intact">★ Intact / gut erhalten</option>
+                    <option value="intact">★ Well preserved / gut erhalten</option>
                     <option value="waterlogged">Waterlogged / wassergesättigt</option>
+                    <option value="charred">Charred / verkohlt</option>
                     <option value="degraded">Degraded / zersetzt</option>
                 </select>
             </div>
         </div>
         <div class="find-depth-row">
             <div class="find-depth-inputs">
-                <div><label class="field-label">Layer #</label><select id="woodLayer" class="layer-pick" onchange="fillDepthFromLayer('wood')"></select></div>
-                <div><label class="field-label">From (m)</label><input type="number" id="woodDepth"   placeholder="e.g. 2.10" step="0.01"></div>
-                <div><label class="field-label">To (m) — optional</label><input type="number" id="woodDepthTo" placeholder="e.g. 2.30" step="0.01"></div>
+                <div><label class="field-label">Layer #</label><select id="plantLayer" class="layer-pick" onchange="fillDepthFromLayer('plant')"></select></div>
+                <div><label class="field-label">From (m)</label><input type="number" id="plantDepth"   placeholder="e.g. 2.10" step="0.01"></div>
+                <div><label class="field-label">To (m) — optional</label><input type="number" id="plantDepthTo" placeholder="e.g. 2.30" step="0.01"></div>
             </div>
-            <input type="text" id="woodNote" placeholder="Extra note (e.g. oak, dendro sample…)" style="flex:2;min-width:0;">
-            <button onclick="addFindMarker('wood')" class="btn-action finds-btn-wood" style="white-space:nowrap;">+ Add Wood Find</button>
+            <input type="text" id="plantNote" placeholder="Extra note (e.g. oak, Phragmites, dendro sample…)" style="flex:2;min-width:0;">
+            <button onclick="addFindMarker('plant')" class="btn-action finds-btn-plant" style="white-space:nowrap;">+ Add Plant / Organic</button>
         </div>
     </div>
 
@@ -899,10 +1000,29 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Type</label>
                 <select id="ceramicsForm">
                     <option value="ceramics">Ceramics — general / Keramik</option>
-                    <option value="pottery sherd">Pottery sherd / Scherbe</option>
-                    <option value="brick fragment">Brick / Ziegelfragment</option>
-                    <option value="tile">Tile / Kachel</option>
-                    <option value="fired clay">Fired clay / Hüttenlehm</option>
+                    <optgroup label="Pottery">
+                        <option value="pottery sherd">Pottery sherd / Scherbe</option>
+                        <option value="rim sherd">Rim sherd / Randscherbe</option>
+                        <option value="base sherd">Base sherd / Bodenscherbe</option>
+                        <option value="wheel-thrown sherd">Wheel-thrown / Drehscheibenware</option>
+                        <option value="handmade sherd">Handmade / handgemacht</option>
+                        <option value="glazed sherd">Glazed / glasiert</option>
+                    </optgroup>
+                    <optgroup label="Building material">
+                        <option value="brick fragment">Brick / Ziegelfragment</option>
+                        <option value="tile">Tile / Kachel</option>
+                        <option value="roof tile">Roof tile / Dachziegel</option>
+                        <option value="mortar">Mortar / Mörtel</option>
+                        <option value="plaster">Plaster / Putz</option>
+                        <option value="fired clay">Fired clay / Hüttenlehm</option>
+                        <option value="daub">Daub / Lehmbewurf</option>
+                    </optgroup>
+                    <optgroup label="Other cultural">
+                        <option value="slag">Slag / Schlacke</option>
+                        <option value="glass">Glass / Glas</option>
+                        <option value="bone (worked)">Worked bone / Knochenartefakt</option>
+                        <option value="metal fragment">Metal fragment / Metallfragment</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -910,6 +1030,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="ceramicsQty">
                     <option value="">— not specified —</option>
                     <option value="few">Few / vereinzelt</option>
+                    <option value="common">Common / häufig</option>
                     <option value="abundant">Abundant / zahlreich</option>
                 </select>
             </div>
@@ -918,8 +1039,10 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="ceramicsCondition">
                     <option value="">— not specified —</option>
                     <option value="intact">★ Intact / vollständig</option>
+                    <option value="fresh">★ Fresh break / frischer Bruch</option>
                     <option value="fragmented">Fragmented / fragmentiert</option>
                     <option value="worn">Worn / abgerollt</option>
+                    <option value="abraded">Heavily abraded / stark verrundet</option>
                 </select>
             </div>
         </div>
@@ -942,9 +1065,19 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Type</label>
                 <select id="humicForm">
                     <option value="humic">Humic — general / humos</option>
-                    <option value="humic concentration">Concentration / Humuskonzentration</option>
-                    <option value="humic layer">Layer / Humushorizont</option>
-                    <option value="organic matter">Organic matter / organisches Material</option>
+                    <optgroup label="Concentration / form">
+                        <option value="humic staining">Humic staining / Humusverfärbung</option>
+                        <option value="humic concentration">Concentration / Humuskonzentration</option>
+                        <option value="humic band">Band / Humusband</option>
+                        <option value="humic layer">Layer / Humushorizont</option>
+                        <option value="humic infill">Infill (burrow/crack) / Humusverfüllung</option>
+                    </optgroup>
+                    <optgroup label="Organic character">
+                        <option value="organic matter">Organic matter / organisches Material</option>
+                        <option value="organic mud / gyttja">Organic mud / gyttja / Mudde</option>
+                        <option value="peaty">Peaty / anmoorig</option>
+                        <option value="humic-rich infiltration">Humus infiltration / Humuseinschwemmung</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -952,6 +1085,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="humicQty">
                     <option value="">— not specified —</option>
                     <option value="few">Weak / schwach</option>
+                    <option value="common">Moderate / mäßig</option>
                     <option value="abundant">Strong / stark</option>
                 </select>
             </div>
@@ -962,6 +1096,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                     <option value="diffuse">Diffuse / diffus</option>
                     <option value="intact">★ Distinct band / deutlich</option>
                     <option value="fragmented">Patchy / gefleckt</option>
+                    <option value="mottled">Mottled / marmoriert</option>
                 </select>
             </div>
         </div>
@@ -984,9 +1119,19 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Type</label>
                 <select id="rootsForm">
                     <option value="roots">Roots — general / Wurzeln</option>
-                    <option value="root traces">Root traces / Wurzelspuren</option>
-                    <option value="root channel">Root channel / Wurzelkanal</option>
-                    <option value="fine roots">Fine roots / Feinwurzeln</option>
+                    <optgroup label="Root form">
+                        <option value="fine roots">Fine roots / Feinwurzeln</option>
+                        <option value="coarse roots">Coarse roots / Grobwurzeln</option>
+                        <option value="root traces">Root traces / Wurzelspuren</option>
+                        <option value="root channel">Root channel / Wurzelkanal</option>
+                        <option value="rhizome">Rhizome / Rhizom</option>
+                    </optgroup>
+                    <optgroup label="Root-related features">
+                        <option value="root mottling">Root mottling / Wurzelflecken</option>
+                        <option value="iron-stained roots">Iron-stained roots / Rostwurzeln</option>
+                        <option value="calcified roots">Calcified roots / Wurzelkalk</option>
+                        <option value="rootlet bioturbation">Rootlet bioturbation / Wurzelbioturbation</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -994,16 +1139,18 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="rootsQty">
                     <option value="">— not specified —</option>
                     <option value="few">Sparse / vereinzelt</option>
+                    <option value="common">Moderate / mäßig durchwurzelt</option>
                     <option value="abundant">Dense / dicht durchwurzelt</option>
                 </select>
             </div>
             <div>
-                <label class="field-label">Depth zone</label>
+                <label class="field-label">State</label>
                 <select id="rootsCondition">
                     <option value="">— not specified —</option>
                     <option value="intact">★ Living / lebendig</option>
                     <option value="fragmented">Fossil / fossil</option>
                     <option value="worn">Decayed / verrottet</option>
+                    <option value="penetrating">Penetrating from above / von oben eindringend</option>
                 </select>
             </div>
         </div>
@@ -1026,11 +1173,27 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Type</label>
                 <select id="stonesForm">
                     <option value="stones">Stones — general / Steine</option>
-                    <option value="pebbles">Pebbles / Kiesel</option>
-                    <option value="cobble">Cobble / Geröll</option>
-                    <option value="gravel clasts">Gravel clasts / Kieskörner</option>
-                    <option value="flint">Flint / Feuerstein</option>
-                    <option value="stone artefact">Stone artefact / Steinartefakt</option>
+                    <optgroup label="By clast size">
+                        <option value="granules">Granules / Feinkies</option>
+                        <option value="pebbles">Pebbles / Kiesel</option>
+                        <option value="gravel clasts">Gravel clasts / Kieskörner</option>
+                        <option value="cobble">Cobble / Geröll</option>
+                        <option value="boulder">Boulder / Findling</option>
+                    </optgroup>
+                    <optgroup label="By lithology">
+                        <option value="flint">Flint / Feuerstein</option>
+                        <option value="quartz clast">Quartz / Quarz</option>
+                        <option value="sandstone clast">Sandstone / Sandstein</option>
+                        <option value="limestone clast">Limestone / Kalkstein</option>
+                        <option value="crystalline erratic">Crystalline erratic / kristallines Geschiebe</option>
+                        <option value="chalk clast">Chalk / Kreide</option>
+                    </optgroup>
+                    <optgroup label="Anthropogenic / worked">
+                        <option value="stone artefact">Stone artefact / Steinartefakt</option>
+                        <option value="struck flint">Struck flint / Abschlag</option>
+                        <option value="burnt stone">Burnt / heat-cracked / Brandstein</option>
+                        <option value="building stone">Building stone / Baustein</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -1038,16 +1201,19 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="stonesQty">
                     <option value="">— not specified —</option>
                     <option value="few">Few / vereinzelt</option>
+                    <option value="common">Common / häufig</option>
                     <option value="abundant">Abundant / zahlreich</option>
                 </select>
             </div>
             <div>
-                <label class="field-label">Condition</label>
+                <label class="field-label">Rounding</label>
                 <select id="stonesCondition">
                     <option value="">— not specified —</option>
                     <option value="intact">★ Worked / bearbeitet</option>
                     <option value="fragmented">Angular / kantig</option>
+                    <option value="subangular">Subangular / kantengerundet</option>
                     <option value="worn">Rounded / gerundet</option>
+                    <option value="wellrounded">Well-rounded / gut gerundet</option>
                 </select>
             </div>
         </div>
@@ -1070,11 +1236,24 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label">Type</label>
                 <select id="ironoxideForm">
                     <option value="iron oxide">Iron oxide — general / Eisenoxid</option>
-                    <option value="iron oxide precipitation">Precipitation / Eisenoxidausfällung</option>
-                    <option value="iron oxide mottling">Mottling / Rostflecken</option>
-                    <option value="iron oxide concretion">Concretion / Eisenkonkretion</option>
-                    <option value="iron oxide band">Band / Eisenoxidband</option>
-                    <option value="ferruginous staining">Staining / Eisenverfärbung</option>
+                    <optgroup label="Iron oxide / oxidation">
+                        <option value="iron oxide mottling">Mottling / Rostflecken</option>
+                        <option value="iron oxide precipitation">Precipitation / Eisenoxidausfällung</option>
+                        <option value="iron oxide band">Band / Eisenoxidband</option>
+                        <option value="iron oxide concretion">Concretion / Eisenkonkretion</option>
+                        <option value="iron pan">Iron pan / Raseneisenstein</option>
+                        <option value="ferruginous staining">Staining / Eisenverfärbung</option>
+                        <option value="rhizoconcretions">Root concretions / Wurzelröhren</option>
+                    </optgroup>
+                    <optgroup label="Reduction / other minerals">
+                        <option value="gleying">Gleying (reduced) / Vergleyung</option>
+                        <option value="manganese mottling">Manganese mottling / Manganflecken</option>
+                        <option value="manganese concretion">Mn concretion / Mangankonkretion</option>
+                        <option value="vivianite">Vivianite (blue) / Vivianit</option>
+                        <option value="pyrite">Pyrite / Pyrit</option>
+                        <option value="carbonate concretion">Carbonate concretion / Kalkkonkretion</option>
+                        <option value="gypsum">Gypsum / Gips</option>
+                    </optgroup>
                 </select>
             </div>
             <div>
@@ -1082,6 +1261,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <select id="ironoxideQty">
                     <option value="">— not specified —</option>
                     <option value="few">Weak / schwach</option>
+                    <option value="common">Moderate / mäßig</option>
                     <option value="abundant">Strong / stark</option>
                 </select>
             </div>
@@ -1092,6 +1272,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                     <option value="diffuse">Diffuse / diffus</option>
                     <option value="intact">★ Distinct band / deutlich</option>
                     <option value="fragmented">Patchy / gefleckt</option>
+                    <option value="nodular">Nodular / knollig</option>
                 </select>
             </div>
         </div>
@@ -1169,16 +1350,37 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 <!-- ── Profile ── -->
 <div class="graph-section">
     <h3>Stratigraphic Profile</h3>
-    <div class="canvas-wrapper" id="canvasWrapper">
-        <div class="canvas-zoom" id="canvasZoom">
-            <canvas id="coreCanvas"></canvas>
+    <div class="scale-controls" id="scaleControls">
+        <div class="scale-ctrl">
+            <span class="scale-val" id="xScaleVal">1.0×</span>
+            <label for="xScaleSlider">Width&nbsp;(X)</label>
+            <input type="range" id="xScaleSlider" min="0.3" max="3" step="0.1" value="1"
+                   oninput="onScaleChange('x', this.value)">
         </div>
+        <div class="scale-ctrl">
+            <span class="scale-val" id="yScaleVal">1.0×</span>
+            <label for="yScaleSlider">Height&nbsp;(Y)</label>
+            <input type="range" id="yScaleSlider" min="0.2" max="4" step="0.1" value="1"
+                   oninput="onScaleChange('y', this.value)">
+        </div>
+        <div class="scale-ctrl">
+            <span class="scale-val" id="fontScaleVal">1.0×</span>
+            <label for="fontScaleSlider">Font</label>
+            <input type="range" id="fontScaleSlider" min="0.6" max="2.5" step="0.1" value="1"
+                   oninput="onScaleChange('font', this.value)">
+        </div>
+        <button type="button" class="scale-reset-btn" onclick="scaleReset()">Reset scale</button>
     </div>
     <div class="zoom-controls" id="zoomControls">
         <button type="button" class="zoom-btn" onclick="zoomStep(-1)" aria-label="Zoom out">−</button>
         <span class="zoom-level" id="zoomLevel">100%</span>
         <button type="button" class="zoom-btn" onclick="zoomStep(1)" aria-label="Zoom in">+</button>
         <button type="button" class="zoom-btn zoom-reset" onclick="zoomReset()" aria-label="Reset zoom">Reset</button>
+    </div>
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <div class="canvas-zoom" id="canvasZoom">
+            <canvas id="coreCanvas"></canvas>
+        </div>
     </div>
     <p class="scroll-hint">↕ Scroll to view full profile &nbsp;·&nbsp; 🤏 Pinch (or use +/−) to zoom &nbsp;·&nbsp; 🖱 Click a boundary to set its transition type</p>
 </div>
@@ -1316,6 +1518,38 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         });
     });
 })();
+
+// ═══════════════════════════════════════════════════════════════
+//  PROFILE SCALING (X / Y / Font multipliers)
+//  These rescale the drawn profile geometry and label text — distinct
+//  from the CSS zoom above, which just magnifies the finished canvas.
+//  Redraws the canvas (and feeds the same multipliers into SVG/PNG/PDF
+//  exports). Stretching Y suits thin/deep cores; X widens narrow columns;
+//  Font enlarges every label for presentation or large-format printing.
+// ═══════════════════════════════════════════════════════════════
+function onScaleChange(axis, value) {
+    const v = parseFloat(value);
+    if (!isFinite(v) || v <= 0) return;
+    if (axis === 'x')         { xScaleMult = v;    setScaleLabel('xScaleVal', v); }
+    else if (axis === 'y')    { yScaleMult = v;    setScaleLabel('yScaleVal', v); }
+    else if (axis === 'font') { fontScaleMult = v; setScaleLabel('fontScaleVal', v); }
+    drawGraph();
+}
+
+function setScaleLabel(id, v) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v.toFixed(1) + '×';
+}
+
+function scaleReset() {
+    xScaleMult = yScaleMult = fontScaleMult = 1;
+    [['xScaleSlider','xScaleVal'], ['yScaleSlider','yScaleVal'], ['fontScaleSlider','fontScaleVal']]
+        .forEach(([slider, val]) => {
+            const s = document.getElementById(slider); if (s) s.value = 1;
+            setScaleLabel(val, 1);
+        });
+    drawGraph();
+}
 </script>
 
 <h6><small>by PLF
@@ -3129,14 +3363,17 @@ function summarizeFinds(l) {
     const combined    = descLow + ' ' + markerText;
 
     const f = {
-        shell:     markerTypes.has('shells')   || /shell|mussel|mollusc|gastropod|oyster|muschel|schale|schnecke|auster/.test(descLow),
-        charcoal:  markerTypes.has('charcoal') || /charcoal|holzkohle/.test(descLow),
-        wood:      markerTypes.has('wood')     || /\bwood\b|twig|bark|\bseed\b|plant remains|holz|zweig|rinde/.test(descLow),
-        ceramics:  markerTypes.has('ceramics') || /ceramic|pottery|sherd|keramik|scherbe|ziegel/.test(descLow),
-        humic:     markerTypes.has('humic')    || /humic|humos|organic matter/.test(descLow),
-        roots:     markerTypes.has('roots')    || /\broot/.test(descLow),
-        stones:    markerTypes.has('stones')   || /\bstone|pebble|cobble|flint|artefact|feuerstein/.test(descLow),
-        ironoxide: markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|ferruginous|eisenoxid|rostfleck/.test(descLow)
+        shell:     markerTypes.has('shells')   || /shell|mussel|cockle|clam|oyster|scrobicularia|mollusc|gastropod|hydrobia|periwinkle|littorina|snail|foraminifer|schill|muschel|schale|schnecke|auster|herzmuschel/.test(descLow),
+        charcoal:  markerTypes.has('charcoal') || /charcoal|burnt wood|\bash\b|soot|burnt organic|holzkohle|asche|ruß|verkohlt/.test(descLow),
+        plant:     markerTypes.has('plant')    || markerTypes.has('wood') ||
+                   /\bwood\b|twig|branch|bark|\bseed\b|\bnut\b|fruit|leaf|leaves|needle|reed|sedge|grass|moss|detritus|plant remains|peat fragment|holz|zweig|\bast\b|rinde|samen|blatt|blätter|nadel|schilf|segge|gras|moos|pflanzenrest|torfbröck/.test(descLow),
+        anthroorg: markerTypes.has('anthroorg') ||
+                   /\bdung\b|manure|stable deposit|stallmist|\bmist\b|cesspit|latrine|kloake|fäkal|faecal|fecal|midden|refuse|abfall|compost|kompost|anthropogenic organic|anthropogen organisch/.test(descLow),
+        ceramics:  markerTypes.has('ceramics') || /ceramic|pottery|sherd|brick|tile|daub|mortar|plaster|slag|glass|\bglas\b|worked bone|keramik|scherbe|ziegel|kachel|mörtel|putz|schlacke|hüttenlehm|lehmbewurf/.test(descLow),
+        humic:     markerTypes.has('humic')    || /humic|humos|organic matter|organic mud|gyttja|mudde|anmoorig|peaty/.test(descLow),
+        roots:     markerTypes.has('roots')    || /\broot|rhizom|wurzel|durchwurzelt/.test(descLow),
+        stones:    markerTypes.has('stones')   || /\bstone|pebble|cobble|boulder|granule|gravel clast|flint|quartz|sandstone|limestone|erratic|chalk clast|artefact|feuerstein|geröll|kiesel|findling|geschiebe|quarz/.test(descLow),
+        ironoxide: markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|iron pan|ferruginous|gleying|manganese|vivianite|pyrite|concretion|eisenoxid|rostfleck|vergleyung|mangan|vivianit|pyrit|konkretion|raseneisen/.test(descLow)
     };
     f.intact = /intact|complete|whole|ganz|intakt/.test(combined);
     const many = /abundant|many|lot|viele|zahlreich|reich/.test(combined);
@@ -3172,7 +3409,8 @@ function findBulletLines(l) {
         const words = [];
         if (f.shell)     words.push('shells' + (f.intact ? ' (intact)' : ''));
         if (f.charcoal)  words.push('charcoal');
-        if (f.wood)      words.push('wood / plant');
+        if (f.plant)     words.push('plant / organic');
+        if (f.anthroorg) words.push('anthropogenic organic');
         if (f.ceramics)  words.push('ceramics');
         if (f.humic)     words.push('humic');
         if (f.roots)     words.push('roots');
@@ -3618,7 +3856,7 @@ function switchFindsTab(tabId) {
 //  Each finds tab has a "Layer #" dropdown that, when chosen, auto-
 //  fills that tab's From/To depth fields with the layer's boundaries.
 // ═══════════════════════════════════════════════════════════════
-const FIND_LAYER_PICKERS = ['marker','shell','charcoal','wood','ceramics','humic','roots','stones','ironoxide'];
+const FIND_LAYER_PICKERS = ['marker','shell','charcoal','plant','ceramics','humic','roots','stones','ironoxide'];
 
 // (Re)build the option list of every layer-picker. Called after any
 // change to the layers array (add / edit / delete / import).
@@ -3736,12 +3974,23 @@ function addFindMarker(type) {
 
     const target = resolveTargetLayer(`${type}Layer`, depth);
 
+    // The Plant / Organic tab covers both natural plant remains and
+    // anthropogenic organics (dung, manure, cesspit fills…). Route the
+    // anthropogenic selections to their own findType so they get a distinct
+    // tag, texture and export category instead of looking like plant debris.
+    const ANTHRO_ORG_FORMS = new Set([
+        'dung', 'manure layer', 'stable deposit', 'cesspit fill',
+        'midden / refuse', 'compost', 'anthropogenic organic'
+    ]);
+    let findType = type;
+    if (type === 'plant' && ANTHRO_ORG_FORMS.has(form)) findType = 'anthroorg';
+
     // Store depthTo + findType on the marker so the drawing code can render
     // the texture ONLY within the find's area (zone) or around its point.
     // NOTE: we intentionally do NOT append the keyword to originalDesc — that
     // would make the texture cover the whole layer. Whole-layer textures are
     // reserved for keywords typed directly into the layer description.
-    target.markers.push({ depth, depthTo, label, findType: type });
+    target.markers.push({ depth, depthTo, label, findType });
 
     updateTable(); drawGraph();
 
@@ -3836,14 +4085,17 @@ function updateTable() {
         const markerText  = (l.markers || []).map(m => (m.label || '')).join(' ').toLowerCase();
         const combined    = descLow + ' ' + markerText;
 
-        const hasShell    = markerTypes.has('shells')   || /shell|mussel|mollusc|gastropod|oyster|muschel|schale|schnecke|auster/.test(descLow);
-        const hasCharcoal = markerTypes.has('charcoal') || /charcoal|holzkohle/.test(descLow);
-        const hasWood     = markerTypes.has('wood')     || /\bwood\b|twig|bark|\bseed\b|plant remains|holz|zweig|rinde/.test(descLow);
-        const hasCeramics = markerTypes.has('ceramics') || /ceramic|pottery|sherd|keramik|scherbe|ziegel/.test(descLow);
-        const hasHumic    = markerTypes.has('humic')    || /humic|humos|organic matter/.test(descLow);
-        const hasRoots    = markerTypes.has('roots')    || /\broot/.test(descLow);
-        const hasStones   = markerTypes.has('stones')   || /\bstone|pebble|cobble|flint|artefact|feuerstein/.test(descLow);
-        const hasIronoxide= markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|ferruginous|eisenoxid|rostfleck/.test(descLow);
+        const hasShell    = markerTypes.has('shells')   || /shell|mussel|cockle|clam|oyster|scrobicularia|mollusc|gastropod|hydrobia|periwinkle|littorina|snail|foraminifer|schill|muschel|schale|schnecke|auster|herzmuschel/.test(descLow);
+        const hasCharcoal = markerTypes.has('charcoal') || /charcoal|burnt wood|\bash\b|soot|burnt organic|holzkohle|asche|ruß|verkohlt/.test(descLow);
+        const hasPlant    = markerTypes.has('plant')    || markerTypes.has('wood') ||
+                            /\bwood\b|twig|branch|bark|\bseed\b|\bnut\b|fruit|leaf|leaves|needle|reed|sedge|grass|moss|detritus|plant remains|peat fragment|holz|zweig|\bast\b|rinde|samen|blatt|blätter|nadel|schilf|segge|gras|moos|pflanzenrest|torfbröck/.test(descLow);
+        const hasAnthroorg= markerTypes.has('anthroorg')||
+                            /\bdung\b|manure|stable deposit|stallmist|\bmist\b|cesspit|latrine|kloake|fäkal|faecal|fecal|midden|refuse|abfall|compost|kompost|anthropogenic organic|anthropogen organisch/.test(descLow);
+        const hasCeramics = markerTypes.has('ceramics') || /ceramic|pottery|sherd|brick|tile|daub|mortar|plaster|slag|glass|\bglas\b|worked bone|keramik|scherbe|ziegel|kachel|mörtel|putz|schlacke|hüttenlehm|lehmbewurf/.test(descLow);
+        const hasHumic    = markerTypes.has('humic')    || /humic|humos|organic matter|organic mud|gyttja|mudde|anmoorig|peaty/.test(descLow);
+        const hasRoots    = markerTypes.has('roots')    || /\broot|rhizom|wurzel|durchwurzelt/.test(descLow);
+        const hasStones   = markerTypes.has('stones')   || /\bstone|pebble|cobble|boulder|granule|gravel clast|flint|quartz|sandstone|limestone|erratic|chalk clast|artefact|feuerstein|geröll|kiesel|findling|geschiebe|quarz/.test(descLow);
+        const hasIronoxide= markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|iron pan|ferruginous|gleying|manganese|vivianite|pyrite|concretion|eisenoxid|rostfleck|vergleyung|mangan|vivianit|pyrit|konkretion|raseneisen/.test(descLow);
         const hasIntact   = /intact|complete|whole|ganz|intakt/.test(combined);
         const shellMany   = /abundant|many|lot|viele|zahlreich|reich/.test(combined);
         const shellFew    = /few|rare|vereinzelt|wenig|selten/.test(combined);
@@ -3852,20 +4104,21 @@ function updateTable() {
 
         const shellTag    = hasShell    ? `<div class="shell-tag">🐚 shells — ${shellQtyLabel}${intactBadge}</div>` : '';
         const charcoalTag = hasCharcoal ? `<div class="find-tag find-tag-charcoal">🔥 charcoal — ${shellQtyLabel}</div>` : '';
-        const woodTag     = hasWood     ? `<div class="find-tag find-tag-wood">🪵 wood / plant${intactBadge}</div>` : '';
+        const plantTag    = hasPlant    ? `<div class="find-tag find-tag-plant">🌾 plant / organic${intactBadge}</div>` : '';
+        const anthroorgTag= hasAnthroorg? `<div class="find-tag find-tag-anthroorg">🟤 anthropogenic organic</div>` : '';
         const ceramicsTag = hasCeramics ? `<div class="find-tag find-tag-ceramics">🏺 ceramics${intactBadge}</div>` : '';
         const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic">🌿 humic</div>` : '';
         const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots">🌱 roots</div>` : '';
         const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones">🪨 stones${intactBadge}</div>` : '';
         const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide">🟠 iron oxide — ${shellQtyLabel}</div>` : '';
-        const allFindTags = shellTag + charcoalTag + woodTag + ceramicsTag + humicTag + rootsTag + stonesTag + ironoxideTag;
+        const allFindTags = shellTag + charcoalTag + plantTag + anthroorgTag + ceramicsTag + humicTag + rootsTag + stonesTag + ironoxideTag;
 
         const elevCell = z !== null
             ? `<td>${depthToElev(l.depthFrom)} – ${depthToElev(l.depthTo)} m</td>` : '';
 
         const row = document.createElement('tr');
         if (l.layerType !== 'normal') row.classList.add(`row-${l.layerType}`);
-        if (hasIntact && (hasShell || hasCharcoal || hasWood || hasCeramics || hasStones)) row.classList.add('row-intact-shell');
+        if (hasIntact && (hasShell || hasCharcoal || hasPlant || hasCeramics || hasStones)) row.classList.add('row-intact-shell');
         row.innerHTML = `
             <td>${escXml(l.id)}</td>
             <td style="text-align:center;font-weight:bold;color:#555;">${idx+1}</td>
@@ -3893,23 +4146,77 @@ function updateTable() {
 // ═══════════════════════════════════════════════════════════════
 //  GRAPH — shared layout constants
 // ═══════════════════════════════════════════════════════════════
-const SCALE        = 2000;   // px per metre
+// Base (unscaled) values. SCALE and CORE_W are derived from these times the
+// user-adjustable multipliers below, recomputed at the start of every draw so
+// the whole profile rescales without touching any individual call site.
+const SCALE_BASE   = 2000;   // reference px per metre for shallow cores (≤ ~1.2 m)
+const CORE_W_BASE  = 110;    // base profile column width (horizontal, coarsest soils)
+
+// Deep cores would otherwise blow the canvas past the browser's hard pixel
+// limit (~32 767 px) and fail to render. fitScaleBase() picks a px-per-metre
+// that keeps the *default* (1× Y) profile within a comfortable on-screen band,
+// so a 10 m or 20 m core stays usable. The Y slider still multiplies on top.
+const TARGET_PROFILE_PX = 1700;   // preferred drawn height of the core column at 1×
+const MIN_SCALE_BASE    = 60;     // floor px/metre (very deep cores stay legible)
+const MAX_CANVAS_PX     = 16000;  // hard cap on logical canvas height (× dpr stays safe)
+
+function fitScaleBase(totalDepth) {
+    if (!(totalDepth > 0)) return SCALE_BASE;
+    // Aim for TARGET_PROFILE_PX of column height, but never exceed the shallow
+    // reference density and never drop below the legibility floor.
+    const ideal = TARGET_PROFILE_PX / totalDepth;
+    return Math.max(MIN_SCALE_BASE, Math.min(SCALE_BASE, ideal));
+}
+
+// Live display multipliers (driven by the X / Y / Font sliders). 1 = default.
+let yScaleMult    = 1;       // stretches the profile vertically (px per metre)
+let xScaleMult    = 1;       // stretches the profile horizontally (column width)
+let fontScaleMult = 1;       // scales every text label in the profile
+
+let SCALE          = SCALE_BASE  * yScaleMult;   // px per metre (recomputed in drawGraph)
+let CORE_W         = CORE_W_BASE * xScaleMult;   // profile column = MAX width (recomputed in drawGraph)
+
 const TITLE_H      = 34;     // title band above the profile (borehole ID)
 const PAD_TOP      = 40 + TITLE_H;
 const PAD_BOTTOM   = 70;
-const PAD_RIGHT    = 430;    // room for finds column + description column
 const DEPTH_LBL_W  = 72;
 const ELEV_LBL_W   = 72;
 const TICK_W       = 6;
-const CORE_W       = 110;    // widened profile column = MAX width (coarsest soils)
+
+// Scale a hardcoded canvas font string by fontScaleMult, e.g.
+//   fpx("bold 11px 'Courier New',monospace")  ->  "bold 14px 'Courier New',monospace"
+// Any "<n>px" (including decimals) is multiplied; the rest is left untouched.
+// Sizes never drop below 5px so labels stay legible when scaled down.
+function fpx(fontStr) {
+    if (fontScaleMult === 1) return fontStr;
+    return fontStr.replace(/(\d*\.?\d+)px/g, (_, n) =>
+        Math.max(5, Math.round(parseFloat(n) * fontScaleMult * 10) / 10) + 'px');
+}
 
 // Right-of-core label columns (offsets measured from the core's right edge
 // at cX + CORE_W). Finds sit closer to the core; the soil description is
-// pushed further right so the two never overlap.
-const FIND_COL_DX  = 16;     // finds (red) labels start here
-const FIND_COL_W   = 132;    // reserved width for the finds column
-const DESC_COL_DX  = FIND_COL_DX + FIND_COL_W;   // description column start
-const DESC_COL_W   = PAD_RIGHT - DESC_COL_DX - 14;
+// pushed further right so the two never overlap. The reserved widths grow
+// with the Font multiplier so larger text gets proportionally more room
+// instead of wrapping into tall narrow stacks.
+const FIND_COL_DX_BASE = 16;    // finds (red) labels start here
+const FIND_COL_W_BASE  = 132;   // reserved width for the finds column
+const PAD_RIGHT_BASE   = 430;   // room for finds column + description column
+
+let FIND_COL_DX = FIND_COL_DX_BASE;
+let FIND_COL_W  = FIND_COL_W_BASE;
+let PAD_RIGHT   = PAD_RIGHT_BASE;
+let DESC_COL_DX = FIND_COL_DX + FIND_COL_W;          // description column start
+let DESC_COL_W  = PAD_RIGHT - DESC_COL_DX - 14;
+
+// Recompute the right-side columns for the current Font multiplier. Called at
+// the top of drawGraph() and buildSVG() before any layout math runs.
+function recomputeLabelColumns() {
+    FIND_COL_DX = Math.round(FIND_COL_DX_BASE * fontScaleMult);
+    FIND_COL_W  = Math.round(FIND_COL_W_BASE  * fontScaleMult);
+    PAD_RIGHT   = Math.round(PAD_RIGHT_BASE    * fontScaleMult);
+    DESC_COL_DX = FIND_COL_DX + FIND_COL_W;
+    DESC_COL_W  = PAD_RIGHT - DESC_COL_DX - 14;
+}
 
 // ── Variable column width by main soil type ──────────────────────
 // Convention (sedimentological grain-size profile / Korngrößenprofil):
@@ -4135,10 +4442,28 @@ function drawGraph(exportMult = null) {
     if (!layers.length) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
 
     const totalDepth  = Math.max(...layers.map(l => l.depthTo));
+
+    // Depth-adaptive vertical scale: keeps deep cores (10/20 m) within the
+    // browser's renderable height while the Y slider still stretches relative
+    // to this baseline.
+    const baseScale = fitScaleBase(totalDepth);
+    SCALE  = baseScale   * yScaleMult;
+    CORE_W = CORE_W_BASE * xScaleMult;
+    recomputeLabelColumns();   // right-side label columns track the Font multiplier
+
     const dpr         = exportMult || window.devicePixelRatio || 1;
     const PAD_LEFT    = getPadLeft();
     const logW        = PAD_LEFT + CORE_W + PAD_RIGHT;
-    const logH        = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+    let   logH        = totalDepth * SCALE + PAD_TOP + PAD_BOTTOM;
+
+    // Safety clamp: never let the logical height (before dpr) approach the
+    // browser canvas limit. If a huge Y multiplier on a deep core would exceed
+    // it, rein SCALE back in so the profile still draws (proportionally).
+    if (logH > MAX_CANVAS_PX) {
+        const usable = MAX_CANVAS_PX - PAD_TOP - PAD_BOTTOM;
+        SCALE = usable / totalDepth;
+        logH  = MAX_CANVAS_PX;
+    }
 
     canvas.width  = logW * dpr;
     canvas.height = logH * dpr;
@@ -4156,7 +4481,7 @@ function drawGraph(exportMult = null) {
     const title = profileTitle();
     if (title) {
         ctx.fillStyle = '#0f172a';
-        ctx.font = "bold 16px sans-serif";
+        ctx.font = fpx("bold 16px sans-serif");
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
         ctx.fillText(title, cX + CORE_W / 2, TITLE_H);
@@ -4239,7 +4564,7 @@ function drawGraph(exportMult = null) {
         ctx.lineTo(cX - 10, yC - 5); ctx.lineTo(cX - 10, yC + 5);
         ctx.fill();
         // Label — anchored past the widest column so it never sits on a bar
-        ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#1d4ed8'; ctx.textAlign = 'left';
+        ctx.font = fpx('bold 9px sans-serif'); ctx.fillStyle = '#1d4ed8'; ctx.textAlign = 'left';
         ctx.fillText('⊕ ' + c.note, cX + CORE_W + 6, yC + 3);
         ctx.restore();
     });
@@ -4266,13 +4591,13 @@ function drawGraph(exportMult = null) {
         }
         // Depth label (right-aligned into DEPTH_LBL_W column)
         const depthLblX = (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W;
-        ctx.fillStyle = '#2d3748'; ctx.font = "11px 'Courier New',monospace"; ctx.textAlign = 'right';
+        ctx.fillStyle = '#2d3748'; ctx.font = fpx("11px 'Courier New',monospace"); ctx.textAlign = 'right';
         ctx.fillText(`${depth.toFixed(2)} m`, depthLblX, labelY + 1);
 
         // Elevation label (if surface elev set) — in the left ELEV column
         if (z !== null) {
             const elev = (z - depth).toFixed(2);
-            ctx.fillStyle = '#16a34a'; ctx.font = "9px 'Courier New',monospace"; ctx.textAlign = 'right';
+            ctx.fillStyle = '#16a34a'; ctx.font = fpx("9px 'Courier New',monospace"); ctx.textAlign = 'right';
             ctx.fillText(`${elev} m`, ELEV_LBL_W, labelY + 1);
         }
     });
@@ -4280,7 +4605,7 @@ function drawGraph(exportMult = null) {
     // Column header for elevation axis
     if (z !== null) {
         ctx.save();
-        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#16a34a'; ctx.font = fpx('bold 8px sans-serif'); ctx.textAlign = 'center';
         ctx.fillText('m a.s.l.', ELEV_LBL_W / 2, PAD_TOP - 10);
         ctx.restore();
     }
@@ -4292,16 +4617,16 @@ function drawGraph(exportMult = null) {
         if (hL < 10) return;
         const midY  = yT + hL / 2;
         const depthX = (z !== null ? ELEV_LBL_W + 4 : 0) + DEPTH_LBL_W;
-        ctx.fillStyle = '#94a3b8'; ctx.font = "bold 9px 'Courier New',monospace"; ctx.textAlign = 'right';
+        ctx.fillStyle = '#94a3b8'; ctx.font = fpx("bold 9px 'Courier New',monospace"); ctx.textAlign = 'right';
         ctx.fillText(`Δ${(l.depthTo - l.depthFrom).toFixed(2)}m`, depthX - 2, midY + 4);
     });
 
     // ── Right side: soil description labels (code + description + finds) ──
     // Drawn in a dedicated column pushed well clear of the finds column.
     const descX  = cX + CORE_W + DESC_COL_DX;
-    const codeFont = 'bold 12px sans-serif';
-    const descFont = '11px sans-serif';
-    const lineH    = 14;
+    const codeFont = fpx('bold 12px sans-serif');
+    const descFont = fpx('11px sans-serif');
+    const lineH    = Math.round(14 * fontScaleMult);
     const BULLET   = '\u25CF ';   // ●
 
     // Build the wrapped description lines for one layer's block.
@@ -4397,7 +4722,9 @@ function drawGraph(exportMult = null) {
                 if (m.findType) {
                     const typeDesc = {
                         shells:   'shells abundant', charcoal: 'charcoal abundant',
-                        wood:     'wood abundant',   ceramics: 'ceramics abundant',
+                        plant:    'plant remains abundant', wood: 'plant remains abundant',
+                        anthroorg: 'dung abundant',
+                        ceramics: 'ceramics abundant',
                         humic:    'humic abundant',  roots:    'roots abundant',
                         stones:   'stones abundant',
                         ironoxide: 'iron oxide abundant'
@@ -4430,7 +4757,9 @@ function drawGraph(exportMult = null) {
                 if (m.findType) {
                     const typeDesc = {
                         shells:   'shells abundant', charcoal: 'charcoal abundant',
-                        wood:     'wood abundant',   ceramics: 'ceramics abundant',
+                        plant:    'plant remains abundant', wood: 'plant remains abundant',
+                        anthroorg: 'dung abundant',
+                        ceramics: 'ceramics abundant',
                         humic:    'humic abundant',  roots:    'roots abundant',
                         stones:   'stones abundant',
                         ironoxide: 'iron oxide abundant'
@@ -4463,9 +4792,9 @@ function drawGraph(exportMult = null) {
                 ctx.beginPath(); ctx.moveTo(cX + CORE_W + 11, it.anchorY); ctx.lineTo(findLabelX - 2, ly - 3); ctx.stroke();
                 ctx.setLineDash([]);
             }
-            ctx.font = 'italic 10px sans-serif'; ctx.fillStyle = '#cc0000'; ctx.textAlign = 'left';
+            ctx.font = fpx('italic 10px sans-serif'); ctx.fillStyle = '#cc0000'; ctx.textAlign = 'left';
             ctx.fillText(fitText(ctx, it.text, FIND_COL_W - 22), findLabelX, ly);
-            ctx.font = `9px 'Courier New',monospace`; ctx.fillStyle = 'rgba(180,0,0,.65)';
+            ctx.font = fpx(`9px 'Courier New',monospace`); ctx.fillStyle = 'rgba(180,0,0,.65)';
             ctx.fillText(it.depthTxt, findLabelX, ly + 11);
         });
     }
@@ -4479,10 +4808,10 @@ function drawGraph(exportMult = null) {
 
     // ── Bottom total label ──
     const yBot = totalDepth * SCALE + PAD_TOP;
-    ctx.fillStyle = '#2d3748'; ctx.font = "bold 11px 'Courier New',monospace"; ctx.textAlign = 'center';
+    ctx.fillStyle = '#2d3748'; ctx.font = fpx("bold 11px 'Courier New',monospace"); ctx.textAlign = 'center';
     ctx.fillText(`↕ ${totalDepth.toFixed(2)} m total`, cX + CORE_W / 2, yBot + 22);
     if (z !== null) {
-        ctx.fillStyle = '#16a34a'; ctx.font = "9px 'Courier New',monospace";
+        ctx.fillStyle = '#16a34a'; ctx.font = fpx("9px 'Courier New',monospace");
         ctx.fillText(`(${(z - totalDepth).toFixed(2)} m a.s.l. base)`, cX + CORE_W / 2, yBot + 36);
     }
 }
@@ -4860,9 +5189,9 @@ function drawTextureOverlay(ctx, desc, x, y, w, h) {
             ctx.restore();
         }
     }
-    // ── Wood / plant macrofossils ─────────────────────────────────
-    if (/\bwood\b|twig|bark|\bseed\b|plant remains/.test(d)) {
-        const { intensity: im, density: dm } = getModifiers(/wood|twig|bark|seed|plant/);
+    // ── Plant / organic macrofossils (wood, reed, leaves, seeds, moss…) ──
+    if (/\bwood\b|twig|branch|bark|\bseed\b|\bnut\b|fruit|leaf|leaves|needle|reed|sedge|grass|moss|detritus|plant remains|peat fragment/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/wood|twig|branch|bark|seed|nut|fruit|leaf|leaves|needle|reed|sedge|grass|moss|detritus|plant/);
         let seed=x*47+y*23+h*31; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
         const wc=Math.max(3, Math.floor(((w*h)/350) * dm));
         for(let i=0;i<wc;i++){
@@ -4874,6 +5203,27 @@ function drawTextureOverlay(ctx, desc, x, y, w, h) {
             ctx.strokeStyle=`rgba(80,48,26,${Math.min(1,0.4*im)})`; ctx.lineWidth=0.4;
             ctx.beginPath(); ctx.moveTo(-len/2,-thick*0.2); ctx.lineTo(len/2,-thick*0.2); ctx.stroke();
             ctx.restore();
+        }
+    }
+    // ── Anthropogenic organic (dung, manure, cesspit, midden…) ──
+    // Clustered irregular blobs in a warm muck-brown — distinct from the
+    // streaky wood/plant texture and the fine humic stipple.
+    if (/\bdung\b|manure|stable deposit|stallmist|\bmist\b|cesspit|latrine|kloake|fäkal|faecal|fecal|midden|refuse|abfall|compost|kompost|anthropogenic organic|anthropogen organisch/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/dung|manure|mist|cesspit|latrine|kloake|midden|refuse|abfall|compost|kompost|anthropogenic|anthropogen/);
+        let seed=x*59+y*17+h*41; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const clusters=Math.max(4, Math.floor(((w*h)/260) * dm));
+        for(let i=0;i<clusters;i++){
+            const cxx=x+rand()*w, cyy=y+rand()*h;
+            // each cluster = a few overlapping blobs
+            const blobs=2+Math.floor(rand()*3);
+            for(let b=0;b<blobs;b++){
+                const bx=cxx+(rand()-0.5)*6, by=cyy+(rand()-0.5)*6, r=1.4+rand()*2.4;
+                ctx.beginPath(); ctx.arc(bx,by,r,0,Math.PI*2);
+                ctx.fillStyle=`rgba(138,90,43,${Math.min(1,(0.30+rand()*0.22)*im)})`; ctx.fill();
+            }
+            // a darker fleck in the cluster core for organic richness
+            ctx.beginPath(); ctx.arc(cxx,cyy,0.8+rand()*1.0,0,Math.PI*2);
+            ctx.fillStyle=`rgba(60,38,18,${Math.min(1,0.45*im)})`; ctx.fill();
         }
     }
     // ── Ceramics / sherds ─────────────────────────────────────────
@@ -4998,7 +5348,14 @@ function buildSVGGrain(layer, cX, yT, hL, clipId) {
 function buildSVG() {
     if (!layers.length) { alert('Add at least one layer first.'); return null; }
 
+    // Mirror the live display multipliers so SVG/PDF exports match the on-screen
+    // profile even when this runs without a preceding drawGraph(). Uses the same
+    // depth-adaptive base scale so deep cores export at the proportions shown.
     const totalDepth = Math.max(...layers.map(l => l.depthTo));
+    SCALE  = fitScaleBase(totalDepth) * yScaleMult;
+    CORE_W = CORE_W_BASE * xScaleMult;
+    recomputeLabelColumns();
+
     const PAD_LEFT   = getPadLeft();
     const z          = getSurfaceElev();
 
@@ -5143,9 +5500,9 @@ function buildSVG() {
         return lines;
     };
     const sDescX   = cX + CORE_W + DESC_COL_DX;
-    const sCodeFont = 'bold 12px sans-serif';
-    const sDescFont = '11px sans-serif';
-    const sLineH    = 14;
+    const sCodeFont = fpx('bold 12px sans-serif');
+    const sDescFont = fpx('11px sans-serif');
+    const sLineH    = Math.round(14 * fontScaleMult);
     const sBullet   = '\u25CF ';
 
     // Build [{text, indent}] lines for a layer: soil description, then one
@@ -5200,7 +5557,9 @@ function buildSVG() {
             if (m.findType) {
                 const typeDesc = {
                     shells:   'shells abundant', charcoal: 'charcoal abundant',
-                    wood:     'wood abundant',   ceramics: 'ceramics abundant',
+                    plant:    'plant remains abundant', wood: 'plant remains abundant',
+                    anthroorg: 'dung abundant',
+                    ceramics: 'ceramics abundant',
                     humic:    'humic abundant',  roots:    'roots abundant',
                     stones:   'stones abundant',
                         ironoxide: 'iron oxide abundant'
@@ -5264,7 +5623,14 @@ function buildSVG() {
         p.push(`<text x="${cX+CORE_W/2}" y="${yBot+36}" font-family="Courier New,monospace" font-size="9" fill="#16a34a" text-anchor="middle">(${(z-totalDepth).toFixed(2)} m a.s.l. base)</text>`);
 
     p.push(`</svg>`);
-    return p.join('\n');
+    // Scale every hardcoded font-size in the assembled SVG so text matches the
+    // on-screen Font multiplier. Geometry already scales via SCALE / CORE_W.
+    let svgOut = p.join('\n');
+    if (fontScaleMult !== 1) {
+        svgOut = svgOut.replace(/font-size="(\d*\.?\d+)"/g, (_, n) =>
+            `font-size="${Math.max(5, Math.round(parseFloat(n) * fontScaleMult * 10) / 10)}"`);
+    }
+    return svgOut;
 }
 
 // Build SVG texture patterns (deterministic, Illustrator-editable)
@@ -5362,14 +5728,28 @@ function buildSVGTexture(desc, x, y, w, h, idx, layerClipPts) {
             parts.push(`<path d="${dpath}" fill="none" stroke="rgba(100,60,20,0.28)" stroke-width="${(0.8+rand()).toFixed(1)}" stroke-linecap="round" clip-path="url(#${pid}cp)"/>`);
         }
     }
-    // ── SVG Wood ───────────────────────────────────────────────────
-    if (/\bwood\b|twig|bark|\bseed\b|plant remains/.test(d)) {
+    // ── SVG Plant / organic (wood, reed, leaves, seeds, moss…) ──
+    if (/\bwood\b|twig|branch|bark|\bseed\b|\bnut\b|fruit|leaf|leaves|needle|reed|sedge|grass|moss|detritus|plant remains|peat fragment/.test(d)) {
         const dm = /abundant|many|viel|zahlreich/.test(d) ? 2 : /few|rare|vereinzelt|wenig/.test(d) ? 0.4 : 1;
         let seed=x*47+y*23+h*31; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
         const cnt=Math.max(3, Math.floor(((w*h)/350)*dm));
         for(let i=0;i<cnt;i++){
             const wx=x+rand()*w, wy=y+rand()*h, len=4+rand()*8, ang=rand()*180, thick=1.2+rand()*1.8;
             parts.push(`<line x1="${-len/2}" y1="0" x2="${len/2}" y2="0" stroke="rgba(107,66,38,0.75)" stroke-width="${thick.toFixed(1)}" stroke-linecap="round" clip-path="url(#${pid}cp)" transform="translate(${wx},${wy}) rotate(${ang.toFixed(1)})"/>`);
+        }
+    }
+    // ── SVG Anthropogenic organic (dung, manure, cesspit, midden…) ──
+    if (/\bdung\b|manure|stable deposit|stallmist|\bmist\b|cesspit|latrine|kloake|fäkal|faecal|fecal|midden|refuse|abfall|compost|kompost|anthropogenic organic|anthropogen organisch/.test(d)) {
+        const dm = /abundant|many|viel|zahlreich/.test(d) ? 2 : /few|rare|vereinzelt|wenig/.test(d) ? 0.4 : 1;
+        let seed=x*59+y*17+h*41; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const clusters=Math.max(4, Math.floor(((w*h)/260)*dm));
+        for(let i=0;i<clusters;i++){
+            const cxx=x+rand()*w, cyy=y+rand()*h, blobs=2+Math.floor(rand()*3);
+            for(let b=0;b<blobs;b++){
+                const bx=cxx+(rand()-0.5)*6, by=cyy+(rand()-0.5)*6, r=(1.4+rand()*2.4);
+                parts.push(`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${r.toFixed(1)}" fill="rgba(138,90,43,0.42)" clip-path="url(#${pid}cp)"/>`);
+            }
+            parts.push(`<circle cx="${cxx.toFixed(1)}" cy="${cyy.toFixed(1)}" r="${(0.8+rand()*1.0).toFixed(1)}" fill="rgba(60,38,18,0.45)" clip-path="url(#${pid}cp)"/>`);
         }
     }
     // ── SVG Ceramics ───────────────────────────────────────────────
@@ -5514,12 +5894,18 @@ function exportPDF() {
     }
 
     // ── Desktop: open a minimal HTML page that auto-triggers print ──
-    //    The profile is cut into 1 m segments so each metre of core sits
+    //    The profile is cut into per-metre segments so each chunk of core sits
     //    neatly on its own page. We render the full SVG once per page inside
     //    a fixed-height window and shift it vertically so the correct metre
     //    is shown; the inline depth axis, finds and description columns move
     //    with it and stay aligned.
-    const SEG_M     = 1;                 // segment height in metres
+    //    The segment size adapts to depth so a 10/20 m core doesn't produce
+    //    dozens of sparse pages (target ≈ 8 pages, snapped to a tidy value).
+    const SEG_M = (() => {
+        const steps = [1, 2, 2.5, 5, 10, 20];
+        const ideal = totalDepth / 8;
+        return steps.find(s => s >= ideal) || Math.ceil(ideal);
+    })();
     const SEG_PX    = SEG_M * SCALE;     // segment core height in px
     const nSegments = Math.ceil(totalDepth / SEG_M);
 
@@ -5642,7 +6028,10 @@ function exportJSON() {
 //  best-effort import.
 // ═══════════════════════════════════════════════════════════════
 const VALID_LAYER_TYPES = ['normal', 'disturbed', 'missing', 'anthropogenic'];
-const VALID_FIND_TYPES   = ['shells','charcoal','wood','ceramics','humic','roots','stones','ironoxide'];
+const VALID_FIND_TYPES   = ['shells','charcoal','plant','anthroorg','ceramics','humic','roots','stones','ironoxide','wood'];
+// 'wood' is retained above for backward compatibility with profiles saved
+// before the tab was broadened to 'plant'. On import it is normalised to
+// 'plant' (see sanitizeProfile) so all new data uses the single category.
 
 function _num(v) {
     if (typeof v === 'number' && isFinite(v)) return v;
@@ -5697,7 +6086,9 @@ function sanitizeProfile(profile) {
                 label: (typeof m.label === 'string') ? m.label : ''
             };
             if (m.findType) {
-                if (VALID_FIND_TYPES.includes(m.findType)) marker.findType = m.findType;
+                // Normalise the legacy 'wood' category to the broadened 'plant'.
+                const ft = (m.findType === 'wood') ? 'plant' : m.findType;
+                if (VALID_FIND_TYPES.includes(ft)) marker.findType = ft;
                 else warnings.push(`Layer ${i+1}, marker ${j+1}: unknown find type "${m.findType}" → kept as plain marker.`);
             }
             markers.push(marker);
@@ -5913,7 +6304,7 @@ function importTSV(event) {
                         const m = raw.match(/^(.+?)(?:\[([^\]]+)\])?\(([0-9.]+(?:\s*-\s*[0-9.]+)?)\)$/);
                         if (m) {
                             const label    = m[1].trim();
-                            const findType = m[2] ? m[2].trim() : null;
+                            const findType = m[2] ? (m[2].trim() === 'wood' ? 'plant' : m[2].trim()) : null;
                             const depthStr = m[3].trim();
                             const rangeMatch = depthStr.match(/^([0-9.]+)\s*-\s*([0-9.]+)$/);
                             const marker = { label, depth: parseFloat(rangeMatch ? rangeMatch[1] : depthStr) };
@@ -6161,8 +6552,8 @@ function exportSEP3CSV() {
             kos,
             l.depthFrom.toFixed(2),
             l.depthTo.toFixed(2),
-            bemerkung,            // translated + flags → Petrographie
-            l.originalDesc,       // raw German/English description → Bemerkung
+            l.originalDesc,       // raw petrographic description (German/English) → Petrographie
+            bemerkung,            // translated text + layer-type flags → Bemerkung (free-text remark)
             `${l.color}${getMunsell(l.color) ? ' ' + getMunsell(l.color) : ''}`, // hex + Munsell → Farbe
             bodengruppe,
             probenahme,
