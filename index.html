@@ -1010,7 +1010,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 <!-- ── Header ── -->
 <div class="header-section">
     <img class="soil-logo" id="logoImg"  alt="Core Logger Logo">
-  
+    <h1><small>BETA VERSION</small></h1>
 </div>
 
 <!-- ── Coordinates ── -->
@@ -1631,7 +1631,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
             <p class="section-hint">Flag a layer as anthropogenic (made ground, fill, cultural layer).</p>
             <details class="info-details align-right" name="infoPopover">
                 <summary class="info-toggle" title="More info">?</summary>
-                <p class="section-hint">Flag a layer as anthropogenic directly — for made ground, fill, or a cultural layer not captured by a specific artefact type above. Logging <em>any</em> artefact find (Charcoal / Ceramics / Stone / Metal) on a layer also marks it anthropogenic automatically.</p>
+                <p class="section-hint">Flag a layer as anthropogenic directly — for made ground, fill, or a cultural layer not captured by a specific artefact type above. Logging an artefact find (Charcoal / Ceramics / Stone / Metal) does <em>not</em> flag the layer automatically — some finds (like charcoal) are often entirely natural, so anthropogenic origin is only ever set here, deliberately, rather than inferred from a single find.</p>
             </details>
         </div>
         <div class="input-grid3" style="margin-bottom:10px;">
@@ -2401,12 +2401,13 @@ function scaleReset() {
 }
 </script>
 
-
+<h6><small>by PLF
+</small></h6>
 <p style="text-align:center; margin:-8px 0 0; font-size:.72rem; font-family:var(--ga-mono); color:var(--ga-subdued);">
-    With thanks to my colleagues for testing and input
+    With thanks to [Name(s)] for testing and input
 </p>
 <p style="text-align:center; margin:4px 0 0; font-size:.72rem; font-family:var(--ga-mono); color:var(--ga-subdued);">
-    Reference: P. L. Frederiks 2026 &nbsp;·&nbsp; DOI: <a href="https://doi.org/10.5281/zenodo.21983775" target="_blank" rel="noopener" style="color:var(--ga-accent);">https://doi.org/10.5281/zenodo.21983775</a>
+    Reference: [Author(s), Year, Title] &nbsp;·&nbsp; DOI: <a href="https://doi.org/[DOI]" target="_blank" rel="noopener" style="color:var(--ga-accent);">https://doi.org/[DOI]</a>
 </p>
 
 </div><!-- /container -->
@@ -6406,26 +6407,41 @@ function fillDepthFromLayer(type) {
 //  anthropogenic layer. Anthropogenic material is still fully logged as
 //  its own observation (the Artefacts tabs, and the "Anthropogenic
 //  layer" entry) and shown as a find tag — it just no longer forces a
-//  special whole-layer highlight.
+//  special whole-layer highlight. In other words: computeLayerType()
+//  below can only ever return 'missing', 'disturbed', or 'normal' —
+//  'anthropogenic' is not a reachable outcome any more, by design.
 // ═══════════════════════════════════════════════════════════════
 function computeLayerType(l) {
+    // A Core disturbance entry (see the "Core Disturbance" tab) "overlaps"
+    // this layer if their depth ranges intersect at all. A point entry
+    // (no depthTo) is treated as a zero-length range at `depth`, so it
+    // still counts as touching a layer whose range contains that depth.
     const overlaps = (c) => {
         const cFrom = c.depth, cTo = (c.depthTo != null) ? c.depthTo : c.depth;
         return cTo >= l.depthFrom && cFrom <= l.depthTo;
     };
     const compsHere = compactions.filter(overlaps);
+
+    // Priority order when a layer has BOTH a "missing" and a "disturbed"
+    // entry logged against it (rare, but possible if someone records both):
+    // "missing" wins, since a gap in the core is a stronger statement than
+    // reworked material — there's nothing to say IS disturbed if the core
+    // wasn't recovered there in the first place.
     if (compsHere.some(c => c.type === 'Sediment gap / missing'))  return 'missing';
     if (compsHere.some(c => c.type === 'Disturbed / reworked'))    return 'disturbed';
 
-    // Preserve any other previously-set value (e.g. from an older imported
-    // profile) except 'anthropogenic', which is retired — a file still
-    // carrying that flag is treated the same as 'normal' from here on.
+    // No disturbance entry overlaps this layer. Preserve any other
+    // previously-set value (e.g. from an older imported profile) except
+    // 'anthropogenic', which is retired — a file still carrying that flag
+    // is treated the same as 'normal' from here on, so old exports don't
+    // resurrect the whole-layer highlight this function no longer produces.
     return (l.layerType && l.layerType !== 'anthropogenic') ? l.layerType : 'normal';
 }
 
 // Re-derive layerType for every layer. Cheap enough to call at the top of
 // both updateTable() and drawGraph(), so it's always in sync regardless of
-// which one ran first after a change.
+// which one ran first after a change — nothing needs to remember to call
+// this manually after editing a layer or a Core disturbance entry.
 function syncLayerConditions() {
     layers.forEach(l => { l.layerType = computeLayerType(l); });
 }
@@ -6433,8 +6449,10 @@ function syncLayerConditions() {
 // ═══════════════════════════════════════════════════════════════
 //  ADD ANTHROPOGENIC LAYER  (direct marker, Artefacts category)
 //  For made ground / fill / cultural layers not tied to a specific
-//  artefact type. Logging this (like any artefact find) auto-flags the
-//  layer as anthropogenic — see computeLayerType() above.
+//  artefact type. Like every find here, this only adds a marker/find
+//  tag — it does not set layerType. No find, including this one,
+//  auto-flags the whole layer anthropogenic; see the rationale above
+//  computeLayerType().
 // ═══════════════════════════════════════════════════════════════
 function addAnthroLayerMarker() {
     const depth       = parseFloat(document.getElementById('anthrolayerDepth').value);
@@ -6505,6 +6523,12 @@ function addCompaction() {
 //
 //  The built label text is chosen so it matches the existing
 //  texture/badge regex patterns (shell, charcoal, humic, root…).
+//
+//  IMPORTANT: this function only ever pushes a marker onto the target
+//  layer — it never sets l.layerType. That includes charcoal, ceramics,
+//  and every other artefact-category find: none of them auto-flag the
+//  whole layer as anthropogenic (see the LAYER CONDITION comment above
+//  computeLayerType() for why that was deliberately removed).
 // ═══════════════════════════════════════════════════════════════
 function addFindMarker(type) {
     const depth    = parseFloat(document.getElementById(`${type}Depth`).value);
@@ -6532,7 +6556,12 @@ function addFindMarker(type) {
     // residue (charcoal from e.g. wildfire), and anthropogenic organics
     // (dung, manure, cesspit fills…). Route these to their own findType so
     // they get the correct tag/texture/export category instead of looking
-    // like generic plant debris.
+    // like generic plant debris. Note that "charcoal" can be logged from
+    // TWO places in the UI — this Plant tab (labelled "natural occurrence")
+    // and the dedicated Charcoal tab under Artefacts — and both end up
+    // with the same findType:'charcoal' here, so they render and export
+    // identically. Which tab you used is not retained; only the observation
+    // itself (and whatever quantity/condition/note you gave it) is.
     const ANTHRO_ORG_FORMS = new Set([
         'dung', 'manure layer', 'stable deposit', 'cesspit fill',
         'midden / refuse', 'compost', 'anthropogenic organic'
