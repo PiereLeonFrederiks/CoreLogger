@@ -460,6 +460,13 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
 .find-tag-roots     { color:#3a6b2f; }
 .find-tag-stones    { color:#5a6472; }
 .find-tag-ironoxide { color:#b5651d; }
+.find-tag-dia-ironoxide { color:#b5651d; }
+.find-tag-dia-carbonate { color:#8a8270; }
+.find-tag-dia-gypsum    { color:#7d8590; }
+.find-tag-dia-manganese { color:#2f2a35; }
+.find-tag-dia-vivianite { color:#3b5ba5; }
+.find-tag-dia-sulfide   { color:#5a5426; }
+.find-tag-dia-reduced   { color:#4f6f78; }
 .find-tag-structure { color:#6a5acd; }
 .find-tag-traces    { color:#6b5334; }
 .find-tag-artstone  { color:#8a7a5c; }
@@ -1891,7 +1898,7 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
             <p class="section-hint">Mark oxic / anoxic redox features.</p>
             <details class="info-details align-right" name="infoPopover">
                 <summary class="info-toggle" title="More info">?</summary>
-                <p class="section-hint">Mark diagenetic / redox features. <strong>Oxic</strong> = light, yellowish or brownish colouring; <strong>anoxic</strong> = black, reduced. Quantity affects texture density.</p>
+                <p class="section-hint">Mark diagenetic / redox features. Each group is drawn with its own symbol: <strong>iron oxides</strong> = rust specks, <strong>carbonates</strong> = cream-white nodules, <strong>gypsum</strong> = white crystals, <strong>manganese</strong> = black dots/dendrites, <strong>reduced / sulphidic</strong> = grey-blue wash or black blotches with brassy pyrite specks, <strong>vivianite</strong> = blue specks. "Weak" draws a sparser texture.</p>
             </details>
         </div>
         <div class="input-grid3" style="margin-bottom:10px;">
@@ -1899,26 +1906,38 @@ tr.row-intact-shell td { background: rgba(212,160,23,.07); border-left: 3px soli
                 <label class="field-label" for="ironoxideForm">Type</label>
                 <select id="ironoxideForm">
                     <option value="iron oxide">Iron oxide — general / Eisenoxid</option>
-                    <optgroup label="Oxic (light / yellowish / brownish)">
+                    <optgroup label="Iron oxides — oxic (rust / ochre / brown)">
                         <option value="iron oxide mottling">Mottling / Rostflecken</option>
                         <option value="iron oxide precipitation">Precipitation / Eisenoxidausfällung</option>
                         <option value="iron oxide band">Band / Eisenoxidband</option>
                         <option value="iron oxide concretion">Concretion / Eisenkonkretion</option>
                         <option value="iron pan">Iron pan / Raseneisenstein</option>
                         <option value="ferruginous staining">Staining / Eisenverfärbung</option>
-                        <option value="rhizoconcretions">Root concretions / Wurzelröhren</option>
-                        <option value="carbonate concretion">Carbonate concretion / Kalkkonkretion</option>
-                        <option value="gypsum">Gypsum / Gips</option>
+                        <option value="rhizoconcretions">Root concretions (Fe) / Wurzelröhren</option>
                     </optgroup>
-                    <optgroup label="Anoxic (black / reduced)">
+                    <optgroup label="Carbonate precipitates (white / cream)">
+                        <option value="carbonate concretion">Carbonate concretion / Kalkkonkretion</option>
+                        <option value="carbonate nodules">Carbonate nodules / Kalkknollen</option>
+                        <option value="loess doll">Loess doll / Lösskindl</option>
+                        <option value="pseudomycelium carbonate">Pseudomycelium / Pseudomycel</option>
+                        <option value="calcareous coating">Carbonate coating / Kalküberzug</option>
+                    </optgroup>
+                    <optgroup label="Evaporites / sulphates">
+                        <option value="gypsum">Gypsum / Gips</option>
+                        <option value="gypsum crystals">Gypsum crystals / Gipskristalle</option>
+                    </optgroup>
+                    <optgroup label="Manganese (black dots / dendrites)">
+                        <option value="manganese mottling">Manganese mottling / Manganflecken</option>
+                        <option value="manganese concretion">Mn concretion / Mangankonkretion</option>
+                        <option value="manganese dendrites">Mn dendrites / Mangandendriten</option>
+                    </optgroup>
+                    <optgroup label="Anoxic / reduced (grey / black / blue)">
                         <option value="gleying">Gleying (reduced) / Vergleyung</option>
                         <option value="black reduced sediment">Black reduced sediment / schwarz reduziert</option>
                         <option value="sulfidic odor">Sulfidic odour (H₂S) / Schwefelgeruch</option>
                         <option value="monosulfidic black ooze">Monosulfidic black ooze / monosulfidischer Schlamm</option>
                         <option value="framboidal pyrite">Framboidal pyrite / Framboidalpyrit</option>
                         <option value="vivianite">Vivianite (blue-grey) / Vivianit</option>
-                        <option value="manganese mottling">Manganese mottling / Manganflecken</option>
-                        <option value="manganese concretion">Mn concretion / Mangankonkretion</option>
                     </optgroup>
                 </select>
             </div>
@@ -2767,6 +2786,7 @@ const DE_TO_EN_RAW = {
     "seeton":               "lake clay",
     "seelehm":              "lake loam",
     "kernverlust":          "core loss",
+    "kein sediment":        "no sediment",
     "feiner ton":           "fine clay",
     "mittelton":            "medium clay",
     "grobton":              "coarse clay",
@@ -2958,7 +2978,12 @@ const EN_TO_DE_RAW = {
     "varved clay": "Bänderton", "varved marl": "Bändermergel",
     "lake chalk": "Seekreide", "lake marl": "Seemergel", "lake sand": "Seesand",
     "lake silt": "Seeschluff", "lake clay": "Seeton", "lake loam": "Seelehm",
-    "core loss": "Kernverlust",
+    "core loss": "Kernverlust", "no sediment": "kein Sediment",
+    "carbonate nodules": "Kalkknollen", "loess doll": "Lösskindl",
+    "pseudomycelium carbonate": "Pseudomycel", "calcareous coating": "Kalküberzug",
+    "gypsum crystals": "Gipskristalle", "manganese dendrites": "Mangandendriten",
+    "carbonate precipitates": "Karbonatausfällungen", "reduction / gleying": "Reduktion / Vergleyung",
+    "sulphides": "Sulfide", "manganese": "Mangan",
     "fine clay": "feiner Ton", "medium clay": "Mittelton", "coarse clay": "Grobton",
     "fine silt": "Feinschluff", "medium silt": "Mittelschluff", "coarse silt": "Grobschluff",
     "fine sand": "Feinsand", "medium sand": "Mittelsand", "coarse sand": "Grobsand",
@@ -3594,6 +3619,7 @@ const SOIL_DATA =
         "varved marl": "Mbd",
         "sand gyttja": "Fms",
         "core loss": "NA",
+        "no sediment": "NS",
         "manure layer": "hY",
         "anthropogenic organic layer": "hY",
         "organic layer": "H",
@@ -3783,7 +3809,10 @@ const PETRO_PRIMARY = [
     { code: 'Gy', en: 'Gleysol',   de: 'Gley',           label: 'Gleysol (Gley)',                group: 'Soil types (pedogenic)' },
     { code: 'Sg', en: 'Stagnosol', de: 'Pseudogley',     label: 'Stagnosol (Pseudogley)',        group: 'Soil types (pedogenic)' },
     { code: 'Rz', en: 'Rendzina',  de: 'Rendzina',                                               group: 'Soil types (pedogenic)' },
-    { code: 'Tz', en: 'Chernozem', de: 'Tschernosem',    label: 'Chernozem (Tschernosem)',       group: 'Soil types (pedogenic)' }
+    { code: 'Tz', en: 'Chernozem', de: 'Tschernosem',    label: 'Chernozem (Tschernosem)',       group: 'Soil types (pedogenic)' },
+
+    // ── Other ──
+    { code: 'NS', en: 'no sediment', de: 'kein Sediment', label: 'No sediment (empty interval)', group: 'Other' }
 ];
 const PETRO_SECONDARY = [
     // code (lowercase), English adjective, German, group
@@ -4578,6 +4607,7 @@ function horizonMainCode(layer) {
 function classifyHorizon(layer, idx, allLayers) {
     // Non-normal layer types map directly.
     if (layer.layerType === 'missing')       return { code: '',    conf: 'high', why: 'sediment gap' };
+    if (isNoSediment(layer))                 return { code: '',    conf: 'high', why: 'no sediment' };
 
     const desc   = ((layer.originalDesc || '') + ' ' +
                     (typeof translateGermanToEnglish === 'function' ? translateGermanToEnglish(layer.originalDesc || '') : '')).toLowerCase();
@@ -4595,7 +4625,8 @@ function classifyHorizon(layer, idx, allLayers) {
 
     const obsRoots   = finds.roots    || /\broot|wurzel|durchwurzel|rooting/.test(desc);
     const obsShell   = finds.shell    || /shell|mollusc|gastropod|bivalve|muschel|schnecke/.test(desc);
-    const obsIronOx  = finds.ironoxide|| /iron.?oxid|eisenoxid|rost|ferrous|ferric|limonit|ocher|ochre/.test(desc);
+    // Only OXIC iron counts as mottling evidence; carbonates/gypsum etc. no longer do.
+    const obsIronOx  = finds.ironOxic || /iron.?oxid|eisenoxid|(?<![a-z])rost|ferrous|ferric|limonit|ocher|ochre/.test(desc);
 
     // Explicit buried / fossil-soil wording. A buried A horizon (fAh, "f" =
     // fossil/begraben) is a real, observable marker of a former land surface
@@ -4635,9 +4666,9 @@ function classifyHorizon(layer, idx, allLayers) {
     const kwPeat      = /\bpeat\b|\btorf\b|\bmoor\b/.test(desc);
     const kwHumus     = /humic|humos|humus|organic matter|organische/.test(desc) || finds.humic;
     const kwPlough    = /plough|plow|tilled|ackerkrume|pflug|arable/.test(desc);
-    const kwMottled   = /mottl|gefleckt|marmor|redoximorph|rost/.test(desc) || obsIronOx;
-    const kwGleyRed   = /reduc|gley|grau|grey|gray|bläulich|blue.?grey|reduktion/.test(desc);
-    const kwCalc      = /calcar|carbonate|kalk|lime\b|kalkhaltig/.test(desc) || (obsShell && lotsOf);
+    const kwMottled   = /mottl|gefleckt|marmor|redoximorph|(?<![a-z])rost/.test(desc) || obsIronOx || finds.manganese;
+    const kwGleyRed   = /reduc|gley|grau|grey|gray|bläulich|blue.?grey|reduktion/.test(desc) || finds.reduced;
+    const kwCalc      = /calcar|carbonate|kalk|lime\b|kalkhaltig/.test(desc) || (obsShell && lotsOf) || finds.carbonate;
     const kwWeather   = /weather|verwitter|browning|verbraun|oxidation|brown/.test(desc);
     const kwFill      = /fill|rubble|bauschutt|aufschüttung|debris|made ground/.test(desc);
     const kwGravelLag = main === 'G' || /gravel|kies|geröll/.test(desc);
@@ -4711,7 +4742,7 @@ function classifyHorizon(layer, idx, allLayers) {
     }
     if (kwMottled) {
         const conf = lotsOf ? 'med' : traceOnly ? 'low' : 'med';
-        return { code: 'Go', conf, why: withGenesis(`${lotsOf?'abundant ':''}iron oxide / mottling → oxidation zone (Go)`) };
+        return { code: 'Go', conf, why: withGenesis(`${lotsOf?'abundant ':''}${(finds.manganese && !obsIronOx) ? 'manganese' : 'iron oxide'} / mottling → oxidation zone (Go)`) };
     }
 
     // 3. Stagnic (perched water) — heuristic from explicit keywords only
@@ -4790,6 +4821,47 @@ function petroLookupSecondary(code) { return PETRO_SECONDARY.find(p => p.code ==
 //  added via the Finds panel. Returns flags + a quantity label.
 //  Used by the table and the profile so they always agree.
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//  DIAGENESIS SUB-TYPES
+//  Order matters: the first match wins for a single find label, so
+//  "carbonate concretion" / "manganese concretion" are never read as iron.
+// ═══════════════════════════════════════════════════════════════
+const DIAGENESIS_INFO = {
+    carbonate: { label: 'carbonate precipitates', icon: '⚪', texture: 'carbonate nodules',
+                 re: /carbonate (?:concretion|nodule|coating|precipitat|crust)|secondary carbonate|calcareous coating|lime (?:concretion|nodule)|kalkkonkretion|kalkknolle|kalküberzug|lösskindl|loesskindl|loess doll|pseudomycel|calcrete/ },
+    gypsum:    { label: 'gypsum',                 icon: '◇', texture: 'gypsum crystals',
+                 re: /gypsum|(?<![a-z])gips|selenite/ },
+    manganese: { label: 'manganese',              icon: '⚫', texture: 'manganese',
+                 re: /manganese|mangan/ },
+    vivianite: { label: 'vivianite',              icon: '🔵', texture: 'vivianite',
+                 re: /vivianit/ },
+    sulfide:   { label: 'sulphides',              icon: '◆', texture: 'pyrite sulfidic',
+                 re: /pyrite|pyrit|sulfidic|sulphidic|monosulfid|schwefelgeruch/ },
+    reduced:   { label: 'reduction / gleying',    icon: '◐', texture: 'gleyed reduced',
+                 re: /gleying|gleyed|black reduced|vergleyung|reduziert/ },
+    ironoxide: { label: 'iron oxide',             icon: '🟠', texture: 'iron oxide',
+                 re: /iron oxide|iron-oxide|iron pan|ferruginous|rhizoconcretion|eisenoxid|rostfleck|raseneisen|limonit|goethit/ }
+};
+const DIAGENESIS_ORDER = ['carbonate', 'gypsum', 'manganese', 'vivianite', 'sulfide', 'reduced', 'ironoxide'];
+
+// Sub-type of a single diagenesis find (from its label). Defaults to iron oxide.
+function diagenesisKind(label) {
+    const s = (label || '').toLowerCase();
+    return DIAGENESIS_ORDER.find(k => DIAGENESIS_INFO[k].re.test(s)) || 'ironoxide';
+}
+
+// Texture keyword used to draw a find/observation marker in the profile.
+// Diagenesis finds get a sub-type-specific texture; "few"/"weak" draws sparser.
+function findTextureDesc(m) {
+    const qty = /\bfew\b/i.test(m.label || '') ? 'few' : 'abundant';
+    const map = {
+        shells: 'shells', charcoal: 'charcoal', plant: 'plant remains', wood: 'plant remains',
+        anthroorg: 'dung', ceramics: 'ceramics', humic: 'humic', roots: 'roots', stones: 'stones'
+    };
+    if (m.findType === 'ironoxide') return `${qty} ${DIAGENESIS_INFO[diagenesisKind(m.label)].texture}`;
+    return map[m.findType] ? `${qty} ${map[m.findType]}` : m.label;
+}
+
 function summarizeFinds(l) {
     const descLow = (l.originalDesc + ' ' +
         (typeof translateGermanToEnglish === 'function' ? translateGermanToEnglish(l.originalDesc) : '')).toLowerCase();
@@ -4808,13 +4880,24 @@ function summarizeFinds(l) {
         humic:     markerTypes.has('humic')    || /humic|humos|organic matter|organic mud|gyttja|mudde|anmoorig|peaty/.test(descLow),
         roots:     markerTypes.has('roots')    || /\broot|rhizom|wurzel|durchwurzelt/.test(descLow),
         stones:    markerTypes.has('stones')   || /\bstone|pebble|cobble|boulder|granule|gravel clast|flint|quartz|sandstone|limestone|erratic|chalk clast|dropstone|mica|feldspar|glauconite|placer deposit|feuerstein|geröll|kiesel|findling|geschiebe|quarz|glimmer|feldspat|glaukonit/.test(descLow),
-        ironoxide: markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|iron pan|ferruginous|gleying|manganese|vivianite|pyrite|concretion|sulfidic|monosulfidic|black reduced|eisenoxid|rostfleck|vergleyung|mangan|vivianit|pyrit|konkretion|raseneisen|schwefelgeruch/.test(descLow),
+        ironoxide: false,   // set below from the diagenesis sub-types
         traces:    markerTypes.has('traces')   || /bioturbat|burrow|krotovina|worm tube|escape trace|feeding trace|wohnbau|krotowine|wurmröhre|fluchtspur|fraßspur/.test(descLow),
         artstone:  markerTypes.has('artstone') || /stone artefact|struck flint|\bblade\b|arrowhead|microlith|\bscraper\b|knapping|quernstone|steinartefakt|abschlag|klinge|pfeilspitze|mikrolith|schaber|mahlstein/.test(descLow),
         artmetal:  markerTypes.has('artmetal') || /metal fragment|iron object|bronze object|\bcoin\b|\bnail\b|fitting|weapon fragment|metallurgical slag|metallfragment|eisenobjekt|bronzeobjekt|münze|nagel|beschlag|waffenfragment/.test(descLow),
         anthrolayer: markerTypes.has('anthrolayer') || /anthropogenic layer|made ground|kulturschicht|anthropogene schicht/.test(descLow),
         structure: markerTypes.has('structure') || /\bbanded\b|\blayered\b|\blaminated\b|\bmassive\b|graded (?:bedding|fining|coarsening)|\bspeckled\b|\bmottled\b|cross.?bedded|\bblocky\b|\bplaty\b|bioturbat|gebändert|geschichtet|laminiert|gesprenkelt|kreuzgeschichtet|prismatisch|plattig/.test(descLow)
     };
+    // Diagenesis sub-types, from structured finds AND description keywords
+    const dia = new Set();
+    (l.markers || []).forEach(m => { if (m.findType === 'ironoxide') dia.add(diagenesisKind(m.label)); });
+    DIAGENESIS_ORDER.forEach(k => { if (DIAGENESIS_INFO[k].re.test(descLow)) dia.add(k); });
+    f.diagenesis = dia;
+    f.ironoxide  = dia.size > 0;
+    f.ironOxic   = dia.has('ironoxide');
+    f.carbonate  = dia.has('carbonate');
+    f.manganese  = dia.has('manganese');
+    f.reduced    = dia.has('reduced') || dia.has('sulfide') || dia.has('vivianite');
+
     f.intact = /intact|complete|whole|ganz|intakt/.test(combined);
     const many = /abundant|many|lot|viele|zahlreich|reich/.test(combined);
     const few  = /few|rare|vereinzelt|wenig|selten/.test(combined);
@@ -4856,7 +4939,7 @@ function findBulletLines(l) {
         if (f.humic)     words.push(localize('humic'));
         if (f.roots)     words.push(localize('roots'));
         if (f.stones)    words.push(localize('rocks'));
-        if (f.ironoxide) words.push(localize('diagenesis'));
+        f.diagenesis.forEach(k => words.push(localize(DIAGENESIS_INFO[k].label)));
         if (f.traces)    words.push(localize('traces'));
         if (f.artstone)  words.push(localize('stone artefact'));
         if (f.artmetal)  words.push(localize('metal find'));
@@ -6684,7 +6767,8 @@ function updateTable() {
         const hasHumic    = markerTypes.has('humic')    || /humic|humos|organic matter|organic mud|gyttja|mudde|anmoorig|peaty/.test(descLow);
         const hasRoots    = markerTypes.has('roots')    || /\broot|rhizom|wurzel|durchwurzelt/.test(descLow);
         const hasStones   = markerTypes.has('stones')   || /\bstone|pebble|cobble|boulder|granule|gravel clast|flint|quartz|sandstone|limestone|erratic|chalk clast|dropstone|mica|feldspar|glauconite|placer deposit|feuerstein|geröll|kiesel|findling|geschiebe|quarz|glimmer|feldspat|glaukonit/.test(descLow);
-        const hasIronoxide= markerTypes.has('ironoxide')|| /iron oxide|iron-oxide|iron pan|ferruginous|gleying|manganese|vivianite|pyrite|concretion|sulfidic|monosulfidic|black reduced|eisenoxid|rostfleck|vergleyung|mangan|vivianit|pyrit|konkretion|raseneisen|schwefelgeruch/.test(descLow);
+        const diaKinds    = summarizeFinds(l).diagenesis;
+        const hasIronoxide= diaKinds.size > 0;
         const hasTraces   = markerTypes.has('traces')   || /bioturbat|burrow|krotovina|worm tube|escape trace|feeding trace|wohnbau|krotowine|wurmröhre|fluchtspur|fraßspur/.test(descLow);
         const hasArtStone = markerTypes.has('artstone') || /stone artefact|struck flint|\bblade\b|arrowhead|microlith|\bscraper\b|knapping|quernstone|steinartefakt|abschlag|klinge|pfeilspitze|mikrolith|schaber|mahlstein/.test(descLow);
         const hasArtMetal = markerTypes.has('artmetal') || /metal fragment|iron object|bronze object|\bcoin\b|\bnail\b|fitting|weapon fragment|metallurgical slag|metallfragment|eisenobjekt|bronzeobjekt|münze|nagel|beschlag|waffenfragment/.test(descLow);
@@ -6704,7 +6788,8 @@ function updateTable() {
         const humicTag    = hasHumic    ? `<div class="find-tag find-tag-humic">🌿 humic</div>` : '';
         const rootsTag    = hasRoots    ? `<div class="find-tag find-tag-roots">🌱 roots</div>` : '';
         const stonesTag   = hasStones   ? `<div class="find-tag find-tag-stones">🪨 rocks${intactBadge}</div>` : '';
-        const ironoxideTag= hasIronoxide? `<div class="find-tag find-tag-ironoxide">🟠 diagenesis — ${shellQtyLabel}</div>` : '';
+        const ironoxideTag= [...diaKinds].map(k =>
+            `<div class="find-tag find-tag-dia-${k}">${DIAGENESIS_INFO[k].icon} ${DIAGENESIS_INFO[k].label} — ${shellQtyLabel}</div>`).join('');
         const tracesTag   = hasTraces   ? `<div class="find-tag find-tag-traces">🐛 traces</div>` : '';
         const artstoneTag = hasArtStone ? `<div class="find-tag find-tag-artstone">🔺 stone artefact${intactBadge}</div>` : '';
         const artmetalTag = hasArtMetal ? `<div class="find-tag find-tag-artmetal">⚙ metal find${intactBadge}</div>` : '';
@@ -6949,16 +7034,41 @@ function widthFracForCode(code) {
     return (SOIL_WIDTH_FRAC[code] != null) ? SOIL_WIDTH_FRAC[code] : 0.62;
 }
 
+// True for layers whose primary soil is "no sediment" (code NS).
+function isNoSediment(layer) {
+    if (!layer) return false;
+    if (typeof layer.officialDesc === 'string' && /^NS(?:\(|$)/.test(layer.officialDesc)) return true;
+    return layerMainCode(layer) === 'NS';
+}
+
+// Draws a "no sediment" interval: white, dashed outline, no texture.
+function drawNoSedimentCanvas(ctx, cX, yT, hL) {
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cX, yT, CORE_W, hL);
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+    ctx.strokeRect(cX, yT, CORE_W, hL);
+    ctx.setLineDash([]);
+    if (hL >= 14) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = fpx('italic 10px sans-serif');
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(localize('no sediment'), cX + CORE_W / 2, yT + hL / 2);
+        ctx.textBaseline = 'alphabetic';
+    }
+    ctx.restore();
+}
+
 // Width (px) at the TOP of a layer — always the layer's primary soil.
 function layerCoreWidthTop(layer) {
-    if (layer && layer.layerType === 'missing') return CORE_W;
+    if (layer && (layer.layerType === 'missing' || isNoSediment(layer))) return CORE_W;
     return Math.round(CORE_W * widthFracForCode(layerMainCode(layer)));
 }
 
 // Width (px) at the BASE of a layer. If the layer has a gradational shift
 // (gradeTo), the base uses that soil; otherwise it equals the top width.
 function layerCoreWidthBottom(layer) {
-    if (layer && layer.layerType === 'missing') return CORE_W;
+    if (layer && (layer.layerType === 'missing' || isNoSediment(layer))) return CORE_W;
     if (layer && layer.gradeTo) return Math.round(CORE_W * widthFracForCode(layer.gradeTo));
     return layerCoreWidthTop(layer);
 }
@@ -7272,6 +7382,7 @@ function drawGraph(exportMult = null, opts = {}) {
     const yT = layer.depthFrom * SCALE + PAD_TOP;
     const hL = (layer.depthTo - layer.depthFrom) * SCALE;
     const wL = layerCoreWidth(layer);   // max width (for missing hatch / fallbacks)
+    if (isNoSediment(layer)) { drawNoSedimentCanvas(ctx, cX, yT, hL); return; }
 
     if (layer.layerType === 'anthropogenic') {
         // dead branch — 'anthropogenic' is never set by computeLayerType()
@@ -7551,15 +7662,7 @@ function drawGraph(exportMult = null, opts = {}) {
             if (hasZone) {
                 const zoneH = yTo - yFrom;
                 if (m.findType) {
-                    const typeDesc = {
-                        shells:   'shells abundant', charcoal: 'charcoal abundant',
-                        plant:    'plant remains abundant', wood: 'plant remains abundant',
-                        anthroorg: 'dung abundant',
-                        ceramics: 'ceramics abundant',
-                        humic:    'humic abundant',  roots:    'roots abundant',
-                        stones:   'stones abundant',
-                        ironoxide: 'iron oxide abundant'
-                    }[m.findType] || m.label;
+                    const typeDesc = findTextureDesc(m);
                     const fEntry = normalizeOverlayEntry(l.overlayWeights?.['find_' + (m.findType === 'wood' ? 'plant' : m.findType)]);
                     drawFindTexture(l, typeDesc, cX + 2, yFrom, wL - 4, zoneH, fEntry);
                 }
@@ -7587,15 +7690,7 @@ function drawGraph(exportMult = null, opts = {}) {
                     text: localize(m.label), depthTxt: `${m.depth.toFixed(2)}–${m.depthTo.toFixed(2)} m` });
             } else {
                 if (m.findType) {
-                    const typeDesc = {
-                        shells:   'shells abundant', charcoal: 'charcoal abundant',
-                        plant:    'plant remains abundant', wood: 'plant remains abundant',
-                        anthroorg: 'dung abundant',
-                        ceramics: 'ceramics abundant',
-                        humic:    'humic abundant',  roots:    'roots abundant',
-                        stones:   'stones abundant',
-                        ironoxide: 'iron oxide abundant'
-                    }[m.findType] || m.label;
+                    const typeDesc = findTextureDesc(m);
                     const bandH = 28;
                     const bandY = Math.max(yFrom - bandH/2, l.depthFrom * SCALE + PAD_TOP);
                     const fEntry = normalizeOverlayEntry(l.overlayWeights?.['find_' + (m.findType === 'wood' ? 'plant' : m.findType)]);
@@ -8036,6 +8131,80 @@ function drawTextureOverlay(ctx, desc, x, y, w, h, weightMult, patternOverride) 
         const dc=Math.max(10, Math.floor(((w*h)/40) * dm));
         for(let i=0;i<dc;i++){const dx=x+rand()*w,dy=y+rand()*h;ctx.beginPath();ctx.arc(dx,dy,.6+rand()*1,0,Math.PI*2);ctx.fillStyle=`rgba(0,0,0,${Math.min(1, (.18+rand()*.18) * im)})`;ctx.fill();}
     }
+    // ── Carbonate nodules / concretions — cream-white, NOT red ──
+    if (/carbonate nodule|carbonate concretion|kalkkonkretion|kalkknolle|lösskindl|loess doll|pseudomycel|calcrete/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/carbonate|kalkkonkretion|kalkknolle|lösskindl|loess doll|pseudomycel|calcrete/);
+        let seed=x*71+y*29+h*11+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const n=Math.max(3, Math.floor(((w*h)/260)*dm));
+        for(let i=0;i<n;i++){
+            const cx=x+rand()*w, cy=y+rand()*h, r=1.8+rand()*3.2, pts=7;
+            ctx.beginPath();
+            for(let p=0;p<=pts;p++){const a=(p/pts)*Math.PI*2, rr=r*(0.75+rand()*0.35);
+                p===0?ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);}
+            ctx.closePath();
+            ctx.fillStyle=`rgba(246,241,226,${Math.min(1,.85*im)})`; ctx.fill();
+            ctx.strokeStyle=`rgba(140,130,110,${Math.min(1,.55*im)})`; ctx.lineWidth=.6; ctx.stroke();
+        }
+    }
+    // ── Gypsum — small white rhombic crystals ──
+    if (/gypsum|(?<![a-z])gips|selenite/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/gypsum|gips|selenite/);
+        let seed=x*67+y*41+h*13+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const n=Math.max(4, Math.floor(((w*h)/200)*dm));
+        for(let i=0;i<n;i++){
+            const len=2.5+rand()*4;
+            ctx.save(); ctx.translate(x+rand()*w, y+rand()*h); ctx.rotate(rand()*Math.PI);
+            ctx.beginPath(); ctx.moveTo(-len,0); ctx.lineTo(0,-len*.35); ctx.lineTo(len,0); ctx.lineTo(0,len*.35); ctx.closePath();
+            ctx.fillStyle=`rgba(255,255,255,${Math.min(1,.85*im)})`; ctx.fill();
+            ctx.strokeStyle=`rgba(120,120,135,${Math.min(1,.5*im)})`; ctx.lineWidth=.5; ctx.stroke();
+            ctx.restore();
+        }
+    }
+    // ── Manganese — black dots with small dendrites ──
+    if (/manganese|mangan/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/manganese|mangan/);
+        let seed=x*83+y*31+h*17+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const n=Math.max(6, Math.floor(((w*h)/110)*dm));
+        const col=`rgba(25,20,30,${Math.min(1,.7*im)})`;
+        for(let i=0;i<n;i++){
+            const cx=x+rand()*w, cy=y+rand()*h;
+            ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx,cy,.6+rand()*1.4,0,Math.PI*2); ctx.fill();
+            if(rand()>.75){ ctx.strokeStyle=col; ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(cx,cy);
+                for(let b=0;b<3;b++) ctx.lineTo(cx+(rand()-.5)*7, cy+(rand()-.5)*7); ctx.stroke(); }
+        }
+    }
+    // ── Vivianite — blue specks ──
+    if (/vivianit/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/vivianit/);
+        let seed=x*89+y*23+h*7+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const n=Math.max(5, Math.floor(((w*h)/130)*dm));
+        for(let i=0;i<n;i++){ ctx.beginPath(); ctx.arc(x+rand()*w, y+rand()*h, .8+rand()*1.8, 0, Math.PI*2);
+            ctx.fillStyle=`rgba(55,85,155,${Math.min(1,(.45+rand()*.25)*im)})`; ctx.fill(); }
+    }
+    // ── Sulphides — black blotches + brassy pyrite specks ──
+    if (/pyrite|pyrit|sulfidic|sulphidic|monosulfid|schwefel/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/pyrite|pyrit|sulfid|sulphid|schwefel/);
+        let seed=x*97+y*19+h*29+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const nb=Math.max(2, Math.floor(((w*h)/700)*dm));
+        for(let i=0;i<nb;i++){ ctx.save(); ctx.translate(x+rand()*w, y+rand()*h); ctx.rotate(rand()*Math.PI);
+            ctx.beginPath(); ctx.ellipse(0,0,4+rand()*w*.2,2+rand()*h*.08,0,0,Math.PI*2);
+            ctx.fillStyle=`rgba(15,15,15,${Math.min(1,.18*im)})`; ctx.fill(); ctx.restore(); }
+        const ns=Math.max(4, Math.floor(((w*h)/160)*dm));
+        for(let i=0;i<ns;i++){ const s=.8+rand()*1.2;
+            ctx.fillStyle=`rgba(190,165,60,${Math.min(1,.8*im)})`; ctx.fillRect(x+rand()*w, y+rand()*h, s, s); }
+    }
+    // ── Reduction / gleying — grey-blue wash + fine stipple ──
+    if (/gleying|gleyed|black reduced|vergleyung|reduziert/.test(d)) {
+        const { intensity: im, density: dm } = getModifiers(/gley|reduced|reduziert/);
+        let seed=x*101+y*13+h*37+1; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+        const nb=Math.max(2, Math.floor(((w*h)/500)*dm));
+        for(let i=0;i<nb;i++){ ctx.save(); ctx.translate(x+rand()*w, y+rand()*h); ctx.rotate(rand()*Math.PI);
+            ctx.beginPath(); ctx.ellipse(0,0,6+rand()*w*.3,3+rand()*h*.12,0,0,Math.PI*2);
+            ctx.fillStyle=`rgba(90,115,125,${Math.min(1,.18*im)})`; ctx.fill(); ctx.restore(); }
+        const ns=Math.max(8, Math.floor(((w*h)/70)*dm));
+        for(let i=0;i<ns;i++){ ctx.beginPath(); ctx.arc(x+rand()*w, y+rand()*h, .5+rand()*.7, 0, Math.PI*2);
+            ctx.fillStyle=`rgba(70,90,100,${Math.min(1,.28*im)})`; ctx.fill(); }
+    }
     if (/iron oxide|iron-oxide|ferruginous|eisenoxid/.test(d)) {
         const { intensity: im, density: dm } = getModifiers(/iron oxide|iron-oxide|ferruginous|eisenoxid/);
         let seed=x*37+y*53+h*19; const rand=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
@@ -8341,6 +8510,11 @@ function buildSVG() {
     const wL = layerCoreWidth(l);   // max width
     const pts = svgLayerBodyPoints(l, cX, yT, hL);   // trapezoid for gradational layers
     const clipId = `clip${idx}`;
+    if (isNoSediment(l)) {
+        p.push(`<rect x="${cX}" y="${yT}" width="${CORE_W}" height="${hL}" fill="#ffffff" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,4"/>`);
+        if (hL >= 14) p.push(`<text x="${cX + CORE_W/2}" y="${yT + hL/2 + 3}" font-family="sans-serif" font-size="10" font-style="italic" fill="#94a3b8" text-anchor="middle">${escXml(localize('no sediment'))}</text>`);
+        return;
+    }
 
     if (l.layerType === 'anthropogenic') {
         // dead branch — 'anthropogenic' is never set any more (see
@@ -8546,15 +8720,7 @@ function buildSVG() {
 
             // Find texture (scoped to zone or point band)
             if (m.findType) {
-                const typeDesc = {
-                    shells:   'shells abundant', charcoal: 'charcoal abundant',
-                    plant:    'plant remains abundant', wood: 'plant remains abundant',
-                    anthroorg: 'dung abundant',
-                    ceramics: 'ceramics abundant',
-                    humic:    'humic abundant',  roots:    'roots abundant',
-                    stones:   'stones abundant',
-                        ironoxide: 'iron oxide abundant'
-                }[m.findType] || m.label;
+                const typeDesc = findTextureDesc(m);
                 if (hasZone) {
                     const lyT = l.depthFrom * S + PAD_TOP;
                     const lhL = (l.depthTo - l.depthFrom) * S;
@@ -8771,6 +8937,48 @@ function buildSVGTexture(desc, x, y, w, h, idx, layerClipPts) {
         for(let i=0;i<cnt;i++){
             const sx=x+rand()*w, sy=y+rand()*h, rx=3+rand()*6, ry=(rx*(0.6+rand()*0.3)), rot=rand()*180;
             parts.push(`<ellipse cx="0" cy="0" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="rgba(120,128,140,0.45)" stroke="rgba(70,78,92,0.7)" stroke-width="0.7" clip-path="url(#${pid}cp)" transform="translate(${sx},${sy}) rotate(${rot.toFixed(1)})"/>`);
+        }
+    }
+    // ── SVG Diagenesis sub-types (non-iron) ────────────────────────
+    {
+        const dmQ = /abundant|strong|many|viel|stark|zahlreich/.test(d) ? 2 : /few|weak|rare|vereinzelt|schwach|wenig/.test(d) ? 0.4 : 1;
+        const mkRand = (s) => { let seed = s; return () => { seed = (seed*16807) % 2147483647; return (seed-1)/2147483646; }; };
+        const cp = `clip-path="url(#${pid}cp)"`;
+        if (/carbonate nodule|carbonate concretion|kalkkonkretion|kalkknolle|lösskindl|loess doll|pseudomycel|calcrete/.test(d)) {
+            const rand = mkRand(x*71+y*29+h*11+1);
+            const n = Math.max(3, Math.floor(((w*h)/260)*dmQ));
+            for (let i=0;i<n;i++) parts.push(`<circle cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" r="${(1.8+rand()*3.2).toFixed(1)}" fill="rgba(246,241,226,0.85)" stroke="rgba(140,130,110,0.55)" stroke-width="0.6" ${cp}/>`);
+        }
+        if (/gypsum|(?<![a-z])gips|selenite/.test(d)) {
+            const rand = mkRand(x*67+y*41+h*13+1);
+            const n = Math.max(4, Math.floor(((w*h)/200)*dmQ));
+            for (let i=0;i<n;i++) { const len=2.5+rand()*4;
+                parts.push(`<polygon points="${(-len).toFixed(1)},0 0,${(-len*.35).toFixed(1)} ${len.toFixed(1)},0 0,${(len*.35).toFixed(1)}" fill="rgba(255,255,255,0.85)" stroke="rgba(120,120,135,0.5)" stroke-width="0.5" ${cp} transform="translate(${(x+rand()*w).toFixed(1)},${(y+rand()*h).toFixed(1)}) rotate(${(rand()*180).toFixed(0)})"/>`); }
+        }
+        if (/manganese|mangan/.test(d)) {
+            const rand = mkRand(x*83+y*31+h*17+1);
+            const n = Math.max(6, Math.floor(((w*h)/110)*dmQ));
+            for (let i=0;i<n;i++) parts.push(`<circle cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" r="${(.6+rand()*1.4).toFixed(1)}" fill="rgba(25,20,30,0.7)" ${cp}/>`);
+        }
+        if (/vivianit/.test(d)) {
+            const rand = mkRand(x*89+y*23+h*7+1);
+            const n = Math.max(5, Math.floor(((w*h)/130)*dmQ));
+            for (let i=0;i<n;i++) parts.push(`<circle cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" r="${(.8+rand()*1.8).toFixed(1)}" fill="rgba(55,85,155,0.55)" ${cp}/>`);
+        }
+        if (/pyrite|pyrit|sulfidic|sulphidic|monosulfid|schwefel/.test(d)) {
+            const rand = mkRand(x*97+y*19+h*29+1);
+            const nb = Math.max(2, Math.floor(((w*h)/700)*dmQ));
+            for (let i=0;i<nb;i++) parts.push(`<ellipse cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" rx="${(4+rand()*w*.2).toFixed(1)}" ry="${(2+rand()*h*.08).toFixed(1)}" fill="rgba(15,15,15,0.18)" ${cp}/>`);
+            const ns = Math.max(4, Math.floor(((w*h)/160)*dmQ));
+            for (let i=0;i<ns;i++) { const s=(.8+rand()*1.2).toFixed(1);
+                parts.push(`<rect x="${(x+rand()*w).toFixed(1)}" y="${(y+rand()*h).toFixed(1)}" width="${s}" height="${s}" fill="rgba(190,165,60,0.8)" ${cp}/>`); }
+        }
+        if (/gleying|gleyed|black reduced|vergleyung|reduziert/.test(d)) {
+            const rand = mkRand(x*101+y*13+h*37+1);
+            const nb = Math.max(2, Math.floor(((w*h)/500)*dmQ));
+            for (let i=0;i<nb;i++) parts.push(`<ellipse cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" rx="${(6+rand()*w*.3).toFixed(1)}" ry="${(3+rand()*h*.12).toFixed(1)}" fill="rgba(90,115,125,0.18)" ${cp}/>`);
+            const ns = Math.max(8, Math.floor(((w*h)/70)*dmQ));
+            for (let i=0;i<ns;i++) parts.push(`<circle cx="${(x+rand()*w).toFixed(1)}" cy="${(y+rand()*h).toFixed(1)}" r="${(.5+rand()*.7).toFixed(1)}" fill="rgba(70,90,100,0.28)" ${cp}/>`);
         }
     }
     // ── SVG Iron oxide / oxidation ─────────────────────────────────
